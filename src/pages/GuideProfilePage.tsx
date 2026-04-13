@@ -138,6 +138,9 @@ export default function GuideProfilePage() {
                         <span className="flex items-center gap-1"><Clock size={14} /> {service.duration_hours}h</span>
                         <span className="flex items-center gap-1"><Users size={14} /> {service.min_people}–{service.max_people} pessoas</span>
                         <span className="flex items-center gap-1"><MapPin size={14} /> {service.meeting_point}</span>
+                        <Link to={`/book/${service.id}`}>
+                          <Button variant="hero" size="sm" className="ml-auto">Reservar</Button>
+                        </Link>
                       </div>
                       {service.includes && service.includes.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-3">
