@@ -1,8 +1,8 @@
 import { Star, MapPin, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VerifiedBadge } from "./VerifiedBadge";
+import { guidePhotos } from "@/data/guidePhotos";
 import type { Guide } from "@/types";
 
 interface GuideCardProps {
@@ -20,22 +20,33 @@ const specialtyColors: Record<string, string> = {
 };
 
 export function GuideCard({ guide }: GuideCardProps) {
-  const initials = guide.user?.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2) ?? "G";
+  const photo = guidePhotos[guide.id];
 
   return (
     <div className="group bg-card rounded-lg border border-border overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1">
-      {/* Cover area */}
-      <div className="h-36 bg-gradient-to-br from-primary/20 to-primary/5 relative flex items-center justify-center">
-        <div className="w-20 h-20 rounded-full bg-primary/10 border-4 border-card flex items-center justify-center text-2xl font-display font-bold text-primary absolute -bottom-10 left-5 shadow-md">
-          {initials}
-        </div>
+      {/* Cover area with photo */}
+      <div className="h-48 relative overflow-hidden">
+        {photo ? (
+          <img
+            src={photo}
+            alt={guide.user?.name ?? "Guia"}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            width={800}
+            height={1024}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
+        {guide.license_verified && (
+          <div className="absolute top-3 right-3">
+            <VerifiedBadge size="sm" showLabel={false} className="bg-card/90 backdrop-blur-sm" />
+          </div>
+        )}
       </div>
 
-      <div className="pt-12 px-5 pb-5">
+      <div className="px-5 pb-5 pt-4">
         <div className="flex items-start justify-between mb-2">
           <div>
             <h3 className="font-display font-semibold text-lg text-foreground">{guide.user?.name}</h3>
@@ -44,7 +55,6 @@ export function GuideCard({ guide }: GuideCardProps) {
               <span>{guide.city}</span>
             </div>
           </div>
-          {guide.license_verified && <VerifiedBadge size="sm" showLabel={false} />}
         </div>
 
         <div className="flex items-center gap-1 mb-3">

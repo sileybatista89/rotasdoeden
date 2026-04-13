@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { mockGuides, mockServices, mockReviews } from "@/data/mockData";
+import { guidePhotos } from "@/data/guidePhotos";
 
 const categoryLabels: Record<string, string> = {
   tour: "Tour",
@@ -39,7 +40,7 @@ export default function GuideProfilePage() {
 
   const services = mockServices.filter((s) => s.guide_id === guide.id);
   const reviews = mockReviews.filter((r) => r.guide_id === guide.id);
-  const initials = guide.user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) ?? "G";
+  const photo = guidePhotos[guide.id];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -53,8 +54,14 @@ export default function GuideProfilePage() {
             </Link>
 
             <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="w-24 h-24 rounded-2xl bg-primary/10 border-4 border-card flex items-center justify-center text-3xl font-display font-bold text-primary shadow-lg">
-                {initials}
+              <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-card shadow-lg flex-shrink-0">
+                {photo ? (
+                  <img src={photo} alt={guide.user?.name ?? "Guia"} className="w-full h-full object-cover" width={800} height={1024} />
+                ) : (
+                  <div className="w-full h-full bg-primary/10 flex items-center justify-center text-3xl font-display font-bold text-primary">
+                    {guide.user?.name?.charAt(0)}
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
