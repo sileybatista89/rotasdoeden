@@ -2,7 +2,7 @@ export type UserRole = 'tourist' | 'guide' | 'admin';
 export type GuideStatus = 'pending' | 'verified' | 'rejected';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'refunded';
 export type PaymentStatus = 'unpaid' | 'paid' | 'held' | 'released' | 'refunded';
-export type ServiceCategory = 'tour' | 'experience' | 'transfer' | 'diving' | 'hiking';
+export type ServiceCategory = 'tour' | 'experience' | 'transfer' | 'diving' | 'hiking' | 'fishing' | 'kayak' | 'surfing' | 'birdwatching' | 'photography' | 'gastronomy' | 'culture' | 'nightlife';
 
 export interface User {
   id: string;
