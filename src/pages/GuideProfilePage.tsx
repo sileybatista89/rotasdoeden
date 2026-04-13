@@ -38,6 +38,32 @@ export default function GuideProfilePage() {
   const [numPeople, setNumPeople] = useState(1);
   const [contactMessage, setContactMessage] = useState("");
 
+  const services = mockServices.filter((s) => s.guide_id === (guide?.id ?? ""));
+  const reviews = mockReviews.filter((r) => r.guide_id === (guide?.id ?? ""));
+  const photo = guide ? guidePhotos[guide.id] : undefined;
+  const selectedService = services.find((s) => s.id === selectedServiceId);
+
+  const ratingBreakdown = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0];
+    reviews.forEach((r) => { if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1]++; });
+    const total = reviews.length || 1;
+    return [5, 4, 3, 2, 1].map((star) => ({
+      star,
+      count: counts[star - 1],
+      pct: Math.round((counts[star - 1] / total) * 100),
+    }));
+  }, [reviews]);
+
+  const nextDates = useMemo(() => {
+    const today = new Date();
+    return [2, 4, 6, 9].map((d) => addDays(today, d));
+  }, []);
+
+  const serviceFee = 0.10;
+  const basePrice = selectedService ? selectedService.price * numPeople : 0;
+  const fee = basePrice * serviceFee;
+  const totalPrice = basePrice + fee;
+
   if (!guide) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -54,23 +80,6 @@ export default function GuideProfilePage() {
       </div>
     );
   }
-
-  const services = mockServices.filter((s) => s.guide_id === guide.id);
-  const reviews = mockReviews.filter((r) => r.guide_id === guide.id);
-  const photo = guidePhotos[guide.id];
-  const selectedService = services.find((s) => s.id === selectedServiceId);
-
-  // Rating breakdown
-  const ratingBreakdown = useMemo(() => {
-    const counts = [0, 0, 0, 0, 0];
-    reviews.forEach((r) => { if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1]++; });
-    const total = reviews.length || 1;
-    return [5, 4, 3, 2, 1].map((star) => ({
-      star,
-      count: counts[star - 1],
-      pct: Math.round((counts[star - 1] / total) * 100),
-    }));
-  }, [reviews]);
 
   // Sidebar price calculation
   const serviceFee = 0.10;
