@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { mockGuides, mockServices, mockReviews } from "@/data/mockData";
+import { guidePhotos } from "@/data/guidePhotos";
 
 const categoryLabels: Record<string, string> = {
   tour: "Tour",
