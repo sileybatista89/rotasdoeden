@@ -17,11 +17,10 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const categoryLabels: Record<string, string> = {
-  tour: "Tour",
-  experience: "Experiência",
-  transfer: "Transfer",
-  diving: "Mergulho",
-  hiking: "Trilho",
+  tour: "Tour", experience: "Experiência", transfer: "Transfer", diving: "Mergulho",
+  hiking: "Trilho", fishing: "Pesca", kayak: "Kayak", surfing: "Surf",
+  birdwatching: "Birdwatching", photography: "Fotografia", gastronomy: "Gastronomia",
+  culture: "Cultura", nightlife: "Noturno",
 };
 
 export default function BookingPage() {
