@@ -81,17 +81,7 @@ export default function GuideProfilePage() {
     );
   }
 
-  // Sidebar price calculation
-  const serviceFee = 0.10;
-  const basePrice = selectedService ? selectedService.price * numPeople : 0;
-  const fee = basePrice * serviceFee;
-  const totalPrice = basePrice + fee;
 
-  // Next available dates
-  const nextDates = useMemo(() => {
-    const today = new Date();
-    return [2, 4, 6, 9].map((d) => addDays(today, d));
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
