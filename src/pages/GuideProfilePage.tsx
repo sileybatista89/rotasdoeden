@@ -1,25 +1,42 @@
-import { useParams, Link } from "react-router-dom";
-import { Star, MapPin, Globe, Clock, Users, CheckCircle, ArrowLeft, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { format, addDays } from "date-fns";
+import { pt } from "date-fns/locale";
+import {
+  Star, MapPin, Globe, Clock, Users, CheckCircle, ArrowLeft, Calendar,
+  FileCheck, Shield, MessageSquare, Minus, Plus, CalendarIcon
+} from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { VerifiedBadge } from "@/components/guides/VerifiedBadge";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { mockGuides, mockServices, mockReviews } from "@/data/mockData";
 import { guidePhotos } from "@/data/guidePhotos";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const categoryLabels: Record<string, string> = {
-  tour: "Tour",
-  experience: "Experiência",
-  transfer: "Transfer",
-  diving: "Mergulho",
-  hiking: "Trilho",
+  tour: "Tour", experience: "Experiência", transfer: "Transfer", diving: "Mergulho",
+  hiking: "Trilho", fishing: "Pesca", kayak: "Kayak", surfing: "Surf",
+  birdwatching: "Birdwatching", photography: "Fotografia", gastronomy: "Gastronomia",
+  culture: "Cultura", nightlife: "Noturno",
 };
 
 export default function GuideProfilePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const guide = mockGuides.find((g) => g.id === id);
+
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [date, setDate] = useState<Date>();
+  const [numPeople, setNumPeople] = useState(1);
+  const [contactMessage, setContactMessage] = useState("");
 
   if (!guide) {
     return (
@@ -41,6 +58,31 @@ export default function GuideProfilePage() {
   const services = mockServices.filter((s) => s.guide_id === guide.id);
   const reviews = mockReviews.filter((r) => r.guide_id === guide.id);
   const photo = guidePhotos[guide.id];
+  const selectedService = services.find((s) => s.id === selectedServiceId);
+
+  // Rating breakdown
+  const ratingBreakdown = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0];
+    reviews.forEach((r) => { if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1]++; });
+    const total = reviews.length || 1;
+    return [5, 4, 3, 2, 1].map((star) => ({
+      star,
+      count: counts[star - 1],
+      pct: Math.round((counts[star - 1] / total) * 100),
+    }));
+  }, [reviews]);
+
+  // Sidebar price calculation
+  const serviceFee = 0.10;
+  const basePrice = selectedService ? selectedService.price * numPeople : 0;
+  const fee = basePrice * serviceFee;
+  const totalPrice = basePrice + fee;
+
+  // Next available dates
+  const nextDates = useMemo(() => {
+    const today = new Date();
+    return [2, 4, 6, 9].map((d) => addDays(today, d));
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -54,9 +96,9 @@ export default function GuideProfilePage() {
             </Link>
 
             <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-card shadow-lg flex-shrink-0">
+              <div className="w-28 h-28 rounded-2xl overflow-hidden border-4 border-card shadow-lg flex-shrink-0">
                 {photo ? (
-                  <img src={photo} alt={guide.user?.name ?? "Guia"} className="w-full h-full object-cover" width={800} height={1024} />
+                  <img src={photo} alt={guide.user?.name ?? "Guia"} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-primary/10 flex items-center justify-center text-3xl font-display font-bold text-primary">
                     {guide.user?.name?.charAt(0)}
@@ -73,13 +115,13 @@ export default function GuideProfilePage() {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
                   <span className="flex items-center gap-1"><MapPin size={14} /> {guide.city}</span>
                   <span className="flex items-center gap-1"><Globe size={14} /> {guide.languages.join(", ")}</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> {guide.years_experience} anos de experiência</span>
+                  <span className="flex items-center gap-1"><Calendar size={14} /> Membro desde {guide.created_at ? new Date(guide.created_at).toLocaleDateString("pt-PT", { month: "long", year: "numeric" }) : ""}</span>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     <Star size={16} className="fill-secondary text-secondary" />
-                    <span className="font-semibold">{guide.rating.toFixed(2)}</span>
+                    <span className="font-semibold">{guide.rating.toFixed(1)}</span>
                     <span className="text-muted-foreground text-sm">({guide.total_reviews} avaliações)</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -88,15 +130,6 @@ export default function GuideProfilePage() {
                     ))}
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm min-w-[240px]">
-                <div className="text-center mb-4">
-                  <span className="text-sm text-muted-foreground">A partir de</span>
-                  <p className="font-display text-3xl font-bold text-foreground">€{guide.price_per_day}<span className="text-sm font-normal text-muted-foreground">/dia</span></p>
-                </div>
-                <Button variant="hero" className="w-full mb-2" size="lg">Reservar</Button>
-                <Button variant="outline" className="w-full">Enviar Mensagem</Button>
               </div>
             </div>
           </div>
@@ -107,7 +140,7 @@ export default function GuideProfilePage() {
             <div className="lg:col-span-2 space-y-10">
               {/* Bio */}
               <section>
-                <h2 className="font-display text-2xl font-semibold text-foreground mb-4">Sobre</h2>
+                <h2 className="font-display text-2xl font-semibold text-foreground mb-4">Sobre Mim</h2>
                 <p className="text-muted-foreground leading-relaxed">{guide.bio}</p>
                 {guide.bio_en && (
                   <p className="text-muted-foreground leading-relaxed mt-3 italic text-sm border-l-2 border-border pl-4">{guide.bio_en}</p>
@@ -115,6 +148,62 @@ export default function GuideProfilePage() {
               </section>
 
               <Separator />
+
+              {/* Specialties & Languages */}
+              <section>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-display font-semibold text-foreground mb-3">Especialidades</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {guide.specialties.map((s) => (
+                        <span key={s} className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-semibold text-foreground mb-3">Idiomas</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {guide.languages.map((lang) => {
+                        const flags: Record<string, string> = {
+                          "Português": "🇵🇹", "Inglês": "🇬🇧", "Francês": "🇫🇷",
+                          "Alemão": "🇩🇪", "Espanhol": "🇪🇸",
+                        };
+                        return (
+                          <span key={lang} className="text-sm px-3 py-1 rounded-full bg-muted text-muted-foreground font-medium">
+                            {flags[lang] ?? "🌐"} {lang}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* License Card */}
+              {guide.license_verified && (
+                <>
+                  <section>
+                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileCheck size={20} className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-display font-semibold text-foreground mb-1">Licença Verificada</h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Licença verificada pelo Ministério do Turismo de São Tomé e Príncipe.
+                        </p>
+                        <p className="text-xs font-mono text-muted-foreground">{guide.license_number}</p>
+                      </div>
+                      <span className="ml-auto text-xs px-2 py-1 rounded-full bg-primary text-primary-foreground font-medium flex items-center gap-1">
+                        <CheckCircle size={12} /> Verificado
+                      </span>
+                    </div>
+                  </section>
+                  <Separator />
+                </>
+              )}
 
               {/* Services */}
               <section>
@@ -124,22 +213,22 @@ export default function GuideProfilePage() {
                     <div key={service.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                              {categoryLabels[service.category]}
-                            </span>
-                          </div>
-                          <h3 className="font-display font-semibold text-lg text-foreground">{service.title}</h3>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                            {categoryLabels[service.category] ?? service.category}
+                          </span>
+                          <h3 className="font-display font-semibold text-lg text-foreground mt-1">{service.title}</h3>
                         </div>
-                        <p className="font-display text-xl font-bold text-foreground">€{service.price}</p>
+                        <p className="font-display text-xl font-bold text-primary">€{service.price}</p>
                       </div>
                       <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1"><Clock size={14} /> {service.duration_hours}h</span>
                         <span className="flex items-center gap-1"><Users size={14} /> {service.min_people}–{service.max_people} pessoas</span>
-                        <span className="flex items-center gap-1"><MapPin size={14} /> {service.meeting_point}</span>
-                        <Link to={`/book/${service.id}`}>
-                          <Button variant="hero" size="sm" className="ml-auto">Reservar</Button>
+                        {service.meeting_point && (
+                          <span className="flex items-center gap-1"><MapPin size={14} /> {service.meeting_point}</span>
+                        )}
+                        <Link to={`/book/${service.id}`} className="ml-auto">
+                          <Button variant="hero" size="sm">Reservar</Button>
                         </Link>
                       </div>
                       {service.includes && service.includes.length > 0 && (
@@ -153,82 +242,238 @@ export default function GuideProfilePage() {
                       )}
                     </div>
                   ))}
-                  {services.length === 0 && (
-                    <p className="text-muted-foreground">Este guia ainda não publicou serviços.</p>
-                  )}
                 </div>
               </section>
 
               <Separator />
 
-              {/* Reviews */}
+              {/* Reviews with Rating Breakdown */}
               <section>
                 <h2 className="font-display text-2xl font-semibold text-foreground mb-6">
-                  Avaliações ({reviews.length})
+                  O que dizem os turistas
                 </h2>
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="bg-card border border-border rounded-xl p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-semibold text-sm text-muted-foreground">
-                            {review.tourist?.name?.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm text-foreground">{review.tourist?.name}</p>
-                            <p className="text-xs text-muted-foreground">{review.tourist?.nationality}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: review.rating }).map((_, i) => (
-                            <Star key={i} size={14} className="fill-secondary text-secondary" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{review.comment}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {new Date(review.created_at).toLocaleDateString("pt-PT", { year: "numeric", month: "long" })}
-                      </p>
+
+                {/* Rating summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                  <div className="flex flex-col items-center justify-center p-6 bg-card border border-border rounded-xl">
+                    <span className="font-display text-5xl font-bold text-foreground">{guide.rating.toFixed(1)}</span>
+                    <div className="flex items-center gap-0.5 my-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={18} className={i < Math.round(guide.rating) ? "fill-secondary text-secondary" : "text-muted"} />
+                      ))}
                     </div>
-                  ))}
-                  {reviews.length === 0 && (
-                    <p className="text-muted-foreground">Este guia ainda não tem avaliações.</p>
-                  )}
+                    <span className="text-sm text-muted-foreground">{guide.total_reviews} avaliações</span>
+                  </div>
+                  <div className="space-y-2 p-6 bg-card border border-border rounded-xl">
+                    {ratingBreakdown.map(({ star, count, pct }) => (
+                      <div key={star} className="flex items-center gap-2 text-sm">
+                        <span className="w-6 text-right text-muted-foreground">{star}★</span>
+                        <Progress value={pct} className="h-2 flex-1" />
+                        <span className="w-10 text-right text-muted-foreground">{pct}%</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Review cards */}
+                <div className="space-y-4">
+                  {reviews.map((review) => {
+                    const flags: Record<string, string> = {
+                      "Portugal": "🇵🇹", "Brasil": "🇧🇷", "França": "🇫🇷", "Alemanha": "🇩🇪",
+                      "Reino Unido": "🇬🇧", "Austrália": "🇦🇺", "Dinamarca": "🇩🇰", "Suécia": "🇸🇪",
+                      "Noruega": "🇳🇴", "Rússia": "🇷🇺", "Singapura": "🇸🇬",
+                    };
+                    return (
+                      <div key={review.id} className="bg-card border border-border rounded-xl p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-sm text-primary">
+                              {review.tourist?.name?.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-foreground">{review.tourist?.name}</p>
+                              <p className="text-xs text-muted-foreground">{flags[review.tourist?.nationality ?? ""] ?? "🌐"} {review.tourist?.nationality}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: review.rating }).map((_, i) => (
+                              <Star key={i} size={14} className="fill-secondary text-secondary" />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{review.comment}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(review.created_at).toLocaleDateString("pt-PT", { year: "numeric", month: "long" })}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* Map Placeholder */}
+              <section>
+                <h2 className="font-display text-2xl font-semibold text-foreground mb-4">Área de Actuação</h2>
+                <div className="bg-muted rounded-xl h-64 flex items-center justify-center border border-border">
+                  <div className="text-center text-muted-foreground">
+                    <MapPin size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Mapa de São Tomé e Príncipe</p>
+                    <p className="text-xs">{guide.city}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">Baseado em {guide.city}</p>
               </section>
             </div>
 
-            {/* Sidebar - sticky on desktop */}
-            <div className="hidden lg:block">
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-accent/50 border border-primary/10 rounded-xl p-5">
-                  <h3 className="font-display font-semibold text-foreground mb-2">Licença Verificada</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Este guia possui licença emitida pela Direcção-Geral do Turismo e Hotelaria de São Tomé e Príncipe.
-                  </p>
-                  <p className="text-xs font-mono text-muted-foreground">{guide.license_number}</p>
+            {/* Sidebar */}
+            <div className="space-y-4">
+              <div className="sticky top-24 space-y-4">
+                {/* Booking Sidebar */}
+                <div className="bg-card border border-border rounded-xl p-6 shadow-md">
+                  <h3 className="font-display font-bold text-foreground mb-4">Reserva Rápida</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1 block">Seleciona um serviço</label>
+                      <Select value={selectedServiceId} onValueChange={(v) => { setSelectedServiceId(v); setNumPeople(1); }}>
+                        <SelectTrigger><SelectValue placeholder="Escolher serviço..." /></SelectTrigger>
+                        <SelectContent>
+                          {services.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>{s.title} — €{s.price}/pessoa</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1 block">Data</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? format(date, "d 'de' MMMM, yyyy", { locale: pt }) : "Escolher data"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single" selected={date} onSelect={setDate}
+                            disabled={(d) => d < new Date()}
+                            initialFocus className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1 block">Nº de pessoas</label>
+                      <div className="flex items-center gap-3">
+                        <Button variant="outline" size="icon" className="h-9 w-9"
+                          onClick={() => setNumPeople(Math.max(selectedService?.min_people ?? 1, numPeople - 1))}
+                          disabled={numPeople <= (selectedService?.min_people ?? 1)}>
+                          <Minus size={14} />
+                        </Button>
+                        <span className="font-display text-lg font-bold w-8 text-center">{numPeople}</span>
+                        <Button variant="outline" size="icon" className="h-9 w-9"
+                          onClick={() => setNumPeople(Math.min(selectedService?.max_people ?? 10, numPeople + 1))}
+                          disabled={numPeople >= (selectedService?.max_people ?? 10)}>
+                          <Plus size={14} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {selectedService && (
+                      <>
+                        <Separator />
+                        <div className="space-y-1.5 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">€{selectedService.price} × {numPeople} pessoa{numPeople > 1 ? "s" : ""}</span>
+                            <span className="text-foreground">€{basePrice.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Taxa de serviço (10%)</span>
+                            <span className="text-foreground">€{fee.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-base pt-1">
+                            <span>Total</span>
+                            <span className="text-primary">€{totalPrice.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <Button
+                      variant="hero" className="w-full" size="lg"
+                      disabled={!selectedServiceId || !date}
+                      onClick={() => navigate(`/book/${selectedServiceId}`)}
+                    >
+                      Reservar Agora
+                    </Button>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Shield size={14} />
+                      <span>Pagamento seguro · Cancelamento gratuito até 48h</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-card border border-border rounded-xl p-5">
-                  <h3 className="font-display font-semibold text-foreground mb-3">Resumo</h3>
-                  <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Experiência</dt>
-                      <dd className="font-medium text-foreground">{guide.years_experience} anos</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Serviços</dt>
-                      <dd className="font-medium text-foreground">{services.length}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Avaliações</dt>
-                      <dd className="font-medium text-foreground">{guide.total_reviews}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Cidade</dt>
-                      <dd className="font-medium text-foreground">{guide.city}</dd>
-                    </div>
-                  </dl>
+                {/* Available dates chips */}
+                <div className="bg-card border border-border rounded-xl p-4">
+                  <h4 className="font-display font-semibold text-sm text-foreground mb-3">Próximas Datas Disponíveis</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {nextDates.map((d) => (
+                      <button
+                        key={d.toISOString()}
+                        onClick={() => setDate(d)}
+                        className={cn(
+                          "text-xs px-3 py-1.5 rounded-full border transition-colors",
+                          date?.toDateString() === d.toDateString()
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                        )}
+                      >
+                        {format(d, "EEE, d MMM", { locale: pt })}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contact */}
+                <div className="bg-card border border-border rounded-xl p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Tens alguma dúvida antes de reservar?</p>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        <MessageSquare size={16} className="mr-2" /> Enviar Mensagem
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle className="font-display">Mensagem para {guide.user?.name}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-2">
+                        <textarea
+                          value={contactMessage}
+                          onChange={(e) => setContactMessage(e.target.value)}
+                          placeholder="Escreve a tua mensagem aqui (mínimo 50 caracteres)..."
+                          className="flex w-full rounded-xl border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[120px] resize-none"
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="hero"
+                            disabled={contactMessage.length < 50}
+                            onClick={() => {
+                              toast.success("Mensagem enviada!", { description: `A tua mensagem foi enviada a ${guide.user?.name}.` });
+                              setContactMessage("");
+                            }}
+                          >
+                            Enviar
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
