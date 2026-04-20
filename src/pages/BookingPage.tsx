@@ -73,7 +73,7 @@ export default function BookingPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 bg-muted/30">
-        <div className="container py-8 max-w-5xl">
+        <div className="container py-6 sm:py-8 max-w-5xl">
           <Link to={`/guides/${guide.id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft size={16} /> Voltar ao perfil do guia
           </Link>
