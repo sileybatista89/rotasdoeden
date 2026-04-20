@@ -414,95 +414,13 @@ export default function GuideProfilePage() {
               </section>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-4">
+            {/* Sidebar — desktop only */}
+            <div className="hidden lg:block space-y-4">
               <div className="sticky top-24 space-y-4">
                 {/* Booking Sidebar */}
                 <div className="bg-card border border-border rounded-xl p-6 shadow-md">
                   <h3 className="font-display font-bold text-foreground mb-4">Reserva Rápida</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1 block">Seleciona um serviço</label>
-                      <Select value={selectedServiceId} onValueChange={(v) => { setSelectedServiceId(v); setNumPeople(1); }}>
-                        <SelectTrigger><SelectValue placeholder="Escolher serviço..." /></SelectTrigger>
-                        <SelectContent>
-                          {services.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>{s.title} — €{s.price}/pessoa</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1 block">Data</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {date ? format(date, "d 'de' MMMM, yyyy", { locale: pt }) : "Escolher data"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single" selected={date} onSelect={setDate}
-                            disabled={(d) => d < new Date()}
-                            initialFocus className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1 block">Nº de pessoas</label>
-                      <div className="flex items-center gap-3">
-                        <Button variant="outline" size="icon" className="h-9 w-9"
-                          onClick={() => setNumPeople(Math.max(selectedService?.min_people ?? 1, numPeople - 1))}
-                          disabled={numPeople <= (selectedService?.min_people ?? 1)}>
-                          <Minus size={14} />
-                        </Button>
-                        <span className="font-display text-lg font-bold w-8 text-center">{numPeople}</span>
-                        <Button variant="outline" size="icon" className="h-9 w-9"
-                          onClick={() => setNumPeople(Math.min(selectedService?.max_people ?? 10, numPeople + 1))}
-                          disabled={numPeople >= (selectedService?.max_people ?? 10)}>
-                          <Plus size={14} />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {selectedService && (
-                      <>
-                        <Separator />
-                        <div className="space-y-1.5 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">€{selectedService.price} × {numPeople} pessoa{numPeople > 1 ? "s" : ""}</span>
-                            <span className="text-foreground">€{basePrice.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Taxa de serviço (10%)</span>
-                            <span className="text-foreground">€{fee.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between font-bold text-base pt-1">
-                            <span>Total</span>
-                            <span className="text-primary">€{totalPrice.toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <Button
-                      variant="hero" className="w-full" size="lg"
-                      disabled={!selectedServiceId || !date}
-                      onClick={() => navigate(`/book/${selectedServiceId}`)}
-                    >
-                      Reservar Agora
-                    </Button>
-
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Shield size={14} />
-                      <span>Pagamento seguro · Cancelamento gratuito até 48h</span>
-                    </div>
-                  </div>
+                  {bookingForm}
                 </div>
 
                 {/* Available dates chips */}
@@ -567,6 +485,46 @@ export default function GuideProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Mobile sticky booking bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs text-muted-foreground">A partir de</span>
+          <span className="font-display font-bold text-lg text-foreground">€{cheapestPrice}<span className="text-xs font-normal text-muted-foreground">/pessoa</span></span>
+        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="hero" size="lg" className="flex-1 max-w-[60%]">Reservar</Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto rounded-t-2xl">
+            <SheetHeader>
+              <SheetTitle className="font-display text-left">Reserva Rápida</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4">{bookingForm}</div>
+
+            <div className="mt-6">
+              <h4 className="font-display font-semibold text-sm text-foreground mb-3">Próximas Datas Disponíveis</h4>
+              <div className="flex flex-wrap gap-2">
+                {nextDates.map((d) => (
+                  <button
+                    key={d.toISOString()}
+                    onClick={() => setDate(d)}
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-full border transition-colors",
+                      date?.toDateString() === d.toDateString()
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                    )}
+                  >
+                    {format(d, "EEE, d MMM", { locale: pt })}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
       <Footer />
     </div>
   );
