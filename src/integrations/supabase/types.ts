@@ -14,16 +14,306 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          date: string
+          guide_id: string
+          id: string
+          num_people: number
+          service_id: string
+          service_title: string
+          special_requests: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          tourist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          guide_id: string
+          id?: string
+          num_people: number
+          service_id: string
+          service_title: string
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          tourist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          guide_id?: string
+          id?: string
+          num_people?: number
+          service_id?: string
+          service_title?: string
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price?: number
+          tourist_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          guide_id: string
+          id: string
+          last_message_at: string
+          tourist_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          guide_id: string
+          id?: string
+          last_message_at?: string
+          tourist_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          guide_id?: string
+          id?: string
+          last_message_at?: string
+          tourist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flagged_messages: {
+        Row: {
+          action_taken: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          message_id: string
+          reason: string
+          reviewed: boolean
+          sender_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          reason: string
+          reviewed?: boolean
+          sender_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          reason?: string
+          reviewed?: boolean
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flagged_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flagged_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_submissions: {
+        Row: {
+          document_back_url: string | null
+          document_front_url: string
+          document_type: string
+          id: string
+          license_number: string | null
+          license_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          selfie_url: string
+          status: Database["public"]["Enums"]["kyc_status"]
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          document_back_url?: string | null
+          document_front_url: string
+          document_type: string
+          id?: string
+          license_number?: string | null
+          license_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_url: string
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          document_back_url?: string | null
+          document_front_url?: string
+          document_type?: string
+          id?: string
+          license_number?: string | null
+          license_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_url?: string
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          flagged_reason: string | null
+          id: string
+          original_content: string | null
+          sender_id: string
+          was_filtered: boolean
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          flagged_reason?: string | null
+          id?: string
+          original_content?: string | null
+          sender_id: string
+          was_filtered?: boolean
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          flagged_reason?: string | null
+          id?: string
+          original_content?: string | null
+          sender_id?: string
+          was_filtered?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          banned: boolean
+          bio: string | null
+          country: string | null
+          created_at: string
+          full_name: string
+          id: string
+          kyc_status: Database["public"]["Enums"]["kyc_status"]
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banned?: boolean
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string
+          id: string
+          kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banned?: boolean
+          bio?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          kyc_status?: Database["public"]["Enums"]["kyc_status"]
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "guide" | "tourist"
+      booking_status:
+        | "pending_payment"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+        | "refunded"
+      kyc_status: "pending" | "submitted" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +440,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "guide", "tourist"],
+      booking_status: [
+        "pending_payment",
+        "confirmed",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
+      kyc_status: ["pending", "submitted", "verified", "rejected"],
+    },
   },
 } as const
