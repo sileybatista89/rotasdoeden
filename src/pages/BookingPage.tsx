@@ -39,7 +39,7 @@ export default function BookingPage() {
     return service.price * numPeople;
   }, [service, numPeople]);
 
-  const commissionRate = 0.15;
+  const commissionRate = 0.10;
   const platformFee = totalPrice * commissionRate;
 
   if (!service || !guide) {
