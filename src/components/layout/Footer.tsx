@@ -49,12 +49,16 @@ export function Footer() {
               <li><Link to="/legal/antifraude" className="hover:text-primary-foreground transition-colors">Protecção Antifraude</Link></li>
               <li><Link to="/legal/comunidade#proteccao-cliente" className="hover:text-primary-foreground transition-colors">Protecção do Cliente</Link></li>
               <li><Link to="/legal/reservas#disputas" className="hover:text-primary-foreground transition-colors">Disputas</Link></li>
-              <li><Link to="/legal/guias" className="hover:text-primary-foreground transition-colors">Seja Parceiro</Link></li>
+              <li><Link to="/seja-parceiro" className="hover:text-primary-foreground transition-colors">Seja Parceiro</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 mt-10 pt-6 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs text-primary-foreground/50">
+        <div className="border-t border-primary-foreground/10 mt-8 pt-6 text-xs text-primary-foreground/60 text-center md:text-left">
+          Guias verificados manualmente · Plataforma segura · Experiências locais autênticas
+        </div>
+
+        <div className="border-t border-primary-foreground/10 mt-6 pt-6 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs text-primary-foreground/50">
           <p>© {year} Rotas do Éden. Todos os direitos reservados. Marketplace independente de experiências turísticas em São Tomé e Príncipe.</p>
           <div className="flex gap-4">
             <Link to="/legal/termos" className="hover:text-primary-foreground transition-colors">Termos</Link>

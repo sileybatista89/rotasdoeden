@@ -2,7 +2,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { StatsSection } from "@/components/home/StatsSection";
-import { FeaturedGuides } from "@/components/home/FeaturedGuides";
+import { GuidesComingSoon } from "@/components/home/GuidesComingSoon";
+import { TrustBlock } from "@/components/home/TrustBlock";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuideCTA } from "@/components/home/GuideCTA";
 
@@ -13,7 +14,8 @@ const Index = () => {
       <main className="flex-1">
         <HeroSection />
         <StatsSection />
-        <FeaturedGuides />
+        <GuidesComingSoon />
+        <TrustBlock />
         <HowItWorks />
         <GuideCTA />
       </main>
