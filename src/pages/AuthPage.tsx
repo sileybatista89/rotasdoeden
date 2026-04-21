@@ -62,6 +62,7 @@ export default function AuthPage() {
     if (!ne.success) return toast.error(ne.error.issues[0].message);
     if (!ee.success) return toast.error(ee.error.issues[0].message);
     if (!pe.success) return toast.error(pe.error.issues[0].message);
+    if (!acceptedTerms) return toast.error("Tens de aceitar os Termos e a Política de Privacidade.");
 
     setBusy(true);
     const { error } = await supabase.auth.signUp({
