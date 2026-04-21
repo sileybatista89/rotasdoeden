@@ -1,101 +1,158 @@
 
+## Plano — corrigir chat interno, remover botões mortos e redesenhar o painel admin
 
-# Plano — Auth com primeiro user = Admin, KYC, Anti-fraude e Chat Interno
+## 1. Corrigir a causa principal do chat não funcionar
 
-Esta é uma fase grande. Requer **activar o Lovable Cloud** (Supabase gerido) para autenticação real, base de dados, storage de documentos KYC, chat em tempo real e protecção de rotas.
+Hoje o fluxo está partido por dois motivos:
+- o botão “Enviar Mensagem” no perfil do guia não cria conversa nenhuma; só mostra toast e manda para `/messages`
+- o booking também continua mock e não cria reserva/conversa real
+- o `last_message_at` está a ser actualizado no cliente, mas a política actual da tabela `conversations` não permite isso aos participantes
 
----
+### O que será feito
+- Criar um helper reutilizável para procurar ou criar conversa entre turista e guia
+- No `GuideProfilePage`, trocar o botão “Enviar Mensagem” para:
+  - pedir login se necessário
+  - criar/recuperar a conversa real
+  - navegar directamente para `/messages/:conversationId`
+- No `BookingPage`, trocar a confirmação mock por:
+  - inserção real em `bookings`
+  - criação/associação da conversa
+  - redirecção para a conversa ou página de mensagens com contexto da reserva
+- Em `MessagesPage`, adicionar actualização em tempo real para novas conversas e melhor empty state
+- Em `ConversationPage`, adicionar tratamento de loading/erro/permissão para não ficar silenciosamente vazio
+- Tirar do cliente a responsabilidade de actualizar `last_message_at` e passar isso para a base de dados com trigger em `messages`
+- Aproveitar o mesmo trigger para registar automaticamente entradas em `flagged_messages` quando `was_filtered = true`
 
-## 1. Activar Lovable Cloud
+## 2. Eliminar os botões mortos no admin
 
-Necessário para: auth, base de dados, storage (documentos KYC), realtime (chat), edge functions (filtro anti-fraude no chat).
+Hoje há vários controlos que parecem reais mas são apenas `toast`:
+- “Ver” em Guias
+- “Aprovar” em Guias
+- parte da moderação de reviews
+- vários elementos ainda dependem de mock data
 
-## 2. Autenticação — primeiro user vira Admin automaticamente
+### O que será feito
+- Substituir a secção “Guias” do `AdminPage` por dados reais do backend (`profiles` + `user_roles` + `kyc_submissions`)
+- Trocar o botão “Ver” por uma acção real:
+  - abrir drawer/modal de detalhe do guia dentro do admin
+  - mostrar nome, email, estado KYC, documentos, data de registo, estado da conta, e métricas básicas
+- Trocar “Aprovar” por acção real:
+  - actualizar `profiles.kyc_status`
+  - actualizar submissão KYC correspondente quando existir
+- Manter “Banir/Desbanir” funcional e mais visível
+- Remover ou converter qualquer botão ainda não suportado para estado explícito “Em breve”, evitando mais botões mortos
 
-**Fluxo:**
-- Página `/auth` com tabs Login / Registo (email + password).
-- Após signup, trigger SQL `handle_new_user` cria registo em `profiles` e atribui role:
-  - Se a tabela `user_roles` ainda estiver vazia → `admin`
-  - Caso contrário → `tourist` (default) ou conforme escolha no registo (`tourist` / `guide`)
-- Tabela `user_roles` separada (segurança — nunca colocar role em `profiles`) com enum `app_role: admin | guide | tourist`.
-- Função SECURITY DEFINER `has_role(_user_id, _role)` para usar em RLS sem recursão.
-- Sessão gerida com `onAuthStateChange` + `getSession`.
-- Navbar passa a mostrar avatar + dropdown (Dashboard / Sair) quando autenticado.
+## 3. Ligar o admin ao perfil certo do guia
 
-## 3. Schema da Base de Dados
+O problema actual é também de arquitectura: o site público usa `mockGuides`, mas o admin usa utilizadores reais. Isso impede que “ver perfil do guia” aponte para um perfil real coerente.
 
-Tabelas novas:
-- `profiles` — id (FK auth.users), full_name, avatar_url, phone, country, kyc_status (`pending|submitted|verified|rejected`), banned (bool), created_at
-- `user_roles` — id, user_id, role (enum)
-- `kyc_submissions` — id, user_id, document_type, document_url (storage), selfie_url, status, reviewer_notes, submitted_at, reviewed_at, reviewed_by
-- `bookings` — id, tourist_id, guide_id, service_id, date, num_people, total_price, status, created_at
-- `conversations` — id, booking_id (nullable), tourist_id, guide_id, created_at, last_message_at
-- `messages` — id, conversation_id, sender_id, content, content_filtered (bool), flagged_reason (text), created_at
-- `flagged_messages` — id, message_id, reason, reviewed (bool), action_taken
+### O que será feito
+- Separar claramente:
+  - perfil público do guia
+  - detalhe administrativo do guia
+- No admin, deixar de tentar depender do perfil público mock
+- Criar uma vista de detalhe administrativa real, baseada no backend
+- Se necessário para fechar o fluxo completo, preparar a migração gradual da área pública de guias/serviços para dados reais, para que booking + chat partam de entidades reais e não de mocks
 
-Storage buckets:
-- `kyc-documents` (privado, RLS estrita — só dono e admin)
-- `avatars` (público)
+## 4. Melhorar bastante o visual do painel admin
 
-## 4. Painel Admin completo (`/admin` protegido)
+Sem mudar para dark mode, o painel pode ficar muito mais premium e menos “branco comum”.
 
-Substitui o mock actual. Secções:
-- **Dashboard** — KPIs reais (users, guias verificados, reservas, receita, chats activos, mensagens flagged)
-- **Utilizadores** — lista de todos, com acções: ver perfil, **banir/desbanir**, alterar role, ver histórico
-- **Guias** — lista com filtro por status KYC, botão **Aprovar/Rejeitar verificação**, ver documentos KYC
-- **KYC / Verificação** — fila de submissões pendentes com preview de documento + selfie, aprovar/rejeitar com nota
-- **Reservas** — todas as reservas, filtros, cancelar/reembolsar
-- **Chats / Moderação** — lista de conversas, mensagens flagged pelo filtro anti-fraude, ver contexto, banir user
-- **Reviews** — moderação (já existe)
-- **Definições** — comissão, configurações da plataforma
+### O que será feito
+- Redesenhar `AdminPage` e `AdminSidebar` com a identidade da marca:
+  - superfícies verde-eden, areia e oceano em camadas suaves
+  - cards com gradientes subtis, destaques e melhor profundidade
+  - header administrativo com contexto, KPIs e atalhos
+  - sidebar mais forte visualmente e com estados activos mais elegantes
+- Dar mais hierarquia visual:
+  - secções com títulos, descrições e acções claras
+  - tabelas dentro de shells mais ricos
+  - badges e estados mais legíveis
+  - empty states mais bonitos e informativos
+- Melhorar a experiência mobile/tablet do admin com navegação lateral responsiva
 
-## 5. KYC para Guias
+## 5. Tornar o chat mais confiável e mais claro
 
-- Após registo como guia, perfil `kyc_status = pending`.
-- Página `/kyc` onde guia faz upload de:
-  - Documento de identificação (BI/passaporte) — frente e verso
-  - Selfie segurando o documento
-  - Licença turística (já existia conceptualmente)
-- Submissão grava em `kyc_submissions` + storage privado.
-- Guia fica com `kyc_status = submitted`, perfil **não aparece publicamente** em `/guides` até admin aprovar (`verified`).
-- Admin vê fila no painel, aprova/rejeita.
+### O que será feito
+- Melhorar `MessageInput` com estados de erro mais claros
+- Mostrar feedback quando a conversa ainda está a ser criada/carregada
+- Melhorar a lista de mensagens e a lista de conversas com:
+  - nomes e avatars consistentes
+  - última mensagem/última actividade
+  - estados vazios úteis
+- Garantir que o banner anti-fraude fica sempre visível e contextual
+- Confirmar que mensagens filtradas aparecem correctamente no chat e no admin
 
-## 6. Chat Interno (anti-fuga da plataforma)
+## 6. Ajustes de backend necessários
 
-- Página `/messages` (lista de conversas) e `/messages/:conversationId`.
-- Conversa é criada automaticamente quando turista envia mensagem ao guia ou faz reserva.
-- Realtime via Supabase Realtime — mensagens aparecem ao vivo.
-- **Filtro anti-fraude** numa edge function `filter-message` chamada antes de inserir:
-  - Bloqueia/máscara: emails, números de telefone (formatos PT/STP/internacionais), URLs externos, handles de redes sociais (@instagram, @whatsapp, t.me/, wa.me/, etc.), palavras-chave ("paypal", "mbway", "iban", "fora da plataforma", "diretamente comigo", etc.)
-  - Mensagem detectada: marcada como `flagged`, conteúdo substituído por aviso, registada em `flagged_messages` para revisão admin.
-  - Usuário recebe toast: "Por segurança, contactos e pagamentos externos não são permitidos. Toda a comunicação e pagamentos devem ocorrer dentro da plataforma."
-- Aviso permanente no topo do chat: banner com termos anti-fraude.
-- Modal "Contactar guia" da página de perfil passa a abrir/criar uma conversa real em vez de ser UI mock.
+### Migrações / regras
+- Adicionar trigger em `messages` para:
+  - actualizar `conversations.last_message_at`
+  - inserir em `flagged_messages` quando a mensagem for filtrada
+- Rever políticas RLS relacionadas com:
+  - leitura de conversas
+  - criação de conversas
+  - inserção de mensagens
+  - fluxos do admin sobre KYC e moderação
+- Manter a segurança actual: admin via `user_roles`, sem roles em `profiles`
 
-## 7. Protecção de rotas
+## 7. Ficheiros a alterar
 
-- `/admin/*` → exige role `admin`
-- `/kyc` → exige login + role `guide`
-- `/messages/*` → exige login
-- `/book/*` → exige login + KYC do guia verificado
+### Frontend
+- `src/pages/GuideProfilePage.tsx`
+- `src/pages/BookingPage.tsx`
+- `src/pages/MessagesPage.tsx`
+- `src/pages/ConversationPage.tsx`
+- `src/components/chat/MessageInput.tsx`
+- `src/components/chat/MessageList.tsx`
+- `src/pages/AdminPage.tsx`
+- `src/components/admin/AdminSidebar.tsx`
+- `src/components/admin/UsersTable.tsx`
+- `src/components/admin/KycQueue.tsx`
+- `src/components/admin/FlaggedMessages.tsx`
+- possivelmente novos componentes como:
+  - `AdminGuideTable.tsx`
+  - `AdminGuideDetailDrawer.tsx`
+  - `AdminSectionHeader.tsx`
 
-## 8. Ficheiros principais
+### Backend
+- nova migration SQL para trigger/políticas auxiliares
+- eventual helper partilhado para criação/abertura de conversa
 
-**Novos:**
-- Migrações SQL (enum, tabelas, RLS, trigger first-user-admin)
-- `src/pages/AuthPage.tsx`, `src/pages/KycPage.tsx`, `src/pages/MessagesPage.tsx`, `src/pages/ConversationPage.tsx`
-- `src/hooks/useAuth.tsx`, `src/hooks/useUserRole.tsx`
-- `src/components/admin/UsersTable.tsx`, `KycQueue.tsx`, `FlaggedMessages.tsx`
-- `src/components/chat/MessageList.tsx`, `MessageInput.tsx`, `AntiFraudBanner.tsx`
-- `src/components/auth/ProtectedRoute.tsx`
-- Edge function `supabase/functions/filter-message/index.ts`
+## 8. Resultado esperado
 
-**Editados:**
-- `App.tsx` (rotas + guards), `Navbar.tsx` (estado real), `AdminPage.tsx` (dados reais + KYC + chats), `GuideProfilePage.tsx` (botão Mensagem cria conversa), `BookingPage.tsx` (cria booking real + conversa)
+No fim desta fase:
+- clicar em “Enviar Mensagem” abre uma conversa real
+- reservar deixa de ser apenas visual e passa a criar booking/conversa
+- o chat interno funciona de ponta a ponta
+- o admin deixa de ter botões falsos
+- “Ver perfil” do guia passa a abrir uma vista real e útil
+- o painel fica visualmente mais marcante, mais premium e menos genérico
+- a moderação anti-fraude passa a ficar sincronizada com o que acontece no chat
 
-## Notas
+## Detalhes técnicos
 
-- Pagamentos reais (Stripe/Paddle) ficam para fase seguinte — por agora reservas ficam `pending_payment`.
-- Filtro anti-fraude é heurístico (regex + lista negra). Pode ser reforçado depois com IA via Lovable AI Gateway.
-- Admin do projecto que mencionas tinha exactamente este padrão (primeiro user = admin, KYC, banir, moderação) — vou replicar essa arquitectura aqui.
+```text
+Fluxo corrigido:
+Perfil do guia / Reserva
+        ↓
+getOrCreateConversation(...)
+        ↓
+/messages/:conversationId
+        ↓
+insert em messages
+        ↓
+trigger actualiza last_message_at
+        ↓
+admin vê mensagens filtradas / actividade real
+```
 
+```text
+Admin renovado:
+Sidebar premium
+  + Dashboard com contexto
+  + Guias reais
+  + KYC funcional
+  + Utilizadores funcionais
+  + Chat moderation ligada ao backend
+```
