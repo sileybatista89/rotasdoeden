@@ -1,158 +1,86 @@
 
-## Plano — corrigir chat interno, remover botões mortos e redesenhar o painel admin
+# Plano — Páginas Legais e Políticas + Rodapé Actualizado
 
-## 1. Corrigir a causa principal do chat não funcionar
+Vou criar a estrutura legal completa do Rota do Éden com 20+ políticas, organizadas em páginas dedicadas, e actualizar o rodapé para servir como índice navegável.
 
-Hoje o fluxo está partido por dois motivos:
-- o botão “Enviar Mensagem” no perfil do guia não cria conversa nenhuma; só mostra toast e manda para `/messages`
-- o booking também continua mock e não cria reserva/conversa real
-- o `last_message_at` está a ser actualizado no cliente, mas a política actual da tabela `conversations` não permite isso aos participantes
+## 1. Estrutura de páginas
 
-### O que será feito
-- Criar um helper reutilizável para procurar ou criar conversa entre turista e guia
-- No `GuideProfilePage`, trocar o botão “Enviar Mensagem” para:
-  - pedir login se necessário
-  - criar/recuperar a conversa real
-  - navegar directamente para `/messages/:conversationId`
-- No `BookingPage`, trocar a confirmação mock por:
-  - inserção real em `bookings`
-  - criação/associação da conversa
-  - redirecção para a conversa ou página de mensagens com contexto da reserva
-- Em `MessagesPage`, adicionar actualização em tempo real para novas conversas e melhor empty state
-- Em `ConversationPage`, adicionar tratamento de loading/erro/permissão para não ficar silenciosamente vazio
-- Tirar do cliente a responsabilidade de actualizar `last_message_at` e passar isso para a base de dados com trigger em `messages`
-- Aproveitar o mesmo trigger para registar automaticamente entradas em `flagged_messages` quando `was_filtered = true`
+Em vez de criar 20 páginas separadas (que ficaria pesado de manter), vou agrupar as políticas por afinidade temática em **7 páginas legais**, cada uma com várias secções ancoradas para navegação directa.
 
-## 2. Eliminar os botões mortos no admin
+### Páginas a criar
 
-Hoje há vários controlos que parecem reais mas são apenas `toast`:
-- “Ver” em Guias
-- “Aprovar” em Guias
-- parte da moderação de reviews
-- vários elementos ainda dependem de mock data
+| Rota | Conteúdo |
+|------|----------|
+| `/legal/termos` | Termos de Serviço + Termos e Condições de Utilização + Aviso Legal |
+| `/legal/privacidade` | Política de Privacidade + RGPD/GDPR + Retenção de Dados + Cookies |
+| `/legal/reservas` | Política de Reservas + Cancelamentos e Reembolsos + Pagamentos + Comissões + Chargeback/Disputas |
+| `/legal/antifraude` | Política Antifraude (versão pública) + Segurança da Plataforma + Suspensão de Contas |
+| `/legal/guias` | Política para Guias Parceiros + Contrato de Parceria + Código de Conduta |
+| `/legal/comunidade` | Política de Avaliações + Conteúdo + Comunicações + Proteção do Cliente |
+| `/legal/parcerias` | Propriedade Intelectual + Cláusula para Investidores/Entidades + Termos Institucionais |
 
-### O que será feito
-- Substituir a secção “Guias” do `AdminPage` por dados reais do backend (`profiles` + `user_roles` + `kyc_submissions`)
-- Trocar o botão “Ver” por uma acção real:
-  - abrir drawer/modal de detalhe do guia dentro do admin
-  - mostrar nome, email, estado KYC, documentos, data de registo, estado da conta, e métricas básicas
-- Trocar “Aprovar” por acção real:
-  - actualizar `profiles.kyc_status`
-  - actualizar submissão KYC correspondente quando existir
-- Manter “Banir/Desbanir” funcional e mais visível
-- Remover ou converter qualquer botão ainda não suportado para estado explícito “Em breve”, evitando mais botões mortos
+Cada página usará a mesma layout shell (Navbar + container legível + Footer + índice lateral em desktop com scroll-spy nas secções).
 
-## 3. Ligar o admin ao perfil certo do guia
+## 2. Componentes novos
 
-O problema actual é também de arquitectura: o site público usa `mockGuides`, mas o admin usa utilizadores reais. Isso impede que “ver perfil do guia” aponte para um perfil real coerente.
+- `src/pages/legal/LegalLayout.tsx` — shell partilhado com índice lateral, breadcrumb e tipografia legível (max-width prose, headings com âncoras)
+- `src/pages/legal/TermosPage.tsx`
+- `src/pages/legal/PrivacidadePage.tsx`
+- `src/pages/legal/ReservasPage.tsx`
+- `src/pages/legal/AntifraudePage.tsx`
+- `src/pages/legal/GuiasPage.tsx`
+- `src/pages/legal/ComunidadePage.tsx`
+- `src/pages/legal/ParceriasPage.tsx`
+- `src/data/legalContent.ts` — conteúdo estruturado (título, secções, parágrafos, listas) para alimentar as páginas; mantém edição centralizada
 
-### O que será feito
-- Separar claramente:
-  - perfil público do guia
-  - detalhe administrativo do guia
-- No admin, deixar de tentar depender do perfil público mock
-- Criar uma vista de detalhe administrativa real, baseada no backend
-- Se necessário para fechar o fluxo completo, preparar a migração gradual da área pública de guias/serviços para dados reais, para que booking + chat partam de entidades reais e não de mocks
+## 3. Rodapé reorganizado
 
-## 4. Melhorar bastante o visual do painel admin
+`Footer.tsx` passa a ter 4 colunas em vez das actuais 3, com links reais (deixam de ser "em breve"):
 
-Sem mudar para dark mode, o painel pode ficar muito mais premium e menos “branco comum”.
+- **Plataforma**: Encontrar Guias, Como Funciona, Contacto
+- **Legal**: Termos, Privacidade, Cookies, Cancelamentos
+- **Para Guias**: Seja Parceiro, Comissões, Código de Conduta
+- **Segurança**: Proteção Antifraude, Proteção do Cliente, Disputas
 
-### O que será feito
-- Redesenhar `AdminPage` e `AdminSidebar` com a identidade da marca:
-  - superfícies verde-eden, areia e oceano em camadas suaves
-  - cards com gradientes subtis, destaques e melhor profundidade
-  - header administrativo com contexto, KPIs e atalhos
-  - sidebar mais forte visualmente e com estados activos mais elegantes
-- Dar mais hierarquia visual:
-  - secções com títulos, descrições e acções claras
-  - tabelas dentro de shells mais ricos
-  - badges e estados mais legíveis
-  - empty states mais bonitos e informativos
-- Melhorar a experiência mobile/tablet do admin com navegação lateral responsiva
+Texto curto no fundo: "© {ano} Rota do Éden. Todos os direitos reservados. Marketplace independente de experiências turísticas em São Tomé e Príncipe."
 
-## 5. Tornar o chat mais confiável e mais claro
+## 4. Tom e linguagem
 
-### O que será feito
-- Melhorar `MessageInput` com estados de erro mais claros
-- Mostrar feedback quando a conversa ainda está a ser criada/carregada
-- Melhorar a lista de mensagens e a lista de conversas com:
-  - nomes e avatars consistentes
-  - última mensagem/última actividade
-  - estados vazios úteis
-- Garantir que o banner anti-fraude fica sempre visível e contextual
-- Confirmar que mensagens filtradas aparecem correctamente no chat e no admin
+Todas as páginas seguem as regras do briefing:
+- Linguagem profissional, neutra, sem ameaças ("reservamo-nos o direito de…" em vez de "vamos processar")
+- Português europeu (consistente com o resto do site)
+- Data de "Última actualização" no topo
+- Email de contacto: `info@rotasdoeden.st` (já existe no rodapé)
+- Aviso "Esta plataforma é uma intermediária digital" onde aplicável
 
-## 6. Ajustes de backend necessários
+## 5. Regras invisíveis (backend)
 
-### Migrações / regras
-- Adicionar trigger em `messages` para:
-  - actualizar `conversations.last_message_at`
-  - inserir em `flagged_messages` quando a mensagem for filtrada
-- Rever políticas RLS relacionadas com:
-  - leitura de conversas
-  - criação de conversas
-  - inserção de mensagens
-  - fluxos do admin sobre KYC e moderação
-- Manter a segurança actual: admin via `user_roles`, sem roles em `profiles`
+A secção "Regras invisíveis" do briefing **não vai para o site público** — fica como referência interna para reforço futuro do filtro antifraude. Já temos a base implementada (`filter-message` edge function detecta números, emails, links, palavras-chave). O que falta para fechar essa lista (multi-conta por IP, reviews suspeitas, chargebacks repetidos) fica para uma fase posterior porque depende de pagamentos reais e tracking de IP — não faz parte deste pedido.
 
-## 7. Ficheiros a alterar
+## 6. Rotas
 
-### Frontend
-- `src/pages/GuideProfilePage.tsx`
-- `src/pages/BookingPage.tsx`
-- `src/pages/MessagesPage.tsx`
-- `src/pages/ConversationPage.tsx`
-- `src/components/chat/MessageInput.tsx`
-- `src/components/chat/MessageList.tsx`
-- `src/pages/AdminPage.tsx`
-- `src/components/admin/AdminSidebar.tsx`
-- `src/components/admin/UsersTable.tsx`
-- `src/components/admin/KycQueue.tsx`
-- `src/components/admin/FlaggedMessages.tsx`
-- possivelmente novos componentes como:
-  - `AdminGuideTable.tsx`
-  - `AdminGuideDetailDrawer.tsx`
-  - `AdminSectionHeader.tsx`
+`App.tsx` ganha 7 rotas novas debaixo de `/legal/*`, todas públicas (sem `ProtectedRoute`).
 
-### Backend
-- nova migration SQL para trigger/políticas auxiliares
-- eventual helper partilhado para criação/abertura de conversa
+## 7. Ficheiros alterados
 
-## 8. Resultado esperado
+**Novos (10):**
+- `src/pages/legal/LegalLayout.tsx`
+- `src/pages/legal/TermosPage.tsx`
+- `src/pages/legal/PrivacidadePage.tsx`
+- `src/pages/legal/ReservasPage.tsx`
+- `src/pages/legal/AntifraudePage.tsx`
+- `src/pages/legal/GuiasPage.tsx`
+- `src/pages/legal/ComunidadePage.tsx`
+- `src/pages/legal/ParceriasPage.tsx`
+- `src/data/legalContent.ts`
 
-No fim desta fase:
-- clicar em “Enviar Mensagem” abre uma conversa real
-- reservar deixa de ser apenas visual e passa a criar booking/conversa
-- o chat interno funciona de ponta a ponta
-- o admin deixa de ter botões falsos
-- “Ver perfil” do guia passa a abrir uma vista real e útil
-- o painel fica visualmente mais marcante, mais premium e menos genérico
-- a moderação anti-fraude passa a ficar sincronizada com o que acontece no chat
+**Editados (2):**
+- `src/components/layout/Footer.tsx` — 4 colunas, links reais
+- `src/App.tsx` — 7 rotas legais
 
-## Detalhes técnicos
+## Resultado esperado
 
-```text
-Fluxo corrigido:
-Perfil do guia / Reserva
-        ↓
-getOrCreateConversation(...)
-        ↓
-/messages/:conversationId
-        ↓
-insert em messages
-        ↓
-trigger actualiza last_message_at
-        ↓
-admin vê mensagens filtradas / actividade real
-```
-
-```text
-Admin renovado:
-Sidebar premium
-  + Dashboard com contexto
-  + Guias reais
-  + KYC funcional
-  + Utilizadores funcionais
-  + Chat moderation ligada ao backend
-```
+- Rodapé deixa de ter "em breve" e passa a ser um índice funcional para todas as políticas
+- 7 páginas legais navegáveis, com índice lateral, conteúdo bem formatado e linguagem profissional
+- Cobertura das 20 políticas pedidas, agrupadas de forma coerente em vez de espalhadas
+- Base sólida para mostrar a investidores/parceiros e cumprir requisitos básicos de transparência
