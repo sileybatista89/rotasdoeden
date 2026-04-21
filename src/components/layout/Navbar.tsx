@@ -3,9 +3,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const notifyAuth = () => toast.info("Brevemente disponível", { description: "Login e registo serão activados em breve." });
 
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
@@ -22,18 +24,18 @@ export function Navbar() {
           <Link to="/guides" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Guias
           </Link>
-          <a href="#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <a href="/#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Como Funciona
           </a>
-          <a href="#contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <a href="/#contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Contacto
           </a>
         </nav>
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">Entrar</Button>
-          <Button size="sm" variant="hero">Registar</Button>
+          <Button variant="ghost" size="sm" onClick={notifyAuth}>Entrar</Button>
+          <Button size="sm" variant="hero" onClick={notifyAuth}>Registar</Button>
         </div>
 
         {/* Mobile hamburger */}
@@ -65,8 +67,8 @@ export function Navbar() {
               </SheetClose>
             </nav>
             <div className="mt-auto flex flex-col gap-2 pb-4">
-              <Button variant="outline" className="w-full">Entrar</Button>
-              <Button variant="hero" className="w-full">Registar</Button>
+              <Button variant="outline" className="w-full" onClick={() => { setOpen(false); notifyAuth(); }}>Entrar</Button>
+              <Button variant="hero" className="w-full" onClick={() => { setOpen(false); notifyAuth(); }}>Registar</Button>
             </div>
           </SheetContent>
         </Sheet>
