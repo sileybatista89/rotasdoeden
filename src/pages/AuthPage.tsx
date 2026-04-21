@@ -34,6 +34,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [role, setRole] = useState<"tourist" | "guide">("tourist");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate(from, { replace: true });
