@@ -22,19 +22,19 @@ const items: { id: AdminSection; label: string; icon: typeof Users }[] = [
 
 export function AdminSidebar({ active, onChange }: Props) {
   return (
-    <aside className="w-full md:w-60 md:min-h-screen md:border-r border-border bg-card">
-      <div className="p-4 border-b border-border">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <Leaf size={16} className="text-primary-foreground" />
+    <aside className="w-full md:w-64 md:min-h-screen md:border-r border-border bg-gradient-to-b from-card via-card to-primary/5 md:sticky md:top-0">
+      <div className="p-5 border-b border-border bg-gradient-to-br from-primary/15 via-card to-secondary/10">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/20">
+            <Leaf size={18} className="text-primary-foreground" />
           </div>
           <div>
-            <p className="font-display font-bold text-sm leading-tight">Rotas do Éden</p>
-            <p className="text-xs text-muted-foreground">Admin</p>
+            <p className="font-display font-bold text-base leading-tight text-foreground">Rotas do Éden</p>
+            <p className="text-[11px] text-primary font-semibold uppercase tracking-wider">Admin Console</p>
           </div>
         </Link>
       </div>
-      <nav className="p-2 flex md:flex-col gap-1 overflow-x-auto">
+      <nav className="p-3 flex md:flex-col gap-1 overflow-x-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = active === item.id;
@@ -43,20 +43,20 @@ export function AdminSidebar({ active, onChange }: Props) {
               key={item.id}
               onClick={() => onChange(item.id)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0",
+                "group flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-gradient-to-r from-primary to-primary/85 text-primary-foreground shadow-md shadow-primary/25"
+                  : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
               )}
             >
-              <Icon size={16} />
+              <Icon size={16} className={cn("transition-transform", isActive ? "" : "group-hover:scale-110")} />
               {item.label}
             </button>
           );
         })}
       </nav>
       <div className="p-4 mt-auto hidden md:block">
-        <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+        <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
           <ArrowLeft size={12} /> Voltar ao site
         </Link>
       </div>

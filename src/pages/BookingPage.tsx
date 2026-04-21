@@ -15,6 +15,9 @@ import { mockServices, mockGuides } from "@/data/mockData";
 import { guidePhotos } from "@/data/guidePhotos";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { getOrCreateConversation, isUuid } from "@/lib/conversations";
 
 const categoryLabels: Record<string, string> = {
   tour: "Tour", experience: "Experiência", transfer: "Transfer", diving: "Mergulho",
@@ -26,6 +29,7 @@ const categoryLabels: Record<string, string> = {
 export default function BookingPage() {
   const { serviceId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const service = mockServices.find((s) => s.id === serviceId);
   const guide = service ? mockGuides.find((g) => g.id === service.guide_id) : null;
 
@@ -62,11 +66,44 @@ export default function BookingPage() {
   const photo = guidePhotos[guide.id];
   const canProceed = step === 1 ? !!date && numPeople >= service.min_people && numPeople <= service.max_people : true;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!user) { navigate("/auth"); return; }
+
+    // Demo guide (mock data, no real auth user) — keep visual confirmation only
+    if (!isUuid(guide!.id)) {
+      toast.success("Reserva confirmada (demo)", {
+        description: "Este é um guia de demonstração. A reserva real será criada quando reservares com guias verificados na plataforma.",
+      });
+      setStep(3);
+      return;
+    }
+
+    const { data: booking, error } = await supabase.from("bookings").insert({
+      tourist_id: user.id,
+      guide_id: guide!.id,
+      service_id: service!.id,
+      service_title: service!.title,
+      date: format(date!, "yyyy-MM-dd"),
+      num_people: numPeople,
+      total_price: totalPrice,
+      special_requests: specialRequests || null,
+    }).select("id").single();
+
+    if (error) { toast.error(error.message); return; }
+
+    const conv = await getOrCreateConversation({
+      touristId: user.id,
+      guideId: guide!.id,
+      bookingId: booking.id,
+    });
+
     toast.success("Reserva confirmada com sucesso!", {
-      description: `A sua reserva para "${service.title}" foi registada.`,
+      description: `A sua reserva para "${service!.title}" foi registada.`,
     });
     setStep(3);
+    if (!("error" in conv)) {
+      setTimeout(() => navigate(`/messages/${conv.id}`), 1500);
+    }
   };
 
   return (

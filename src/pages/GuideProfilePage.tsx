@@ -22,7 +22,7 @@ import { guidePhotos } from "@/data/guidePhotos";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { getOrCreateConversation, isUuid } from "@/lib/conversations";
 
 const categoryLabels: Record<string, string> = {
   tour: "Tour", experience: "Experiência", transfer: "Transfer", diving: "Mergulho",
@@ -42,10 +42,16 @@ export default function GuideProfilePage() {
       navigate("/auth", { state: { from: `/guides/${id}` } });
       return;
     }
-    toast.info("Chat interno disponível", {
-      description: "Vai a Mensagens para conversar com guias registados na plataforma. Toda a comunicação ocorre dentro do sistema.",
-    });
-    setTimeout(() => navigate("/messages"), 1500);
+    if (!id || !isUuid(id)) {
+      toast.info("Perfil de demonstração", {
+        description: "Este guia faz parte da galeria de exemplos. Reserva ou contacta um guia real para abrir uma conversa.",
+      });
+      navigate("/messages");
+      return;
+    }
+    const result = await getOrCreateConversation({ touristId: user.id, guideId: id });
+    if ("error" in result) { toast.error(result.error); return; }
+    navigate(`/messages/${result.id}`);
   }
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");

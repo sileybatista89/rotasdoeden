@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { AntiFraudBanner } from "@/components/chat/AntiFraudBanner";
 import { MessageList, type ChatMessage } from "@/components/chat/MessageList";
@@ -13,25 +13,31 @@ export default function ConversationPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [otherName, setOtherName] = useState("Conversa");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!conversationId || !user) return;
+    setLoading(true);
+    setError(null);
 
     (async () => {
-      const { data: conv } = await supabase
+      const { data: conv, error: convErr } = await supabase
         .from("conversations").select("*").eq("id", conversationId).maybeSingle();
-      if (conv) {
-        const otherId = conv.tourist_id === user.id ? conv.guide_id : conv.tourist_id;
-        const { data: prof } = await supabase
-          .from("profiles").select("full_name").eq("id", otherId).maybeSingle();
-        if (prof) setOtherName(prof.full_name);
-      }
+      if (convErr) { setError("Sem permissão para ver esta conversa."); setLoading(false); return; }
+      if (!conv) { setError("Conversa não encontrada."); setLoading(false); return; }
+
+      const otherId = conv.tourist_id === user.id ? conv.guide_id : conv.tourist_id;
+      const { data: prof } = await supabase
+        .from("profiles").select("full_name").eq("id", otherId).maybeSingle();
+      if (prof) setOtherName(prof.full_name || "Conversa");
 
       const { data } = await supabase.from("messages")
         .select("id, sender_id, content, was_filtered, created_at")
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
       setMessages((data ?? []) as ChatMessage[]);
+      setLoading(false);
     })();
 
     const channel = supabase
@@ -40,7 +46,10 @@ export default function ConversationPage() {
         event: "INSERT", schema: "public", table: "messages",
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as ChatMessage]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === (payload.new as ChatMessage).id)) return prev;
+          return [...prev, payload.new as ChatMessage];
+        });
       })
       .subscribe();
 
@@ -58,9 +67,19 @@ export default function ConversationPage() {
         </Link>
         <h1 className="font-display text-xl font-bold text-foreground mb-3">{otherName}</h1>
         <AntiFraudBanner />
-        <div className="mt-3 flex-1 flex flex-col bg-card border border-border rounded-2xl overflow-hidden min-h-[60vh]">
-          <MessageList messages={messages} currentUserId={user.id} />
-          <MessageInput conversationId={conversationId} senderId={user.id} />
+        <div className="mt-3 flex-1 flex flex-col bg-card border border-border rounded-2xl overflow-hidden min-h-[60vh] shadow-sm">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2 text-sm">
+              <Loader2 size={16} className="animate-spin" /> A carregar conversa…
+            </div>
+          ) : error ? (
+            <div className="flex-1 flex items-center justify-center text-sm text-destructive p-6 text-center">{error}</div>
+          ) : (
+            <>
+              <MessageList messages={messages} currentUserId={user.id} />
+              <MessageInput conversationId={conversationId} senderId={user.id} />
+            </>
+          )}
         </div>
       </main>
     </div>

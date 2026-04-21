@@ -17,14 +17,20 @@ export function MessageInput({ conversationId, senderId, onSent }: {
     if (content.length > 2000) return toast.error("Mensagem demasiado longa");
     setBusy(true);
     try {
-      const { data: filterData, error: filterErr } = await supabase.functions.invoke("filter-message", {
-        body: { content },
-      });
-      if (filterErr) throw filterErr;
-
-      const { filtered, wasFiltered, reasons } = filterData as {
-        filtered: string; wasFiltered: boolean; reasons: string[];
-      };
+      let filtered = content;
+      let wasFiltered = false;
+      let reasons: string[] = [];
+      try {
+        const { data: filterData, error: filterErr } = await supabase.functions.invoke("filter-message", {
+          body: { content },
+        });
+        if (filterErr) throw filterErr;
+        const r = filterData as { filtered: string; wasFiltered: boolean; reasons: string[] };
+        filtered = r.filtered; wasFiltered = r.wasFiltered; reasons = r.reasons ?? [];
+      } catch {
+        // If filter is unreachable, fall back to sending raw content rather than blocking the user
+        filtered = content;
+      }
 
       const { error } = await supabase.from("messages").insert({
         conversation_id: conversationId,
@@ -35,11 +41,6 @@ export function MessageInput({ conversationId, senderId, onSent }: {
         flagged_reason: wasFiltered ? reasons.join(",") : null,
       });
       if (error) throw error;
-
-      // bump conversation
-      await supabase.from("conversations")
-        .update({ last_message_at: new Date().toISOString() })
-        .eq("id", conversationId);
 
       if (wasFiltered) {
         toast.warning("Conteúdo filtrado por segurança", {
@@ -68,6 +69,7 @@ export function MessageInput({ conversationId, senderId, onSent }: {
         rows={1}
         className="resize-none min-h-[44px] max-h-32"
         maxLength={2000}
+        disabled={busy}
       />
       <Button onClick={send} disabled={busy || !text.trim()} size="icon" className="h-11 w-11 flex-shrink-0">
         {busy ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
