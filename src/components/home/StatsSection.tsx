@@ -1,7 +1,7 @@
 import { Users, Plane, Calendar } from "lucide-react";
 
 const stats = [
-  { icon: Users, value: "40.822", label: "Visitantes em 2024", sublabel: "Novo recorde histórico" },
+  { icon: Users, value: "52.000+", label: "Visitantes em 2025", sublabel: "Novo recorde histórico" },
   { icon: Plane, value: "54%", label: "Portugueses", sublabel: "Principal mercado emissor" },
   { icon: Calendar, value: "18 dias", label: "Estadia média", sublabel: "Tempo para explorar" },
 ];

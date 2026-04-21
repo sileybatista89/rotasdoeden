@@ -8,7 +8,7 @@ export function HeroSection() {
     <section className="relative overflow-hidden min-h-[90vh] flex items-center">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img src={heroBg} alt="São Tomé e Príncipe" className="w-full h-full object-cover" width={1920} height={1080} />
+        <img src={heroBg} alt="Pico Cão Grande, São Tomé e Príncipe" className="w-full h-full object-cover" width={1920} height={1080} />
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/40 to-foreground/70" />
       </div>
 
@@ -16,7 +16,7 @@ export function HeroSection() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-foreground/15 backdrop-blur-sm text-primary-foreground text-sm font-medium mb-6 border border-primary-foreground/20">
             <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-            40.822 visitantes em 2024
+            52.000+ visitantes em 2025
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-tight mb-6 drop-shadow-lg">
