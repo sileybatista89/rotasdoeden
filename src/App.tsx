@@ -62,6 +62,7 @@ const App = () => (
             <Route path="/legal/parcerias" element={<ParceriasPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <CookieConsent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
