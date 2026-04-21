@@ -28,10 +28,10 @@ export function LegalLayout({ page }: LegalLayoutProps) {
               <FileText size={22} />
             </div>
             <div>
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
+              <h1 className="font-display text-3xl md:text-[32px] font-bold text-foreground mb-3">
                 {page.title}
               </h1>
-              <p className="text-muted-foreground max-w-2xl text-sm md:text-base">{page.intro}</p>
+              <p className="text-muted-foreground max-w-2xl text-base md:text-lg leading-relaxed">{page.intro}</p>
               <p className="text-xs text-muted-foreground/80 mt-3">
                 Última actualização: <span className="font-medium text-foreground/80">{page.updated}</span>
               </p>
@@ -56,7 +56,7 @@ export function LegalLayout({ page }: LegalLayoutProps) {
                       <li key={item.slug}>
                         <Link
                           to={`/legal/${item.slug}`}
-                          className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+                          className={`block px-3 py-2 rounded-lg text-[13px] transition-colors ${
                             active
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -80,7 +80,7 @@ export function LegalLayout({ page }: LegalLayoutProps) {
                       <li key={s.id}>
                         <a
                           href={`#${s.id}`}
-                          className="block pl-3 -ml-px py-1.5 text-xs text-muted-foreground hover:text-foreground border-l border-transparent hover:border-primary transition-colors"
+                          className="block pl-3 -ml-px py-1.5 text-[13px] text-muted-foreground hover:text-foreground border-l border-transparent hover:border-primary transition-colors"
                         >
                           {s.title}
                         </a>
@@ -93,25 +93,25 @@ export function LegalLayout({ page }: LegalLayoutProps) {
           </aside>
 
           {/* Content */}
-          <article className="max-w-3xl">
-            <div className="space-y-10">
+          <article className="max-w-[720px] lg:pl-2">
+            <div className="space-y-12">
               {page.sections.map((section) => (
                 <section key={section.id} id={section.id} className="scroll-mt-24">
-                  <h2 className="font-display text-xl md:text-2xl font-bold text-foreground mb-4 pb-2 border-b border-border">
+                  <h2 className="font-display text-xl md:text-[22px] font-bold text-foreground mb-5 pb-3 border-b border-border">
                     {section.title}
                   </h2>
-                  <div className="space-y-4 text-foreground/85 leading-relaxed">
+                  <div className="space-y-5 text-foreground/85 leading-[1.7]">
                     {section.blocks.map((block, i) => {
                       if (block.type === "p")
-                        return <p key={i} className="text-sm md:text-base">{block.text}</p>;
+                        return <p key={i} className="text-base md:text-[17px]">{block.text}</p>;
                       if (block.type === "h3")
                         return (
-                          <h3 key={i} className="font-display text-base font-semibold text-foreground mt-4">
+                          <h3 key={i} className="font-display text-lg font-semibold text-foreground mt-6">
                             {block.text}
                           </h3>
                         );
                       return (
-                        <ul key={i} className="space-y-1.5 list-disc pl-5 text-sm md:text-base marker:text-primary">
+                        <ul key={i} className="space-y-2.5 list-disc pl-5 text-base md:text-[17px] marker:text-primary">
                           {block.items.map((it, j) => (
                             <li key={j}>{it}</li>
                           ))}
@@ -123,7 +123,7 @@ export function LegalLayout({ page }: LegalLayoutProps) {
               ))}
             </div>
 
-            <div className="mt-12 p-5 rounded-xl bg-muted/40 border border-border text-sm text-muted-foreground">
+            <div className="mt-12 p-6 rounded-xl bg-muted/40 border border-border text-base text-muted-foreground leading-relaxed">
               Para questões relativas a esta política, contacte-nos em{" "}
               <a href="mailto:info@rotasdoeden.st" className="text-primary font-medium hover:underline">
                 info@rotasdoeden.st
@@ -143,7 +143,7 @@ export function LegalLayout({ page }: LegalLayoutProps) {
                     <li key={item.slug}>
                       <Link
                         to={`/legal/${item.slug}`}
-                        className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        className="block px-3 py-2 rounded-[13px] text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
                         {item.label}
                       </Link>
