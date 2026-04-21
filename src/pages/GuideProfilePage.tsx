@@ -21,6 +21,8 @@ import { mockGuides, mockServices, mockReviews } from "@/data/mockData";
 import { guidePhotos } from "@/data/guidePhotos";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const categoryLabels: Record<string, string> = {
   tour: "Tour", experience: "Experiência", transfer: "Transfer", diving: "Mergulho",
@@ -32,7 +34,19 @@ const categoryLabels: Record<string, string> = {
 export default function GuideProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const guide = mockGuides.find((g) => g.id === id);
+
+  async function handleSendMessage() {
+    if (!user) {
+      navigate("/auth", { state: { from: `/guides/${id}` } });
+      return;
+    }
+    toast.info("Chat interno disponível", {
+      description: "Vai a Mensagens para conversar com guias registados na plataforma. Toda a comunicação ocorre dentro do sistema.",
+    });
+    setTimeout(() => navigate("/messages"), 1500);
+  }
 
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [date, setDate] = useState<Date>();
@@ -447,38 +461,12 @@ export default function GuideProfilePage() {
                 {/* Contact */}
                 <div className="bg-card border border-border rounded-xl p-4">
                   <p className="text-sm text-muted-foreground mb-3">Tens alguma dúvida antes de reservar?</p>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                        <MessageSquare size={16} className="mr-2" /> Enviar Mensagem
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle className="font-display">Mensagem para {guide.user?.name}</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 pt-2">
-                        <textarea
-                          value={contactMessage}
-                          onChange={(e) => setContactMessage(e.target.value)}
-                          placeholder="Escreve a tua mensagem aqui (mínimo 50 caracteres)..."
-                          className="flex w-full rounded-xl border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[120px] resize-none"
-                        />
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            variant="hero"
-                            disabled={contactMessage.length < 50}
-                            onClick={() => {
-                              toast.success("Mensagem enviada!", { description: `A tua mensagem foi enviada a ${guide.user?.name}.` });
-                              setContactMessage("");
-                            }}
-                          >
-                            Enviar
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <Button variant="outline" className="w-full" onClick={handleSendMessage}>
+                    <MessageSquare size={16} className="mr-2" /> Enviar Mensagem
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                    🛡️ Toda a comunicação e pagamentos devem ocorrer dentro da plataforma.
+                  </p>
                 </div>
               </div>
             </div>
