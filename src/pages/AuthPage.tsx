@@ -5,6 +5,7 @@ import { Leaf, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +34,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [role, setRole] = useState<"tourist" | "guide">("tourist");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate(from, { replace: true });
@@ -60,6 +62,7 @@ export default function AuthPage() {
     if (!ne.success) return toast.error(ne.error.issues[0].message);
     if (!ee.success) return toast.error(ee.error.issues[0].message);
     if (!pe.success) return toast.error(pe.error.issues[0].message);
+    if (!acceptedTerms) return toast.error("Tens de aceitar os Termos e a Política de Privacidade.");
 
     setBusy(true);
     const { error } = await supabase.auth.signUp({
@@ -145,7 +148,26 @@ export default function AuthPage() {
                     </label>
                   </RadioGroup>
                 </div>
-                <Button type="submit" variant="hero" className="w-full" disabled={busy}>
+                <div className="flex items-start gap-2 pt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="terms" className="text-xs leading-relaxed text-muted-foreground font-normal cursor-pointer">
+                    Li e aceito os{" "}
+                    <Link to="/legal/termos" target="_blank" className="text-primary font-medium hover:underline">
+                      Termos de Serviço
+                    </Link>{" "}
+                    e a{" "}
+                    <Link to="/legal/privacidade" target="_blank" className="text-primary font-medium hover:underline">
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </Label>
+                </div>
+                <Button type="submit" variant="hero" className="w-full" disabled={busy || !acceptedTerms}>
                   {busy && <Loader2 className="animate-spin mr-2" size={16} />}
                   Criar conta
                 </Button>
