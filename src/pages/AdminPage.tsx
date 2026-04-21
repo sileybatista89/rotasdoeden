@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Star, CheckCircle2, ShieldAlert, Cloud, Sparkles } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star } from "lucide-react";
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
@@ -11,11 +11,9 @@ import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockReviews } from "@/data/mockData";
 import { bookingsPerMonth } from "@/data/mockBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
 
 export default function AdminPage() {
   const [section, setSection] = useState<AdminSection>("dashboard");
@@ -97,13 +95,13 @@ export default function AdminPage() {
                     <span className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0"><CheckCircle2 size={14} className="text-primary" /></span>
                     <div><p className="text-foreground">Nova reserva confirmada</p><p className="text-xs text-muted-foreground">Mergulho nos Recifes</p></div>
                   </li>
-                  <li className="flex items-start gap-3">
+              <li className="flex items-start gap-3">
                     <span className="w-8 h-8 rounded-full bg-secondary/25 flex items-center justify-center flex-shrink-0"><Star size={14} className="text-secondary-foreground" /></span>
-                    <div><p className="text-foreground">Nova review 5★</p><p className="text-xs text-muted-foreground">para Ana Quaresma</p></div>
+                    <div><p className="text-foreground">Aguardando primeiras reviews</p><p className="text-xs text-muted-foreground">após reservas concluídas</p></div>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="w-8 h-8 rounded-full bg-destructive/15 flex items-center justify-center flex-shrink-0"><ShieldAlert size={14} className="text-destructive" /></span>
-                    <div><p className="text-foreground">Pedido de licença pendente</p><p className="text-xs text-muted-foreground">Tomás Vaz</p></div>
+                    <div><p className="text-foreground">Verificações KYC em curso</p><p className="text-xs text-muted-foreground">candidaturas em adesão</p></div>
                   </li>
                 </ul>
               </div>
@@ -173,27 +171,14 @@ export default function AdminPage() {
               title="Reviews"
               description="Modera as avaliações deixadas por turistas."
             />
-            <div className="space-y-3">
-              {mockReviews.slice(0, 8).map((r) => (
-                <div key={r.id} className="bg-card border border-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 hover:shadow-sm transition-shadow">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm text-foreground">{r.tourist?.name}</span>
-                      <span className="text-xs text-muted-foreground">· {r.tourist?.nationality}</span>
-                      <span className="inline-flex items-center gap-0.5 ml-auto sm:ml-0 text-xs text-secondary-foreground">
-                        {Array.from({ length: r.rating }).map((_, i) => (
-                          <Star key={i} size={12} className="fill-secondary text-secondary" />
-                        ))}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{r.comment}</p>
-                  </div>
-                  <div className="flex gap-2 sm:flex-col">
-                    <Button size="sm" variant="outline" onClick={() => toast.success("Review aprovada")}>Aprovar</Button>
-                    <Button size="sm" variant="ghost" onClick={() => toast.error("Review removida")}>Remover</Button>
-                  </div>
-                </div>
-              ))}
+            <div className="bg-card border border-border rounded-2xl p-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Star size={20} className="text-primary" />
+              </div>
+              <h3 className="font-display font-semibold text-foreground mb-1">Sem avaliações ainda</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                As reviews aparecerão aqui assim que as primeiras reservas forem concluídas pelos guias parceiros verificados.
+              </p>
             </div>
           </>
         )}

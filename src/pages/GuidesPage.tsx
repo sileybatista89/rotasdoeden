@@ -1,163 +1,146 @@
-import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, Sparkles, IdCard, Wallet, Users } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { GuideCard } from "@/components/guides/GuideCard";
 import { Button } from "@/components/ui/button";
-import { mockGuides } from "@/data/mockData";
-import type { GuideFilters } from "@/types";
 
-const specialties = ["Natureza", "História", "Mergulho", "Gastronomia", "Aventura", "Birdwatching", "Pesca"];
-const languages = ["Português", "Inglês", "Francês", "Espanhol", "Alemão"];
-const cities = ["São Tomé", "Príncipe", "Neves", "Santana"];
+const pillars = [
+  { icon: IdCard, title: "Verificação manual de licença", text: "Cada licença é validada com a autoridade competente antes da activação do perfil." },
+  { icon: FileCheck, title: "KYC documental", text: "Documento de identificação, comprovativo de licença e selfie de verificação obrigatórios." },
+  { icon: MessageSquare, title: "Entrevista", text: "Conversamos com cada candidato antes de o activar como guia parceiro." },
+  { icon: Eye, title: "Monitorização contínua", text: "Avaliações, mensagens e disputas são revistas regularmente pela nossa equipa." },
+];
+
+const benefits = [
+  { icon: Users, title: "Visibilidade real", text: "Tráfego de turistas internacionais e nacionais qualificados." },
+  { icon: Wallet, title: "Pagamentos protegidos", text: "Recebes o valor após o serviço, sem risco de calote." },
+  { icon: ShieldCheck, title: "Suporte e mediação", text: "Equipa dedicada a resolver disputas e apoiar o teu trabalho." },
+  { icon: MessageSquare, title: "Sem captação externa", text: "As reservas e a comunicação ficam dentro da plataforma — proteges-te a ti e ao turista." },
+];
+
+const steps = [
+  { n: "01", title: "Registo", text: "Criar conta de guia." },
+  { n: "02", title: "KYC", text: "Submeter documento, licença e selfie." },
+  { n: "03", title: "Entrevista", text: "Validação por videochamada." },
+  { n: "04", title: "Activação", text: "Perfil visível e a receber reservas." },
+];
 
 export default function GuidesPage() {
-  const [filters, setFilters] = useState<GuideFilters>({});
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("rating");
-
-  const filteredGuides = useMemo(() => {
-    let result = [...mockGuides];
-
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      result = result.filter(
-        (g) =>
-          g.user?.name?.toLowerCase().includes(q) ||
-          g.bio?.toLowerCase().includes(q)
-      );
-    }
-    if (filters.specialty) {
-      result = result.filter((g) => g.specialties.includes(filters.specialty!));
-    }
-    if (filters.language) {
-      result = result.filter((g) => g.languages.includes(filters.language!));
-    }
-    if (filters.city) {
-      result = result.filter((g) => g.city === filters.city);
-    }
-
-    if (sortBy === "rating") result.sort((a, b) => b.rating - a.rating);
-    if (sortBy === "price_asc") result.sort((a, b) => (a.price_per_day ?? 0) - (b.price_per_day ?? 0));
-    if (sortBy === "price_desc") result.sort((a, b) => (b.price_per_day ?? 0) - (a.price_per_day ?? 0));
-
-    return result;
-  }, [filters, sortBy]);
-
-  const clearFilters = () => setFilters({});
-  const hasFilters = Object.values(filters).some(Boolean);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <div className="bg-gradient-to-b from-accent/50 to-background py-10">
-          <div className="container">
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Guias Turísticos
+        {/* Hero */}
+        <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-20">
+          <div className="container max-w-3xl text-center">
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full mb-5">
+              <Sparkles size={12} /> Novos parceiros em adesão
+            </span>
+            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Os primeiros guias parceiros estão em adesão
             </h1>
-            <p className="text-muted-foreground">
-              {filteredGuides.length} guias verificados prontos para te guiar
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              Por princípio, a Rotas do Éden não publica guias antes de os verificar pessoalmente.
+              Estamos a selecionar os primeiros guias locais — preferimos arrancar com qualidade
+              comprovada a preencher esta página com perfis sem garantias.
             </p>
           </div>
-        </div>
+        </section>
 
-        <div className="container py-8">
-          {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-muted border border-border">
-              <Search size={18} className="text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Pesquisar guias..."
-                className="bg-transparent text-sm flex-1 outline-none text-foreground placeholder:text-muted-foreground"
-                value={filters.search ?? ""}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              />
+        {/* Why we wait */}
+        <section className="py-16 md:py-20">
+          <div className="container">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Porquê esperamos por guias verificados</h2>
+              <p className="text-muted-foreground">Quatro pilares que distinguem a Rotas do Éden de directórios genéricos.</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <SlidersHorizontal size={16} />
-              Filtros
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {pillars.map((p) => (
+                <div key={p.title} className="bg-card border border-border rounded-2xl p-6">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <p.icon size={20} className="text-primary" />
+                  </div>
+                  <h3 className="font-display font-semibold text-foreground mb-1.5">{p.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{p.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className="py-16 bg-muted/30 border-y border-border">
+          <div className="container">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Benefícios para guias parceiros</h2>
+              <p className="text-muted-foreground">O que oferecemos a quem se junta à plataforma.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {benefits.map((b) => (
+                <div key={b.title} className="bg-card border border-border rounded-2xl p-6 flex gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <b.icon size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-semibold text-foreground mb-1">{b.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{b.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Process */}
+        <section className="py-16 md:py-20">
+          <div className="container">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Processo de candidatura</h2>
+              <p className="text-muted-foreground">Quatro passos, sem burocracia desnecessária.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
+              {steps.map((s) => (
+                <div key={s.n} className="bg-card border border-border rounded-2xl p-6">
+                  <span className="font-display text-3xl font-bold text-primary/40">{s.n}</span>
+                  <h3 className="font-display font-semibold text-foreground mt-2 mb-1">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Commissions */}
+        <section className="py-16 bg-muted/30 border-y border-border">
+          <div className="container max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-bold text-foreground mb-4">Comissões transparentes</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Não cobramos mensalidades nem taxas de adesão. A plataforma sustenta-se de
+              uma comissão fixa por reserva concluída, comunicada por escrito a cada guia
+              antes da activação do perfil. Sem letras pequenas, sem cobranças surpresa.
+            </p>
+            <Button asChild variant="link" className="mt-3">
+              <Link to="/legal/parcerias#comissoes">Política de Comissões →</Link>
             </Button>
-            <select
-              className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-foreground"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="rating">Melhor avaliação</option>
-              <option value="price_asc">Preço crescente</option>
-              <option value="price_desc">Preço decrescente</option>
-            </select>
           </div>
+        </section>
 
-          {/* Filters panel */}
-          {showFilters && (
-            <div className="bg-card border border-border rounded-lg p-5 mb-6 animate-fade-in">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold">Filtros</h3>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 text-muted-foreground">
-                    <X size={14} /> Limpar
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1.5 block">Especialidade</label>
-                  <select
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
-                    value={filters.specialty ?? ""}
-                    onChange={(e) => setFilters({ ...filters, specialty: e.target.value || undefined })}
-                  >
-                    <option value="">Todas</option>
-                    {specialties.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1.5 block">Língua</label>
-                  <select
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
-                    value={filters.language ?? ""}
-                    onChange={(e) => setFilters({ ...filters, language: e.target.value || undefined })}
-                  >
-                    <option value="">Todas</option>
-                    {languages.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1.5 block">Cidade</label>
-                  <select
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
-                    value={filters.city ?? ""}
-                    onChange={(e) => setFilters({ ...filters, city: e.target.value || undefined })}
-                  >
-                    <option value="">Todas</option>
-                    {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGuides.map((guide) => (
-              <GuideCard key={guide.id} guide={guide} />
-            ))}
+        {/* CTA */}
+        <section className="py-20 bg-primary">
+          <div className="container text-center">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
+              És guia turístico em São Tomé e Príncipe?
+            </h2>
+            <p className="text-primary-foreground/80 max-w-lg mx-auto mb-8 text-lg">
+              Junta-te à primeira geração de guias verificados da Rotas do Éden.
+            </p>
+            <Button asChild variant="sand" size="lg" className="rounded-full px-8">
+              <Link to="/seja-parceiro">
+                Tornar-me Guia Parceiro <ArrowRight size={18} />
+              </Link>
+            </Button>
           </div>
-
-          {filteredGuides.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">Nenhum guia encontrado com esses filtros.</p>
-              <Button variant="outline" onClick={clearFilters} className="mt-4">Limpar filtros</Button>
-            </div>
-          )}
-        </div>
+        </section>
       </main>
       <Footer />
     </div>
