@@ -1,96 +1,76 @@
 
 
-# Plano de Implementação — Rotas do Éden (Prompts 1-4)
+# Plano — Modernização, Imagens, Admin e Correcção de Bugs
 
-## Estado Actual
+## 1. Actualizar referências a 2024 → 2026
 
-O projecto já tem implementado:
-- Homepage com hero, stats, guias em destaque, como funciona, CTA
-- Página `/guides` com grid de 6 guias e filtros
-- Página `/guides/:id` com perfil completo (bio, serviços, reviews, sidebar)
-- Página `/book/:serviceId` com fluxo de 3 steps (detalhes, resumo, confirmação) — sem pagamento real
-- Fotos geradas para hero e guias
-- Mock data com 6 guias, 6 serviços e 6 reviews
-- Design system com cores eden-green/eden-sand, fontes Playfair Display/Source Sans 3
+- `Footer.tsx`: copyright dinâmico `© {new Date().getFullYear()} Rotas do Éden`
+- `HeroSection.tsx`: badge "40.822 visitantes em 2024" → "52.000+ visitantes em 2025"
+- `StatsSection.tsx`: label "Visitantes em 2024" → "Visitantes em 2025"
+- `mockReviews.ts`: actualizar datas de 2023/2024 para 2025/2026 (mantendo realismo cronológico)
 
-## O Que Falta dos Prompts
+## 2. Nova imagem de hero — Pico Cão Grande
 
-### Prompt 1 (Perfil do Guia) — ~80% feito
-Falta enriquecer:
-- Expandir mock data com os dados detalhados dos 6 guias (bios completos, 3 serviços por guia = 18 serviços, 4 reviews por guia = 24 reviews)
-- Sidebar de reserva rápida com dropdown de serviços, selector de pessoas e cálculo de preço
-- Secção de documentação/licença com card estilizado
-- Rating breakdown (barras de progresso por estrela)
-- Placeholder de mapa na página de perfil
-- Modal de contacto ao guia
-- Chips de próximas datas disponíveis
+O **Pico Cão Grande** é o ícone visual de São Tomé: um pico vulcânico em forma de agulha com 663 m, emergindo dramaticamente da floresta tropical no sul da ilha. É a imagem mais reconhecível do país.
 
-### Prompt 2 (Autenticação) — Requer Lovable Cloud
-- Registo multi-step (Turista vs Guia)
-- Login com Supabase Auth
-- Navbar com estado de autenticação (dropdown com opções por role)
-- Protecção de rotas
-- Reset de password
+- Gerar nova imagem hero com IA (modelo `google/gemini-3-pro-image-preview` para alta qualidade): vista panorâmica do Pico Cão Grande emergindo da floresta tropical com luz dourada ao amanhecer, oceano ao fundo, atmosfera cinematográfica
+- Substituir `src/assets/hero-bg.jpg`
+- Ajustar `alt` text para "Pico Cão Grande, São Tomé e Príncipe"
 
-### Prompt 3 (Mapa Mapbox) — Requer token Mapbox
-- Componente MapView reutilizável
-- Toggle lista/mapa na página `/guides`
-- Nova secção de mapa na homepage
-- Custom markers com fotos e preços
-- Popups interactivos
+## 3. Página de Admin
 
-### Prompt 4 (Reserva com Stripe) — Requer Lovable Cloud + Stripe
-- Integração Stripe Elements no Step 2
-- API route para criar PaymentIntent
-- Webhook para confirmar pagamento
-- Escrow (capture manual)
+Criar dashboard de administração estático (UI mock — sem backend, dados de `mockData`):
 
-## Plano de Implementação
+**Rota:** `/admin` (protecção real virá com Lovable Cloud na Fase 2)
 
-Dado que o projecto é um frontend React/Vite (sem backend), vou focar no que pode ser feito agora sem dependências externas, e identificar o que requer activação de serviços.
+**Layout:** Sidebar lateral + área principal com 4 secções:
 
-### Fase 1 — Enriquecer dados e UI (sem dependências)
+```text
+┌─────────────┬───────────────────────────────┐
+│  Dashboard  │  KPIs: guias, reservas,       │
+│  Guias      │  receita, taxa de conversão   │
+│  Reservas   │                               │
+│  Reviews    │  Gráfico de reservas/mês      │
+│  Definições │  Lista de actividade recente  │
+└─────────────┴───────────────────────────────┘
+```
 
-**1. Expandir mock data** (mockData.ts)
-- 18 serviços (3 por guia) com dados detalhados do Prompt 1/4
-- 24 reviews (4 por guia) com dados internacionais do Prompt 1
-- Actualizar IDs dos guias para slugs descritivos (carlos-espirito-santo, etc.) ou manter os actuais com dados enriquecidos
+- **Dashboard:** cards de KPIs (total de guias, reservas pendentes, receita simulada, rating médio) + gráfico de barras (recharts) com reservas por mês
+- **Guias:** tabela com 6 guias, colunas: foto, nome, cidade, rating, status (verificado/pendente), acções (ver/aprovar/suspender — apenas UI)
+- **Reservas:** tabela de reservas mock com filtros por status (pendente/confirmada/cancelada)
+- **Reviews:** lista de reviews com botão de moderação (aprovar/remover — UI)
+- **Definições:** placeholder com avisos sobre integração futura com Lovable Cloud
 
-**2. Melhorar GuideProfilePage**
-- Sidebar de reserva rápida: dropdown de serviços, date picker, selector de pessoas, cálculo de preço em tempo real, taxa de serviço
-- Card de licença verificada com estilização premium
-- Rating breakdown com barras de progresso
-- Chips de próximas datas disponíveis
-- Modal de contacto (UI only)
-- Placeholder de mapa
+Adicionar link discreto no footer "Admin" e rota em `App.tsx`.
 
-**3. Melhorar BookingPage**
-- Actualizar para funcionar com os 18 serviços
-- Placeholder para Stripe no Step 2 (UI do formulário de cartão sem integração real)
+## 4. Correcção de bugs e melhorias
 
-### Fase 2 — Autenticação (requer Lovable Cloud)
+Após inspecção do código identifiquei:
 
-**4. Activar Lovable Cloud** para ter Supabase
-- Criar tabela de profiles e user_roles
-- Implementar registo multi-step (Turista/Guia)
-- Login page
-- Navbar com estado de autenticação e dropdown por role
-- Reset de password
+- **Inconsistência de comissão:** `BookingPage` usa 15% (`commissionRate = 0.15`) mas `GuideProfilePage` usa 10% na sidebar. Padronizar para **10%** em ambos.
+- **Links mortos no Footer:** as listas "Plataforma" e "Para Guias" são `<li>` sem links. Converter em links funcionais (ou desabilitar visualmente como "Em breve" para itens sem destino) — links válidos: "Encontrar Guias" → `/guides`, "Como Funciona" → `/#como-funciona`.
+- **Booking sem validação de `numPeople` por defeito:** quando `service.min_people` é maior que 1 (ex: 2), o estado inicial pode ficar a 1. Inicializar correctamente com `service?.min_people ?? 1`.
+- **Hash links no Navbar:** quando o utilizador está em `/guides` e clica "Como Funciona" (`#como-funciona`), nada acontece. Já está parcialmente corrigido com `/#como-funciona` no menu mobile mas não no desktop. Padronizar para `/#como-funciona` em ambos.
+- **Página `/auth/login` e `/auth/register`** não existem mas o Navbar (botões Entrar/Registar) não tem `onClick` — neste momento são botões inertes. Adicionar toast "Brevemente disponível" enquanto a Fase 2 (Lovable Cloud) não estiver activa.
 
-### Fase 3 — Mapa e Pagamentos (requer tokens/keys)
+## Ficheiros afectados
 
-**5. Mapa Mapbox** — requer MAPBOX_TOKEN
-- Componente MapView
-- Toggle lista/mapa em `/guides`
-- Secção de mapa na homepage
+- `src/components/layout/Footer.tsx` — copyright dinâmico + links funcionais
+- `src/components/home/HeroSection.tsx` — texto + nova imagem + alt
+- `src/components/home/StatsSection.tsx` — label
+- `src/data/mockReviews.ts` — datas actualizadas
+- `src/assets/hero-bg.jpg` — nova imagem gerada
+- `src/pages/AdminPage.tsx` — **novo**
+- `src/components/admin/AdminSidebar.tsx` — **novo**
+- `src/components/admin/StatsCards.tsx` — **novo**
+- `src/components/admin/BookingsTable.tsx` — **novo**
+- `src/data/mockBookings.ts` — **novo** (reservas fictícias)
+- `src/App.tsx` — rota `/admin`
+- `src/components/layout/Navbar.tsx` — toast nos botões auth + hash link consistente
+- `src/pages/BookingPage.tsx` — comissão 10%
 
-**6. Stripe** — requer activação de pagamentos
-- Integração Stripe Elements
-- Webhooks e PaymentIntent
+## Notas
 
-## Recomendação
-
-Sugiro começar pela **Fase 1** (enriquecer dados e melhorar UI), que pode ser feita imediatamente sem dependências externas. Depois, activar Lovable Cloud para a Fase 2 (autenticação), e por fim configurar Mapbox e Stripe para a Fase 3.
-
-Queres que avance com a Fase 1?
+- Autenticação real do admin fica para a Fase 2 (Lovable Cloud com tabela `user_roles`)
+- A imagem do hero será gerada via Lovable AI Gateway (modelo Gemini 3 Pro Image)
 
