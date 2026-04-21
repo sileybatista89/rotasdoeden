@@ -15,6 +15,13 @@ import KycPage from "./pages/KycPage.tsx";
 import MessagesPage from "./pages/MessagesPage.tsx";
 import ConversationPage from "./pages/ConversationPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import TermosPage from "./pages/legal/TermosPage.tsx";
+import PrivacidadePage from "./pages/legal/PrivacidadePage.tsx";
+import ReservasPage from "./pages/legal/ReservasPage.tsx";
+import AntifraudePage from "./pages/legal/AntifraudePage.tsx";
+import GuiasLegalPage from "./pages/legal/GuiasPage.tsx";
+import ComunidadePage from "./pages/legal/ComunidadePage.tsx";
+import ParceriasPage from "./pages/legal/ParceriasPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +52,13 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute requireRole="admin"><AdminPage /></ProtectedRoute>
             } />
+            <Route path="/legal/termos" element={<TermosPage />} />
+            <Route path="/legal/privacidade" element={<PrivacidadePage />} />
+            <Route path="/legal/reservas" element={<ReservasPage />} />
+            <Route path="/legal/antifraude" element={<AntifraudePage />} />
+            <Route path="/legal/guias" element={<GuiasLegalPage />} />
+            <Route path="/legal/comunidade" element={<ComunidadePage />} />
+            <Route path="/legal/parcerias" element={<ParceriasPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
