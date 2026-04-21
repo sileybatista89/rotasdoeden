@@ -1,76 +1,101 @@
 
 
-# Plano — Modernização, Imagens, Admin e Correcção de Bugs
+# Plano — Auth com primeiro user = Admin, KYC, Anti-fraude e Chat Interno
 
-## 1. Actualizar referências a 2024 → 2026
+Esta é uma fase grande. Requer **activar o Lovable Cloud** (Supabase gerido) para autenticação real, base de dados, storage de documentos KYC, chat em tempo real e protecção de rotas.
 
-- `Footer.tsx`: copyright dinâmico `© {new Date().getFullYear()} Rotas do Éden`
-- `HeroSection.tsx`: badge "40.822 visitantes em 2024" → "52.000+ visitantes em 2025"
-- `StatsSection.tsx`: label "Visitantes em 2024" → "Visitantes em 2025"
-- `mockReviews.ts`: actualizar datas de 2023/2024 para 2025/2026 (mantendo realismo cronológico)
+---
 
-## 2. Nova imagem de hero — Pico Cão Grande
+## 1. Activar Lovable Cloud
 
-O **Pico Cão Grande** é o ícone visual de São Tomé: um pico vulcânico em forma de agulha com 663 m, emergindo dramaticamente da floresta tropical no sul da ilha. É a imagem mais reconhecível do país.
+Necessário para: auth, base de dados, storage (documentos KYC), realtime (chat), edge functions (filtro anti-fraude no chat).
 
-- Gerar nova imagem hero com IA (modelo `google/gemini-3-pro-image-preview` para alta qualidade): vista panorâmica do Pico Cão Grande emergindo da floresta tropical com luz dourada ao amanhecer, oceano ao fundo, atmosfera cinematográfica
-- Substituir `src/assets/hero-bg.jpg`
-- Ajustar `alt` text para "Pico Cão Grande, São Tomé e Príncipe"
+## 2. Autenticação — primeiro user vira Admin automaticamente
 
-## 3. Página de Admin
+**Fluxo:**
+- Página `/auth` com tabs Login / Registo (email + password).
+- Após signup, trigger SQL `handle_new_user` cria registo em `profiles` e atribui role:
+  - Se a tabela `user_roles` ainda estiver vazia → `admin`
+  - Caso contrário → `tourist` (default) ou conforme escolha no registo (`tourist` / `guide`)
+- Tabela `user_roles` separada (segurança — nunca colocar role em `profiles`) com enum `app_role: admin | guide | tourist`.
+- Função SECURITY DEFINER `has_role(_user_id, _role)` para usar em RLS sem recursão.
+- Sessão gerida com `onAuthStateChange` + `getSession`.
+- Navbar passa a mostrar avatar + dropdown (Dashboard / Sair) quando autenticado.
 
-Criar dashboard de administração estático (UI mock — sem backend, dados de `mockData`):
+## 3. Schema da Base de Dados
 
-**Rota:** `/admin` (protecção real virá com Lovable Cloud na Fase 2)
+Tabelas novas:
+- `profiles` — id (FK auth.users), full_name, avatar_url, phone, country, kyc_status (`pending|submitted|verified|rejected`), banned (bool), created_at
+- `user_roles` — id, user_id, role (enum)
+- `kyc_submissions` — id, user_id, document_type, document_url (storage), selfie_url, status, reviewer_notes, submitted_at, reviewed_at, reviewed_by
+- `bookings` — id, tourist_id, guide_id, service_id, date, num_people, total_price, status, created_at
+- `conversations` — id, booking_id (nullable), tourist_id, guide_id, created_at, last_message_at
+- `messages` — id, conversation_id, sender_id, content, content_filtered (bool), flagged_reason (text), created_at
+- `flagged_messages` — id, message_id, reason, reviewed (bool), action_taken
 
-**Layout:** Sidebar lateral + área principal com 4 secções:
+Storage buckets:
+- `kyc-documents` (privado, RLS estrita — só dono e admin)
+- `avatars` (público)
 
-```text
-┌─────────────┬───────────────────────────────┐
-│  Dashboard  │  KPIs: guias, reservas,       │
-│  Guias      │  receita, taxa de conversão   │
-│  Reservas   │                               │
-│  Reviews    │  Gráfico de reservas/mês      │
-│  Definições │  Lista de actividade recente  │
-└─────────────┴───────────────────────────────┘
-```
+## 4. Painel Admin completo (`/admin` protegido)
 
-- **Dashboard:** cards de KPIs (total de guias, reservas pendentes, receita simulada, rating médio) + gráfico de barras (recharts) com reservas por mês
-- **Guias:** tabela com 6 guias, colunas: foto, nome, cidade, rating, status (verificado/pendente), acções (ver/aprovar/suspender — apenas UI)
-- **Reservas:** tabela de reservas mock com filtros por status (pendente/confirmada/cancelada)
-- **Reviews:** lista de reviews com botão de moderação (aprovar/remover — UI)
-- **Definições:** placeholder com avisos sobre integração futura com Lovable Cloud
+Substitui o mock actual. Secções:
+- **Dashboard** — KPIs reais (users, guias verificados, reservas, receita, chats activos, mensagens flagged)
+- **Utilizadores** — lista de todos, com acções: ver perfil, **banir/desbanir**, alterar role, ver histórico
+- **Guias** — lista com filtro por status KYC, botão **Aprovar/Rejeitar verificação**, ver documentos KYC
+- **KYC / Verificação** — fila de submissões pendentes com preview de documento + selfie, aprovar/rejeitar com nota
+- **Reservas** — todas as reservas, filtros, cancelar/reembolsar
+- **Chats / Moderação** — lista de conversas, mensagens flagged pelo filtro anti-fraude, ver contexto, banir user
+- **Reviews** — moderação (já existe)
+- **Definições** — comissão, configurações da plataforma
 
-Adicionar link discreto no footer "Admin" e rota em `App.tsx`.
+## 5. KYC para Guias
 
-## 4. Correcção de bugs e melhorias
+- Após registo como guia, perfil `kyc_status = pending`.
+- Página `/kyc` onde guia faz upload de:
+  - Documento de identificação (BI/passaporte) — frente e verso
+  - Selfie segurando o documento
+  - Licença turística (já existia conceptualmente)
+- Submissão grava em `kyc_submissions` + storage privado.
+- Guia fica com `kyc_status = submitted`, perfil **não aparece publicamente** em `/guides` até admin aprovar (`verified`).
+- Admin vê fila no painel, aprova/rejeita.
 
-Após inspecção do código identifiquei:
+## 6. Chat Interno (anti-fuga da plataforma)
 
-- **Inconsistência de comissão:** `BookingPage` usa 15% (`commissionRate = 0.15`) mas `GuideProfilePage` usa 10% na sidebar. Padronizar para **10%** em ambos.
-- **Links mortos no Footer:** as listas "Plataforma" e "Para Guias" são `<li>` sem links. Converter em links funcionais (ou desabilitar visualmente como "Em breve" para itens sem destino) — links válidos: "Encontrar Guias" → `/guides`, "Como Funciona" → `/#como-funciona`.
-- **Booking sem validação de `numPeople` por defeito:** quando `service.min_people` é maior que 1 (ex: 2), o estado inicial pode ficar a 1. Inicializar correctamente com `service?.min_people ?? 1`.
-- **Hash links no Navbar:** quando o utilizador está em `/guides` e clica "Como Funciona" (`#como-funciona`), nada acontece. Já está parcialmente corrigido com `/#como-funciona` no menu mobile mas não no desktop. Padronizar para `/#como-funciona` em ambos.
-- **Página `/auth/login` e `/auth/register`** não existem mas o Navbar (botões Entrar/Registar) não tem `onClick` — neste momento são botões inertes. Adicionar toast "Brevemente disponível" enquanto a Fase 2 (Lovable Cloud) não estiver activa.
+- Página `/messages` (lista de conversas) e `/messages/:conversationId`.
+- Conversa é criada automaticamente quando turista envia mensagem ao guia ou faz reserva.
+- Realtime via Supabase Realtime — mensagens aparecem ao vivo.
+- **Filtro anti-fraude** numa edge function `filter-message` chamada antes de inserir:
+  - Bloqueia/máscara: emails, números de telefone (formatos PT/STP/internacionais), URLs externos, handles de redes sociais (@instagram, @whatsapp, t.me/, wa.me/, etc.), palavras-chave ("paypal", "mbway", "iban", "fora da plataforma", "diretamente comigo", etc.)
+  - Mensagem detectada: marcada como `flagged`, conteúdo substituído por aviso, registada em `flagged_messages` para revisão admin.
+  - Usuário recebe toast: "Por segurança, contactos e pagamentos externos não são permitidos. Toda a comunicação e pagamentos devem ocorrer dentro da plataforma."
+- Aviso permanente no topo do chat: banner com termos anti-fraude.
+- Modal "Contactar guia" da página de perfil passa a abrir/criar uma conversa real em vez de ser UI mock.
 
-## Ficheiros afectados
+## 7. Protecção de rotas
 
-- `src/components/layout/Footer.tsx` — copyright dinâmico + links funcionais
-- `src/components/home/HeroSection.tsx` — texto + nova imagem + alt
-- `src/components/home/StatsSection.tsx` — label
-- `src/data/mockReviews.ts` — datas actualizadas
-- `src/assets/hero-bg.jpg` — nova imagem gerada
-- `src/pages/AdminPage.tsx` — **novo**
-- `src/components/admin/AdminSidebar.tsx` — **novo**
-- `src/components/admin/StatsCards.tsx` — **novo**
-- `src/components/admin/BookingsTable.tsx` — **novo**
-- `src/data/mockBookings.ts` — **novo** (reservas fictícias)
-- `src/App.tsx` — rota `/admin`
-- `src/components/layout/Navbar.tsx` — toast nos botões auth + hash link consistente
-- `src/pages/BookingPage.tsx` — comissão 10%
+- `/admin/*` → exige role `admin`
+- `/kyc` → exige login + role `guide`
+- `/messages/*` → exige login
+- `/book/*` → exige login + KYC do guia verificado
+
+## 8. Ficheiros principais
+
+**Novos:**
+- Migrações SQL (enum, tabelas, RLS, trigger first-user-admin)
+- `src/pages/AuthPage.tsx`, `src/pages/KycPage.tsx`, `src/pages/MessagesPage.tsx`, `src/pages/ConversationPage.tsx`
+- `src/hooks/useAuth.tsx`, `src/hooks/useUserRole.tsx`
+- `src/components/admin/UsersTable.tsx`, `KycQueue.tsx`, `FlaggedMessages.tsx`
+- `src/components/chat/MessageList.tsx`, `MessageInput.tsx`, `AntiFraudBanner.tsx`
+- `src/components/auth/ProtectedRoute.tsx`
+- Edge function `supabase/functions/filter-message/index.ts`
+
+**Editados:**
+- `App.tsx` (rotas + guards), `Navbar.tsx` (estado real), `AdminPage.tsx` (dados reais + KYC + chats), `GuideProfilePage.tsx` (botão Mensagem cria conversa), `BookingPage.tsx` (cria booking real + conversa)
 
 ## Notas
 
-- Autenticação real do admin fica para a Fase 2 (Lovable Cloud com tabela `user_roles`)
-- A imagem do hero será gerada via Lovable AI Gateway (modelo Gemini 3 Pro Image)
+- Pagamentos reais (Stripe/Paddle) ficam para fase seguinte — por agora reservas ficam `pending_payment`.
+- Filtro anti-fraude é heurístico (regex + lista negra). Pode ser reforçado depois com IA via Lovable AI Gateway.
+- Admin do projecto que mencionas tinha exactamente este padrão (primeiro user = admin, KYC, banir, moderação) — vou replicar essa arquitectura aqui.
 
