@@ -1,0 +1,67 @@
+import { corsHeaders } from "@supabase/supabase-js/cors";
+
+interface FilterResult {
+  filtered: string;
+  wasFiltered: boolean;
+  reasons: string[];
+}
+
+const PATTERNS: { name: string; re: RegExp }[] = [
+  { name: "email", re: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi },
+  // International phone (7+ digits, optional +, spaces, dashes)
+  { name: "phone", re: /(?:\+?\d[\d\s\-().]{6,}\d)/g },
+  { name: "url", re: /\b(?:https?:\/\/|www\.)[^\s]+/gi },
+  { name: "whatsapp_link", re: /\b(?:wa\.me|api\.whatsapp\.com|t\.me|telegram\.me)\/[^\s]*/gi },
+  { name: "social_handle", re: /(?:^|\s)@[a-z0-9._]{3,}/gi },
+  {
+    name: "external_payment",
+    re: /\b(paypal|mbway|revolut|wise|venmo|cash\s?app|zelle|iban|swift|bitcoin|btc|crypto|moneygram|western\s?union)\b/gi,
+  },
+  {
+    name: "off_platform_keywords",
+    re: /\b(fora\s+da\s+plataforma|diretamente\s+comigo|direct(?:o|amente)\s+comigo|pagar\s+(?:em\s+)?dinheiro|pay\s+cash|off[-\s]?platform|outside\s+the\s+app|whatsapp|instagram|facebook|messenger|signal|viber)\b/gi,
+  },
+];
+
+function filterContent(input: string): FilterResult {
+  const reasons = new Set<string>();
+  let filtered = input;
+  for (const { name, re } of PATTERNS) {
+    if (re.test(filtered)) {
+      reasons.add(name);
+      filtered = filtered.replace(re, "███");
+    }
+  }
+  return {
+    filtered,
+    wasFiltered: reasons.size > 0,
+    reasons: Array.from(reasons),
+  };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const { content } = await req.json();
+    if (typeof content !== "string" || content.length === 0 || content.length > 4000) {
+      return new Response(JSON.stringify({ error: "Invalid content" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const result = filterContent(content);
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: String(e) }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
