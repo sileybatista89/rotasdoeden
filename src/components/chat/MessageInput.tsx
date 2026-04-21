@@ -17,32 +17,20 @@ export function MessageInput({ conversationId, senderId, onSent }: {
     if (content.length > 2000) return toast.error("Mensagem demasiado longa");
     setBusy(true);
     try {
-      let filtered = content;
-      let wasFiltered = false;
-      let reasons: string[] = [];
-      try {
-        const { data: filterData, error: filterErr } = await supabase.functions.invoke("filter-message", {
-          body: { content },
-        });
-        if (filterErr) throw filterErr;
-        const r = filterData as { filtered: string; wasFiltered: boolean; reasons: string[] };
-        filtered = r.filtered; wasFiltered = r.wasFiltered; reasons = r.reasons ?? [];
-      } catch {
-        // If filter is unreachable, fall back to sending raw content rather than blocking the user
-        filtered = content;
-      }
-
-      const { error } = await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_id: senderId,
-        content: filtered,
-        original_content: wasFiltered ? content : null,
-        was_filtered: wasFiltered,
-        flagged_reason: wasFiltered ? reasons.join(",") : null,
-      });
+      // Server-side BEFORE INSERT trigger does the authoritative filtering.
+      // We just submit the raw content; DB rewrites it and sets was_filtered.
+      const { data: inserted, error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          sender_id: senderId,
+          content,
+        })
+        .select("was_filtered")
+        .single();
       if (error) throw error;
 
-      if (wasFiltered) {
+      if (inserted?.was_filtered) {
         toast.warning("Conteúdo filtrado por segurança", {
           description: "Contactos e pagamentos externos não são permitidos. Toda a comunicação deve ocorrer dentro da plataforma.",
         });
