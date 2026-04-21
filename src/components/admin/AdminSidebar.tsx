@@ -1,8 +1,8 @@
-import { LayoutDashboard, Users, Calendar, Star, Settings, Leaf, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Star, Settings, Leaf, ArrowLeft, ShieldCheck, MessageSquare, UserCog } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "dashboard" | "guias" | "reservas" | "reviews" | "definicoes";
+export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "reservas" | "chats" | "reviews" | "definicoes";
 
 interface Props {
   active: AdminSection;
@@ -11,8 +11,11 @@ interface Props {
 
 const items: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "users", label: "Utilizadores", icon: UserCog },
   { id: "guias", label: "Guias", icon: Users },
+  { id: "kyc", label: "Verificação KYC", icon: ShieldCheck },
   { id: "reservas", label: "Reservas", icon: Calendar },
+  { id: "chats", label: "Moderação Chat", icon: MessageSquare },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "definicoes", label: "Definições", icon: Settings },
 ];
@@ -40,7 +43,7 @@ export function AdminSidebar({ active, onChange }: Props) {
               key={item.id}
               onClick={() => onChange(item.id)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
+                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"

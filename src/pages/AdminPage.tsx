@@ -4,6 +4,9 @@ import { Star, CheckCircle2, ShieldAlert, Cloud } from "lucide-react";
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
+import { UsersTable } from "@/components/admin/UsersTable";
+import { KycQueue } from "@/components/admin/KycQueue";
+import { FlaggedMessages } from "@/components/admin/FlaggedMessages";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,6 +63,36 @@ export default function AdminPage() {
                 <li className="flex items-center gap-3"><ShieldAlert size={16} className="text-destructive" /> Pedido de licença pendente — <span className="font-medium">Tomás Vaz</span></li>
               </ul>
             </div>
+          </div>
+        )}
+
+        {section === "users" && (
+          <div className="space-y-6">
+            <header>
+              <h1 className="font-display text-3xl font-bold text-foreground">Utilizadores</h1>
+              <p className="text-sm text-muted-foreground">Gestão de utilizadores reais (Lovable Cloud)</p>
+            </header>
+            <UsersTable />
+          </div>
+        )}
+
+        {section === "kyc" && (
+          <div className="space-y-6">
+            <header>
+              <h1 className="font-display text-3xl font-bold text-foreground">Verificação KYC</h1>
+              <p className="text-sm text-muted-foreground">Fila de submissões de guias para revisão</p>
+            </header>
+            <KycQueue />
+          </div>
+        )}
+
+        {section === "chats" && (
+          <div className="space-y-6">
+            <header>
+              <h1 className="font-display text-3xl font-bold text-foreground">Moderação de Chat</h1>
+              <p className="text-sm text-muted-foreground">Mensagens detectadas pelo filtro anti-fraude</p>
+            </header>
+            <FlaggedMessages />
           </div>
         )}
 
