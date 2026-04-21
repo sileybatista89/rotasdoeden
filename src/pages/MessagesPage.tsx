@@ -32,7 +32,7 @@ export default function MessagesPage() {
     const rows = (data ?? []) as ConvRow[];
     const ids = Array.from(new Set(rows.flatMap((r) => [r.tourist_id, r.guide_id])));
     const { data: profs } = ids.length
-      ? await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids)
+      ? await supabase.from("profiles_public").select("id, full_name, avatar_url").in("id", ids)
       : { data: [] };
     const map = new Map((profs ?? []).map((p) => [p.id, p]));
 
