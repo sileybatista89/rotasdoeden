@@ -1,86 +1,112 @@
 
-# Plano — Páginas Legais e Políticas + Rodapé Actualizado
+# Plano — Remover guias fictícios e tornar a plataforma 100% credível
 
-Vou criar a estrutura legal completa do Rota do Éden com 20+ políticas, organizadas em páginas dedicadas, e actualizar o rodapé para servir como índice navegável.
+Vou eliminar todos os perfis, serviços e reviews mock e substituir por estados profissionais "em adesão", com foco claro em recrutar guias reais e mostrar credibilidade a investidores.
 
-## 1. Estrutura de páginas
+## 1. Remover dados fictícios
 
-Em vez de criar 20 páginas separadas (que ficaria pesado de manter), vou agrupar as políticas por afinidade temática em **7 páginas legais**, cada uma com várias secções ancoradas para navegação directa.
+**Apagar / esvaziar:**
+- `src/data/mockGuides.ts` — 6 guias inventados (Carlos, João, Ana, Pedro, Maria, Tomás)
+- `src/data/mockServices.ts` — tours associados
+- `src/data/mockReviews.ts` — avaliações falsas
+- `src/data/guidePhotos.ts` — fotos AI/stock dos guias
+- Imagens em `src/assets/guide-*.jpg` (deixam de ser referenciadas)
 
-### Páginas a criar
+`src/data/mockData.ts` passa a exportar arrays vazios para não partir importações enquanto migramos.
 
-| Rota | Conteúdo |
-|------|----------|
-| `/legal/termos` | Termos de Serviço + Termos e Condições de Utilização + Aviso Legal |
-| `/legal/privacidade` | Política de Privacidade + RGPD/GDPR + Retenção de Dados + Cookies |
-| `/legal/reservas` | Política de Reservas + Cancelamentos e Reembolsos + Pagamentos + Comissões + Chargeback/Disputas |
-| `/legal/antifraude` | Política Antifraude (versão pública) + Segurança da Plataforma + Suspensão de Contas |
-| `/legal/guias` | Política para Guias Parceiros + Contrato de Parceria + Código de Conduta |
-| `/legal/comunidade` | Política de Avaliações + Conteúdo + Comunicações + Proteção do Cliente |
-| `/legal/parcerias` | Propriedade Intelectual + Cláusula para Investidores/Entidades + Termos Institucionais |
+## 2. Página inicial (`/`)
 
-Cada página usará a mesma layout shell (Navbar + container legível + Footer + índice lateral em desktop com scroll-spy nas secções).
+Substituir `FeaturedGuides` por nova secção **`GuidesComingSoon`**:
+- Headline: "Estamos a selecionar os primeiros guias locais verificados"
+- Subtexto sobre processo de verificação manual
+- 3 cards de confiança: "Verificação manual", "Licença DGTH validada", "Experiências autênticas"
+- CTA primário: **"Tornar-me Guia Parceiro"** → `/auth?mode=signup&role=guide`
+- CTA secundário: "Saber mais" → `/seja-parceiro`
 
-## 2. Componentes novos
+`StatsSection` — remover qualquer número que dependa de guias fictícios; manter apenas dados verificáveis (52.000+ visitantes STP 2025, ilhas, património UNESCO).
 
-- `src/pages/legal/LegalLayout.tsx` — shell partilhado com índice lateral, breadcrumb e tipografia legível (max-width prose, headings com âncoras)
-- `src/pages/legal/TermosPage.tsx`
-- `src/pages/legal/PrivacidadePage.tsx`
-- `src/pages/legal/ReservasPage.tsx`
-- `src/pages/legal/AntifraudePage.tsx`
-- `src/pages/legal/GuiasPage.tsx`
-- `src/pages/legal/ComunidadePage.tsx`
-- `src/pages/legal/ParceriasPage.tsx`
-- `src/data/legalContent.ts` — conteúdo estruturado (título, secções, parágrafos, listas) para alimentar as páginas; mantém edição centralizada
+`GuideCTA` mantém-se mas com copy reforçada.
 
-## 3. Rodapé reorganizado
+## 3. Página `/guides`
 
-`Footer.tsx` passa a ter 4 colunas em vez das actuais 3, com links reais (deixam de ser "em breve"):
+Reorganizar completamente. Deixa de ser directório com filtros vazios. Passa a ser **landing de recrutamento + transparência**:
 
-- **Plataforma**: Encontrar Guias, Como Funciona, Contacto
-- **Legal**: Termos, Privacidade, Cookies, Cancelamentos
-- **Para Guias**: Seja Parceiro, Comissões, Código de Conduta
-- **Segurança**: Proteção Antifraude, Proteção do Cliente, Disputas
+- Hero: "Os primeiros guias parceiros estão em adesão"
+- Bloco "Porquê esperamos por guias verificados" — 4 pilares (verificação manual de licença, KYC documental, entrevista, monitorização contínua)
+- Bloco "Benefícios para guias parceiros" — visibilidade, reservas com pagamento seguro, suporte, sem captação externa
+- Bloco "Processo de candidatura" — 4 passos (registo → KYC → entrevista → activação)
+- Bloco "Comissões transparentes" — sem percentagem fixa pública, texto explicando que é comunicada antes da adesão (alinhado com a Política de Comissões já publicada)
+- CTA final: "Tornar-me Guia Parceiro"
+- Quando houver guias verificados reais no backend, esta página mostra-os automaticamente acima dos blocos informativos (query a `profiles` com role guide e `kyc_status = verified`)
 
-Texto curto no fundo: "© {ano} Rota do Éden. Todos os direitos reservados. Marketplace independente de experiências turísticas em São Tomé e Príncipe."
+## 4. Nova página `/seja-parceiro`
 
-## 4. Tom e linguagem
+Landing dedicada para guias, ligada a partir do rodapé ("Seja Parceiro" já existe lá). Conteúdo focado em conversão:
+- Proposta de valor
+- O que precisas para te candidatares (licença DGTH, documento de identificação, foto profissional)
+- FAQ curta
+- CTA de registo
 
-Todas as páginas seguem as regras do briefing:
-- Linguagem profissional, neutra, sem ameaças ("reservamo-nos o direito de…" em vez de "vamos processar")
-- Português europeu (consistente com o resto do site)
-- Data de "Última actualização" no topo
-- Email de contacto: `info@rotasdoeden.st` (já existe no rodapé)
-- Aviso "Esta plataforma é uma intermediária digital" onde aplicável
+## 5. Perfil individual de guia (`/guides/:id`)
 
-## 5. Regras invisíveis (backend)
+- Já não existem guias mock para abrir, portanto a página passa a mostrar estado "Perfil não disponível" com CTA para voltar a `/guides`
+- Quando existirem guias reais no backend, a página é alimentada por esses dados
+- Remove referências a `mockGuides`, `mockReviews`, `mockServices`
 
-A secção "Regras invisíveis" do briefing **não vai para o site público** — fica como referência interna para reforço futuro do filtro antifraude. Já temos a base implementada (`filter-message` edge function detecta números, emails, links, palavras-chave). O que falta para fechar essa lista (multi-conta por IP, reviews suspeitas, chargebacks repetidos) fica para uma fase posterior porque depende de pagamentos reais e tracking de IP — não faz parte deste pedido.
+## 6. Booking (`/book/:serviceId`)
 
-## 6. Rotas
+- Sem serviços mock, a página mostra estado "Reservas estarão disponíveis assim que os primeiros guias parceiros forem activados"
+- Mantém estrutura para quando houver dados reais
 
-`App.tsx` ganha 7 rotas novas debaixo de `/legal/*`, todas públicas (sem `ProtectedRoute`).
+## 7. Admin
 
-## 7. Ficheiros alterados
+- `AdminPage` dashboard: KPIs de "reviews" mock removidos; manter apenas contadores reais (guias registados, reservas, KYC pendente — já vêm do backend)
+- Secção "Reviews" do admin: deixa de mostrar lista mock; passa a empty state "Sem avaliações ainda — aparecerão aqui após as primeiras reservas concluídas"
+- Tabelas de guias/reservas continuam ligadas ao backend real
 
-**Novos (10):**
-- `src/pages/legal/LegalLayout.tsx`
-- `src/pages/legal/TermosPage.tsx`
-- `src/pages/legal/PrivacidadePage.tsx`
-- `src/pages/legal/ReservasPage.tsx`
-- `src/pages/legal/AntifraudePage.tsx`
-- `src/pages/legal/GuiasPage.tsx`
-- `src/pages/legal/ComunidadePage.tsx`
-- `src/pages/legal/ParceriasPage.tsx`
-- `src/data/legalContent.ts`
+## 8. Reforço de confiança (transversal)
 
-**Editados (2):**
-- `src/components/layout/Footer.tsx` — 4 colunas, links reais
-- `src/App.tsx` — 7 rotas legais
+Adicionar selos/copy em pontos-chave:
+- Navbar: pequeno indicador "Plataforma em verificação activa"? — **não**, evita parecer beta. Em vez disso, manter visual premium.
+- Footer: já tem secção "Confiança" — adicionar linha "Guias verificados manualmente · Plataforma segura · Experiências locais autênticas"
+- Página inicial: bloco de confiança com 3 ícones (shield, check, users)
+
+## 9. Linguagem
+
+Português europeu, tom profissional, sem promessas exageradas. Frases-chave aprovadas:
+- "Guias verificados manualmente"
+- "Estamos a selecionar os primeiros guias locais verificados"
+- "Novos parceiros em adesão"
+- "Experiências locais autênticas"
+
+## 10. Ficheiros
+
+**Novos (3):**
+- `src/components/home/GuidesComingSoon.tsx`
+- `src/pages/SejaParceiroPage.tsx`
+- `src/components/home/TrustBlock.tsx`
+
+**Editados (10):**
+- `src/data/mockGuides.ts` → array vazio
+- `src/data/mockServices.ts` → array vazio
+- `src/data/mockReviews.ts` → array vazio
+- `src/data/guidePhotos.ts` → mapa vazio
+- `src/pages/Index.tsx` → trocar `FeaturedGuides` por `GuidesComingSoon` + `TrustBlock`
+- `src/pages/GuidesPage.tsx` → reescrever como landing de recrutamento (mostra guias reais quando existirem)
+- `src/pages/GuideProfilePage.tsx` → empty state quando não há guia real
+- `src/pages/BookingPage.tsx` → empty state quando não há serviço real
+- `src/pages/AdminPage.tsx` → remover lista mock de reviews
+- `src/App.tsx` → rota `/seja-parceiro`
+- `src/components/layout/Footer.tsx` → linha de confiança + link "Seja Parceiro" aponta para nova página
+
+**Apagados (efectivamente):**
+- `src/components/home/FeaturedGuides.tsx` (deixa de ser usado; removo o ficheiro)
+- Imports a `mockGuides` em todo o lado
 
 ## Resultado esperado
 
-- Rodapé deixa de ter "em breve" e passa a ser um índice funcional para todas as políticas
-- 7 páginas legais navegáveis, com índice lateral, conteúdo bem formatado e linguagem profissional
-- Cobertura das 20 políticas pedidas, agrupadas de forma coerente em vez de espalhadas
-- Base sólida para mostrar a investidores/parceiros e cumprir requisitos básicos de transparência
+- Zero guias fictícios visíveis em qualquer página pública
+- Mensagem clara e profissional sobre processo de adesão
+- CTAs fortes para captar guias reais
+- Investidores vêem uma plataforma transparente e séria, não preenchida com personagens inventados
+- Quando os primeiros guias verificados forem aprovados no admin, aparecem automaticamente em `/` e `/guides` sem mais alterações de código
