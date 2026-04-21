@@ -29,7 +29,7 @@ export default function ConversationPage() {
 
       const otherId = conv.tourist_id === user.id ? conv.guide_id : conv.tourist_id;
       const { data: prof } = await supabase
-        .from("profiles").select("full_name").eq("id", otherId).maybeSingle();
+        .from("profiles_public").select("full_name").eq("id", otherId).maybeSingle();
       if (prof) setOtherName(prof.full_name || "Conversa");
 
       const { data } = await supabase.from("messages")
