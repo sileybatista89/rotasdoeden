@@ -143,7 +143,7 @@ export function LegalLayout({ page }: LegalLayoutProps) {
                     <li key={item.slug}>
                       <Link
                         to={`/legal/${item.slug}`}
-                        className="block px-3 py-2 rounded-[13px] text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        className="block px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
                         {item.label}
                       </Link>
