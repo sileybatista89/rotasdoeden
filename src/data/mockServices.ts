@@ -1,8 +1,9 @@
 import type { Service } from "@/types";
 
-export const mockServices: Service[] = [
-  // Carlos Espírito Santo (g1)
-  {
+// Sem serviços fictícios. Serão alimentados pelo backend assim que existirem
+// guias parceiros verificados a publicar experiências reais.
+export const mockServices: Service[] = [];
+
     id: "s1", guide_id: "g1", title: "Mergulho para Iniciantes",
     description: "Experiência completa de mergulho para quem nunca mergulhou. Inclui equipamento, instrução em terra e 2 mergulhos guiados em águas rasas até 8 metros.",
     duration_hours: 4, price: 65, max_people: 4, min_people: 1, category: "diving", images: [],

@@ -1,8 +1,8 @@
 import type { Review } from "@/types";
 
-export const mockReviews: Review[] = [
-  // Carlos Espírito Santo (g1)
-  { id: "r1", booking_id: "b1", tourist_id: "t1", guide_id: "g1", rating: 5,
+// Sem avaliações fictícias. As reviews aparecerão após reservas reais concluídas.
+export const mockReviews: Review[] = [];
+
     comment: "Carlos é simplesmente incrível. Paciência infinita comigo que nunca tinha mergulhado, e mostrou-me um mundo completamente novo. O mergulho nos recifes profundos foi a experiência mais memorável da minha vida. Altamente recomendado!",
     created_at: "2025-03-15",
     tourist: { id: "t1", email: "sophie@example.com", role: "tourist", name: "Sophie Müller", nationality: "Alemanha" },
