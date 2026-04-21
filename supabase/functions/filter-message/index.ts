@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -12,7 +14,6 @@ interface FilterResult {
 
 const PATTERNS: { name: string; re: RegExp }[] = [
   { name: "email", re: /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi },
-  // International phone (7+ digits, optional +, spaces, dashes)
   { name: "phone", re: /(?:\+?\d[\d\s\-().]{6,}\d)/g },
   { name: "url", re: /\b(?:https?:\/\/|www\.)[^\s]+/gi },
   { name: "whatsapp_link", re: /\b(?:wa\.me|api\.whatsapp\.com|t\.me|telegram\.me)\/[^\s]*/gi },
@@ -49,6 +50,29 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authentication so the endpoint cannot be probed anonymously
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { content } = await req.json();
     if (typeof content !== "string" || content.length === 0 || content.length > 4000) {
       return new Response(JSON.stringify({ error: "Invalid content" }), {
