@@ -148,7 +148,26 @@ export default function AuthPage() {
                     </label>
                   </RadioGroup>
                 </div>
-                <Button type="submit" variant="hero" className="w-full" disabled={busy}>
+                <div className="flex items-start gap-2 pt-1">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="terms" className="text-xs leading-relaxed text-muted-foreground font-normal cursor-pointer">
+                    Li e aceito os{" "}
+                    <Link to="/legal/termos" target="_blank" className="text-primary font-medium hover:underline">
+                      Termos de Serviço
+                    </Link>{" "}
+                    e a{" "}
+                    <Link to="/legal/privacidade" target="_blank" className="text-primary font-medium hover:underline">
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </Label>
+                </div>
+                <Button type="submit" variant="hero" className="w-full" disabled={busy || !acceptedTerms}>
                   {busy && <Loader2 className="animate-spin mr-2" size={16} />}
                   Criar conta
                 </Button>
