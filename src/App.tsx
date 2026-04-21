@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { CookieConsent } from "@/components/CookieConsent";
 import Index from "./pages/Index.tsx";
 import GuidesPage from "./pages/GuidesPage.tsx";
 import GuideProfilePage from "./pages/GuideProfilePage.tsx";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/legal/parcerias" element={<ParceriasPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <CookieConsent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
