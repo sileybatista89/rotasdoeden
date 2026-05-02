@@ -24,6 +24,8 @@ import GuiasLegalPage from "./pages/legal/GuiasPage.tsx";
 import ComunidadePage from "./pages/legal/ComunidadePage.tsx";
 import ParceriasPage from "./pages/legal/ParceriasPage.tsx";
 import SejaParceiroPage from "./pages/SejaParceiroPage.tsx";
+import MyServicesPage from "./pages/MyServicesPage.tsx";
+import ServiceFormPage from "./pages/ServiceFormPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,15 @@ const App = () => (
             } />
             <Route path="/kyc" element={
               <ProtectedRoute requireRole="guide"><KycPage /></ProtectedRoute>
+            } />
+            <Route path="/my-services" element={
+              <ProtectedRoute requireRole="guide"><MyServicesPage /></ProtectedRoute>
+            } />
+            <Route path="/my-services/new" element={
+              <ProtectedRoute requireRole="guide"><ServiceFormPage /></ProtectedRoute>
+            } />
+            <Route path="/my-services/:id/edit" element={
+              <ProtectedRoute requireRole="guide"><ServiceFormPage /></ProtectedRoute>
             } />
             <Route path="/messages" element={
               <ProtectedRoute><MessagesPage /></ProtectedRoute>

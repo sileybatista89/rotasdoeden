@@ -1,4 +1,4 @@
-import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon } from "lucide-react";
+import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon, Briefcase } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,9 +63,14 @@ export function Navbar() {
                   <MessageSquare size={14} className="mr-2" /> Mensagens
                 </DropdownMenuItem>
                 {role === "guide" && (
-                  <DropdownMenuItem onClick={() => navigate("/kyc")}>
-                    <ShieldCheck size={14} className="mr-2" /> KYC
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/my-services")}>
+                      <Briefcase size={14} className="mr-2" /> Os meus serviços
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/kyc")}>
+                      <ShieldCheck size={14} className="mr-2" /> KYC
+                    </DropdownMenuItem>
+                  </>
                 )}
                 {role === "admin" && (
                   <DropdownMenuItem onClick={() => navigate("/admin")}>
@@ -114,11 +119,18 @@ export function Navbar() {
                     <MessageSquare size={16} /> Mensagens
                   </Link>
                 </SheetClose>
-                {role === "guide" && <SheetClose asChild>
-                  <Link to="/kyc" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
-                    <ShieldCheck size={16} /> KYC
-                  </Link>
-                </SheetClose>}
+                {role === "guide" && <>
+                  <SheetClose asChild>
+                    <Link to="/my-services" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                      <Briefcase size={16} /> Os meus serviços
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to="/kyc" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                      <ShieldCheck size={16} /> KYC
+                    </Link>
+                  </SheetClose>
+                </>}
                 {role === "admin" && <SheetClose asChild>
                   <Link to="/admin" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
                     <LayoutDashboard size={16} /> Admin
