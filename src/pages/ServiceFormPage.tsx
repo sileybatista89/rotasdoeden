@@ -153,9 +153,17 @@ export default function ServiceFormPage() {
     }
 
     setSaving(true);
+    const d = parsed.data;
     const payload = {
-      ...parsed.data,
-      meeting_point: parsed.data.meeting_point ?? null,
+      title: d.title,
+      description: d.description,
+      category: d.category,
+      price_per_person: d.price_per_person,
+      duration_hours: d.duration_hours,
+      min_people: d.min_people,
+      max_people: d.max_people,
+      meeting_point: d.meeting_point ?? null,
+      is_active: d.is_active,
       guide_id: user.id,
       currency: "EUR",
       images,
@@ -165,7 +173,7 @@ export default function ServiceFormPage() {
 
     const { error } = isEdit
       ? await supabase.from("services").update(payload).eq("id", id!)
-      : await supabase.from("services").insert([payload]);
+      : await supabase.from("services").insert(payload);
 
     setSaving(false);
     if (error) {
