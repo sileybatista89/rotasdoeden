@@ -28,6 +28,9 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6">
+          <Link to="/experiences" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Experiências
+          </Link>
           <Link to="/guides" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Guias
           </Link>
@@ -98,6 +101,11 @@ export function Navbar() {
               <SheetTitle className="font-display text-left">Menu</SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 mt-6">
+              <SheetClose asChild>
+                <Link to="/experiences" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
+                  Experiências
+                </Link>
+              </SheetClose>
               <SheetClose asChild>
                 <Link to="/guides" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
                   Guias
