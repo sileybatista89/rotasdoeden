@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -15,9 +16,16 @@ export function GuideCTA() {
         <p className="text-primary-foreground/80 max-w-lg mx-auto mb-8 text-lg">
           Regista-te na plataforma, verifica a tua licença e começa a receber reservas de turistas de todo o mundo.
         </p>
-        <Button variant="sand" size="lg" className="rounded-full px-8">
-          Registar como Guia <ArrowRight size={18} />
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button asChild variant="sand" size="lg" className="rounded-full px-8">
+            <Link to="/auth?mode=register&role=guide&next=/kyc">
+              Criar conta de guia <ArrowRight size={18} />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-8 bg-transparent text-primary-foreground border-primary-foreground/40 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+            <Link to="/seja-parceiro">Saber mais</Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
