@@ -30,6 +30,7 @@ import MyServicesPage from "./pages/MyServicesPage.tsx";
 import ServiceFormPage from "./pages/ServiceFormPage.tsx";
 import ExperiencesPage from "./pages/ExperiencesPage.tsx";
 import ExperienceDetailPage from "./pages/ExperienceDetailPage.tsx";
+import MyBookingsPage from "./pages/MyBookingsPage.tsx";
 
 const queryClient = new QueryClient();
 
