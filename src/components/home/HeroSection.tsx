@@ -1,9 +1,19 @@
+import { useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export function HeroSection() {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const target = q.trim() ? `/experiences?q=${encodeURIComponent(q.trim())}` : "/experiences";
+    navigate(target);
+  }
+
   return (
     <section className="relative overflow-hidden min-h-[90vh] flex items-center">
       {/* Background image */}
@@ -30,19 +40,21 @@ export function HeroSection() {
           </p>
 
           {/* Search bar */}
-          <div className="bg-card/95 backdrop-blur-md rounded-xl shadow-2xl border border-border/50 p-2 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto">
+          <form onSubmit={submit} className="bg-card/95 backdrop-blur-md rounded-xl shadow-2xl border border-border/50 p-2 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto">
             <div className="flex-1 flex items-center gap-2 px-4 py-2 rounded-lg bg-muted">
               <Search size={18} className="text-muted-foreground" />
               <input
                 type="text"
-                placeholder="O que queres explorar?"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="O que queres explorar? (mergulho, trilhos, gastronomia...)"
                 className="bg-transparent text-sm flex-1 outline-none text-foreground placeholder:text-muted-foreground"
               />
             </div>
-            <Button asChild variant="hero" size="lg" className="rounded-lg">
-              <Link to="/guides">Pesquisar Guias</Link>
+            <Button type="submit" variant="hero" size="lg" className="rounded-lg">
+              Procurar Experiências
             </Button>
-          </div>
+          </form>
 
           <div className="flex items-center justify-center gap-6 mt-8 text-sm text-primary-foreground/70">
             <span>Mergulho</span>
