@@ -46,8 +46,11 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {!user ? (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Entrar</Button>
-              <Button size="sm" variant="hero" onClick={() => navigate("/auth")}>Registar</Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/seja-parceiro">Tornar-me parceiro</Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/auth?mode=login")}>Entrar</Button>
+              <Button size="sm" variant="hero" onClick={() => navigate("/auth?mode=register")}>Registar</Button>
             </>
           ) : (
             <DropdownMenu>
@@ -156,8 +159,11 @@ export function Navbar() {
             </nav>
             <div className="mt-auto flex flex-col gap-2 pb-4">
               {!user ? <>
-                <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/auth"); }}>Entrar</Button>
-                <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/auth"); }}>Registar</Button>
+                <Button asChild variant="ghost" className="w-full justify-center">
+                  <Link to="/seja-parceiro" onClick={() => setOpen(false)}>Tornar-me guia parceiro</Link>
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/auth?mode=login"); }}>Entrar</Button>
+                <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/auth?mode=register"); }}>Registar</Button>
               </> : <>
                 <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
                   <UserIcon size={14} /> {user.email}
