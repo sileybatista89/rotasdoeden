@@ -26,6 +26,8 @@ import ParceriasPage from "./pages/legal/ParceriasPage.tsx";
 import SejaParceiroPage from "./pages/SejaParceiroPage.tsx";
 import MyServicesPage from "./pages/MyServicesPage.tsx";
 import ServiceFormPage from "./pages/ServiceFormPage.tsx";
+import ExperiencesPage from "./pages/ExperiencesPage.tsx";
+import ExperienceDetailPage from "./pages/ExperienceDetailPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/guides" element={<GuidesPage />} />
             <Route path="/guides/:id" element={<GuideProfilePage />} />
+            <Route path="/experiences" element={<ExperiencesPage />} />
+            <Route path="/experiences/:id" element={<ExperienceDetailPage />} />
             <Route path="/seja-parceiro" element={<SejaParceiroPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/book/:serviceId" element={
