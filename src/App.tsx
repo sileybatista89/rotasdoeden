@@ -68,6 +68,9 @@ const App = () => (
             <Route path="/my-services/:id/edit" element={
               <ProtectedRoute requireRole="guide"><ServiceFormPage /></ProtectedRoute>
             } />
+            <Route path="/my-bookings" element={
+              <ProtectedRoute><MyBookingsPage /></ProtectedRoute>
+            } />
             <Route path="/messages" element={
               <ProtectedRoute><MessagesPage /></ProtectedRoute>
             } />
