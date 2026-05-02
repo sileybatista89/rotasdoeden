@@ -16,43 +16,61 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          commission_amount: number | null
           created_at: string
+          currency: string
           date: string
           guide_id: string
+          guide_payout: number | null
           id: string
           num_people: number
+          paid_at: string | null
+          payment_status: string
           service_id: string
           service_title: string
           special_requests: string | null
           status: Database["public"]["Enums"]["booking_status"]
+          stripe_session_id: string | null
           total_price: number
           tourist_id: string
           updated_at: string
         }
         Insert: {
+          commission_amount?: number | null
           created_at?: string
+          currency?: string
           date: string
           guide_id: string
+          guide_payout?: number | null
           id?: string
           num_people: number
+          paid_at?: string | null
+          payment_status?: string
           service_id: string
           service_title: string
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
+          stripe_session_id?: string | null
           total_price: number
           tourist_id: string
           updated_at?: string
         }
         Update: {
+          commission_amount?: number | null
           created_at?: string
+          currency?: string
           date?: string
           guide_id?: string
+          guide_payout?: number | null
           id?: string
           num_people?: number
+          paid_at?: string | null
+          payment_status?: string
           service_id?: string
           service_title?: string
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
+          stripe_session_id?: string | null
           total_price?: number
           tourist_id?: string
           updated_at?: string
@@ -270,6 +288,66 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string
+          currency: string
+          description: string
+          duration_hours: number
+          excludes: string[] | null
+          guide_id: string
+          id: string
+          images: string[]
+          includes: string[] | null
+          is_active: boolean
+          max_people: number
+          meeting_point: string | null
+          min_people: number
+          price_per_person: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          currency?: string
+          description: string
+          duration_hours: number
+          excludes?: string[] | null
+          guide_id: string
+          id?: string
+          images?: string[]
+          includes?: string[] | null
+          is_active?: boolean
+          max_people?: number
+          meeting_point?: string | null
+          min_people?: number
+          price_per_person: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          currency?: string
+          description?: string
+          duration_hours?: number
+          excludes?: string[] | null
+          guide_id?: string
+          id?: string
+          images?: string[]
+          includes?: string[] | null
+          is_active?: boolean
+          max_people?: number
+          meeting_point?: string | null
+          min_people?: number
+          price_per_person?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -341,6 +419,20 @@ export type Database = {
         | "cancelled"
         | "refunded"
       kyc_status: "pending" | "submitted" | "verified" | "rejected"
+      service_category:
+        | "tour"
+        | "experience"
+        | "transfer"
+        | "diving"
+        | "hiking"
+        | "fishing"
+        | "kayak"
+        | "surfing"
+        | "birdwatching"
+        | "photography"
+        | "gastronomy"
+        | "culture"
+        | "nightlife"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -477,6 +569,21 @@ export const Constants = {
         "refunded",
       ],
       kyc_status: ["pending", "submitted", "verified", "rejected"],
+      service_category: [
+        "tour",
+        "experience",
+        "transfer",
+        "diving",
+        "hiking",
+        "fishing",
+        "kayak",
+        "surfing",
+        "birdwatching",
+        "photography",
+        "gastronomy",
+        "culture",
+        "nightlife",
+      ],
     },
   },
 } as const
