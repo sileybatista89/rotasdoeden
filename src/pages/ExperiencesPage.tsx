@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Clock, Users, MapPin, Sparkles, Search } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -21,11 +21,12 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function ExperiencesPage() {
+  const [params] = useSearchParams();
   const [services, setServices] = useState<Service[]>([]);
   const [guides, setGuides] = useState<Record<string, ProfilePub>>({});
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("all");
+  const [search, setSearch] = useState(params.get("q") ?? "");
+  const [category, setCategory] = useState<string>(params.get("category") ?? "all");
 
   useEffect(() => {
     (async () => {
