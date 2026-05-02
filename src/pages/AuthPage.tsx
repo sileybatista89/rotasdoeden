@@ -101,6 +101,15 @@ export default function AuthPage() {
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          {tab === "register" && role === "guide" && (
+            <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+              <p className="font-display font-semibold mb-1">Candidatura a Guia Parceiro</p>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Cria a tua conta de guia. Depois vais submeter os documentos KYC (BI/passaporte,
+                licença e selfie) e, após aprovação pela equipa, podes publicar as tuas experiências.
+              </p>
+            </div>
+          )}
           <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "register")}>
             <TabsList className="grid grid-cols-2 w-full mb-6">
               <TabsTrigger value="login">Entrar</TabsTrigger>
