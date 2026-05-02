@@ -126,6 +126,11 @@ export function Navbar() {
               </SheetClose>
               {user && <>
                 <SheetClose asChild>
+                  <Link to="/my-bookings" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                    <Calendar size={16} /> {role === "guide" ? "Reservas recebidas" : "As minhas reservas"}
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
                   <Link to="/messages" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
                     <MessageSquare size={16} /> Mensagens
                   </Link>
