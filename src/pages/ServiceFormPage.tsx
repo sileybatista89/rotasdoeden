@@ -165,7 +165,7 @@ export default function ServiceFormPage() {
 
     const { error } = isEdit
       ? await supabase.from("services").update(payload).eq("id", id!)
-      : await supabase.from("services").insert(payload);
+      : await supabase.from("services").insert([payload]);
 
     setSaving(false);
     if (error) {
