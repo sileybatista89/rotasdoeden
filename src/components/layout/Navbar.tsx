@@ -62,6 +62,9 @@ export function Navbar() {
                   <span className="block text-[10px] text-muted-foreground capitalize mt-0.5">{role}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
+                  <Calendar size={14} className="mr-2" /> {role === "guide" ? "Reservas recebidas" : "As minhas reservas"}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/messages")}>
                   <MessageSquare size={14} className="mr-2" /> Mensagens
                 </DropdownMenuItem>
