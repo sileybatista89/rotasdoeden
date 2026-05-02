@@ -1,4 +1,4 @@
-import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon, Briefcase } from "lucide-react";
+import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon, Briefcase, Calendar } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,9 @@ export function Navbar() {
                   <span className="block text-[10px] text-muted-foreground capitalize mt-0.5">{role}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
+                  <Calendar size={14} className="mr-2" /> {role === "guide" ? "Reservas recebidas" : "As minhas reservas"}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/messages")}>
                   <MessageSquare size={14} className="mr-2" /> Mensagens
                 </DropdownMenuItem>
@@ -122,6 +125,11 @@ export function Navbar() {
                 </a>
               </SheetClose>
               {user && <>
+                <SheetClose asChild>
+                  <Link to="/my-bookings" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                    <Calendar size={16} /> {role === "guide" ? "Reservas recebidas" : "As minhas reservas"}
+                  </Link>
+                </SheetClose>
                 <SheetClose asChild>
                   <Link to="/messages" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
                     <MessageSquare size={16} /> Mensagens
