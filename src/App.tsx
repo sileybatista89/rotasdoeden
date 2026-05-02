@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import CheckoutReturnPage from "./pages/CheckoutReturnPage.tsx";
 import Index from "./pages/Index.tsx";
 import GuidesPage from "./pages/GuidesPage.tsx";
 import GuideProfilePage from "./pages/GuideProfilePage.tsx";
@@ -38,6 +40,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PaymentTestModeBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/guides" element={<GuidesPage />} />
@@ -48,6 +51,9 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
+            } />
+            <Route path="/checkout/return" element={
+              <ProtectedRoute><CheckoutReturnPage /></ProtectedRoute>
             } />
             <Route path="/kyc" element={
               <ProtectedRoute requireRole="guide"><KycPage /></ProtectedRoute>
