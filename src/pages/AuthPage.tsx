@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { Leaf, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,17 @@ export default function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: string })?.from ?? "/";
+  const [params] = useSearchParams();
 
-  const [tab, setTab] = useState<"login" | "register">("login");
+  const initialMode = params.get("mode") === "register" ? "register" : "login";
+  const initialRole = params.get("role") === "guide" ? "guide" : "tourist";
+  const next = useMemo(() => {
+    const q = params.get("next");
+    if (q && q.startsWith("/")) return q;
+    return (location.state as { from?: string })?.from ?? "/";
+  }, [params, location.state]);
+
+  const [tab, setTab] = useState<"login" | "register">(initialMode);
   const [busy, setBusy] = useState(false);
 
   // login
@@ -33,12 +41,12 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
-  const [role, setRole] = useState<"tourist" | "guide">("tourist");
+  const [role, setRole] = useState<"tourist" | "guide">(initialRole);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) navigate(from, { replace: true });
-  }, [user, loading, from, navigate]);
+    if (!loading && user) navigate(next, { replace: true });
+  }, [user, loading, next, navigate]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -93,6 +101,15 @@ export default function AuthPage() {
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          {tab === "register" && role === "guide" && (
+            <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+              <p className="font-display font-semibold mb-1">Candidatura a Guia Parceiro</p>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Cria a tua conta de guia. Depois vais submeter os documentos KYC (BI/passaporte,
+                licença e selfie) e, após aprovação pela equipa, podes publicar as tuas experiências.
+              </p>
+            </div>
+          )}
           <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "register")}>
             <TabsList className="grid grid-cols-2 w-full mb-6">
               <TabsTrigger value="login">Entrar</TabsTrigger>

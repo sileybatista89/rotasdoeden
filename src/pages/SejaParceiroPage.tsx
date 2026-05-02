@@ -63,7 +63,7 @@ export default function SejaParceiroPage() {
               com critério.
             </p>
             <Button asChild variant="hero" size="lg" className="rounded-full px-8">
-              <Link to="/auth">
+              <Link to="/auth?mode=register&role=guide&next=/kyc">
                 Candidatar-me agora <ArrowRight size={18} />
               </Link>
             </Button>
@@ -177,7 +177,7 @@ export default function SejaParceiroPage() {
               Junta-te à primeira geração de guias verificados da Rotas do Éden.
             </p>
             <Button asChild variant="sand" size="lg" className="rounded-full px-8">
-              <Link to="/auth">
+              <Link to="/auth?mode=register&role=guide&next=/kyc">
                 Tornar-me Guia Parceiro <ArrowRight size={18} />
               </Link>
             </Button>
