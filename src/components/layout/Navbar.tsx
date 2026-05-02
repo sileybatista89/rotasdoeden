@@ -1,4 +1,4 @@
-import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon, Briefcase } from "lucide-react";
+import { Leaf, Menu, LogOut, ShieldCheck, MessageSquare, LayoutDashboard, User as UserIcon, Briefcase, Calendar } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
