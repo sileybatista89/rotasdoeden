@@ -83,9 +83,7 @@ export default function AuthPage() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Conta criada — pode iniciar sessão.", {
-      description: "O primeiro utilizador da plataforma fica como administrador.",
-    });
+    toast.success("Conta criada — pode iniciar sessão.");
     setTab("login");
     setLoginEmail(email);
   }
@@ -188,9 +186,6 @@ export default function AuthPage() {
                   {busy && <Loader2 className="animate-spin mr-2" size={16} />}
                   Criar conta
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  O primeiro utilizador registado torna-se administrador da plataforma.
-                </p>
               </form>
             </TabsContent>
           </Tabs>
