@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/Logo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -89,14 +90,11 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-muted/40 via-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-            <Leaf size={22} className="text-primary-foreground" />
-          </div>
-          <span className="font-display font-bold text-xl text-foreground">Rotas do Éden</span>
-        </Link>
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" />
+        </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           {tab === "register" && role === "guide" && (
