@@ -1,41 +1,35 @@
 import { ShieldCheck, BadgeCheck, Users } from "lucide-react";
-
-const pillars = [
-  {
-    icon: ShieldCheck,
-    title: "Verificação manual",
-    text: "Cada guia é avaliado individualmente pela nossa equipa antes de ser activado na plataforma.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Licença DGTH validada",
-    text: "Trabalhamos apenas com guias com licença reconhecida pela autoridade turística de São Tomé e Príncipe.",
-  },
-  {
-    icon: Users,
-    title: "Experiências locais autênticas",
-    text: "Sem intermediários estrangeiros. Cada euro pago beneficia directamente comunidades locais.",
-  },
-];
+import { useT } from "@/i18n/LanguageProvider";
 
 export function TrustBlock() {
+  const { t } = useT();
+  const pillars = [
+    { icon: ShieldCheck, title: t("trust.p1.title"), text: t("trust.p1.text") },
+    { icon: BadgeCheck, title: t("trust.p2.title"), text: t("trust.p2.text") },
+    { icon: Users, title: t("trust.p3.title"), text: t("trust.p3.text") },
+  ];
+
   return (
-    <section className="py-16 bg-card border-y border-border">
+    <section className="py-20 bg-gradient-to-b from-card via-card to-muted/40 border-y border-border/60">
       <div className="container">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">Confiança</p>
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-            Uma plataforma construída com critério
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-3">{t("trust.eyebrow")}</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+            {t("trust.title")}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pillars.map((p) => (
-            <div key={p.title} className="bg-background border border-border rounded-2xl p-6">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                <p.icon size={20} className="text-primary" />
+          {pillars.map((p, i) => (
+            <div
+              key={p.title}
+              className="group relative bg-background border border-border/70 rounded-3xl p-7 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 flex items-center justify-center mb-5">
+                <p.icon size={22} className="text-primary" />
               </div>
-              <h3 className="font-display font-semibold text-foreground mb-1.5">{p.title}</h3>
+              <h3 className="font-display font-semibold text-lg text-foreground mb-2">{p.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{p.text}</p>
+              <span className="absolute top-5 right-5 text-[10px] font-semibold text-primary/30 tabular-nums">0{i + 1}</span>
             </div>
           ))}
         </div>
