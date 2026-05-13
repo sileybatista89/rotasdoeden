@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/brand/Logo";
 import { useT } from "@/i18n/LanguageProvider";
@@ -19,6 +19,26 @@ export function Footer() {
               <div className="flex items-center gap-2"><Mail size={14} /> info@rotasdoeden.st</div>
               <div className="flex items-center gap-2"><Phone size={14} /> +239 222 0000</div>
               <div className="flex items-center gap-2"><MapPin size={14} /> São Tomé, STP</div>
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              <a
+                href="https://www.instagram.com/rotasdoeden?igsh=MXkxZ3VlMDhuYWdocg%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-9 h-9 rounded-full bg-primary-foreground/10 hover:bg-secondary hover:text-foreground text-primary-foreground flex items-center justify-center transition-colors"
+              >
+                <Instagram size={16} />
+              </a>
+              <a
+                href="https://www.facebook.com/share/18VczajHfs/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="w-9 h-9 rounded-full bg-primary-foreground/10 hover:bg-secondary hover:text-foreground text-primary-foreground flex items-center justify-center transition-colors"
+              >
+                <Facebook size={16} />
+              </a>
             </div>
           </div>
 
