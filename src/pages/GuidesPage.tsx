@@ -3,6 +3,7 @@ import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, Sparkles, IdCar
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 const pillars = [
   { icon: IdCard, title: "Verificação manual de licença", text: "Cada licença é validada com a autoridade competente antes da activação do perfil." },
@@ -28,6 +29,11 @@ const steps = [
 export default function GuidesPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Guias verificados em São Tomé e Príncipe | Rotas do Éden"
+        description="Conheça os nossos guias turísticos verificados em São Tomé e Príncipe. KYC obrigatório, licença validada e suporte dedicado."
+        path="/guides"
+      />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}

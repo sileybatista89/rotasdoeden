@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 const emailSchema = z.string().trim().email("Email inválido").max(255);
 const passwordSchema = z.string().min(8, "Mínimo 8 caracteres").max(72);
@@ -91,6 +92,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/40 via-background to-primary/5 flex items-center justify-center p-4">
+      <SEO
+        title="Entrar ou criar conta | Rotas do Éden"
+        description="Aceda à sua conta Rotas do Éden ou registe-se como turista ou guia parceiro em São Tomé e Príncipe."
+        path="/auth"
+      />
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo size="lg" />

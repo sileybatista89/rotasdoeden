@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Constants, type Tables } from "@/integrations/supabase/types";
+import { SEO } from "@/components/SEO";
 
 type Service = Tables<"services">;
 type ProfilePub = Tables<"profiles_public">;
@@ -65,6 +66,11 @@ export default function ExperiencesPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Experiências em São Tomé e Príncipe | Rotas do Éden"
+        description="Explore trilhas, mergulho, gastronomia e cultura em São Tomé e Príncipe. Reserve experiências autênticas com guias locais verificados."
+        path="/experiences"
+      />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}

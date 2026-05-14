@@ -3,6 +3,7 @@ import { ArrowRight, FileCheck, IdCard, Camera, ShieldCheck, Wallet, MessageSqua
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 const requirements = [
   { icon: IdCard, title: "Documento de identificação", text: "Bilhete de identidade ou passaporte válido emitido por autoridade reconhecida." },
@@ -46,6 +47,11 @@ const faqs = [
 export default function SejaParceiroPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Seja Parceiro — Guia turístico em São Tomé e Príncipe | Rotas do Éden"
+        description="Junte-se à Rotas do Éden como guia parceiro. Receba reservas verificadas, pagamentos protegidos e suporte dedicado em São Tomé e Príncipe."
+        path="/seja-parceiro"
+      />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}

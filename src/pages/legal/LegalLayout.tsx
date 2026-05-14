@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { legalNav, type LegalPage } from "@/data/legalContent";
 import { ChevronRight, FileText } from "lucide-react";
 
@@ -11,6 +12,11 @@ interface LegalLayoutProps {
 export function LegalLayout({ page }: LegalLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title={`${page.title} | Rotas do Éden`}
+        description={page.intro.slice(0, 155)}
+        path={`/legal/${page.slug}`}
+      />
       <Navbar />
 
       {/* Hero band */}
