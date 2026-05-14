@@ -3,6 +3,7 @@ import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, Sparkles, IdCar
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 const pillars = [
   { icon: IdCard, title: "Verificação manual de licença", text: "Cada licença é validada com a autoridade competente antes da activação do perfil." },
