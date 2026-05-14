@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Constants, type Tables } from "@/integrations/supabase/types";
+import { SEO } from "@/components/SEO";
 
 type Service = Tables<"services">;
 type ProfilePub = Tables<"profiles_public">;
