@@ -29,6 +29,11 @@ const steps = [
 export default function GuidesPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Guias verificados em São Tomé e Príncipe | Rotas do Éden"
+        description="Conheça os nossos guias turísticos verificados em São Tomé e Príncipe. KYC obrigatório, licença validada e suporte dedicado."
+        path="/guides"
+      />
       <Navbar />
       <main className="flex-1">
         {/* Hero */}
