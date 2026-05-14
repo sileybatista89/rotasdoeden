@@ -1,0 +1,21 @@
+# Rotas do Éden
+
+> Marketplace de guias turísticos verificados em São Tomé e Príncipe. Reserve experiências autênticas — trilhas, praias, cultura e gastronomia — diretamente com guias locais de confiança.
+
+## Páginas
+
+- [Início](/): Visão geral da plataforma e destaques de São Tomé e Príncipe.
+- [Guias](/guias): Guias turísticos verificados disponíveis no arquipélago.
+- [Experiências](/experiencias): Catálogo de passeios, trilhas e atividades reserváveis.
+- [Seja Parceiro](/seja-parceiro): Informações para guias que querem se cadastrar na plataforma.
+- [Entrar](/auth): Login e registo de viajantes e guias.
+
+## Legal
+
+- [Termos de Uso](/legal/termos): Termos e condições da plataforma.
+- [Privacidade](/legal/privacidade): Política de privacidade e tratamento de dados.
+- [Reservas](/legal/reservas): Política de reservas, pagamentos e cancelamentos.
+- [Antifraude](/legal/antifraude): Medidas de proteção contra fraudes.
+- [Comunidade](/legal/comunidade): Diretrizes da comunidade.
+- [Guias](/legal/guias): Termos específicos para guias parceiros.
+- [Parcerias](/legal/parcerias): Informação sobre parcerias institucionais.
