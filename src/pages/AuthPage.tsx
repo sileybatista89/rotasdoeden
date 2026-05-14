@@ -92,6 +92,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/40 via-background to-primary/5 flex items-center justify-center p-4">
+      <SEO
+        title="Entrar ou criar conta | Rotas do Éden"
+        description="Aceda à sua conta Rotas do Éden ou registe-se como turista ou guia parceiro em São Tomé e Príncipe."
+        path="/auth"
+      />
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Logo size="lg" />
