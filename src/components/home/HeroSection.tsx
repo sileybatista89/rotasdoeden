@@ -69,7 +69,7 @@ export function HeroSection() {
             <span className="px-3 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/15">{t("hero.tag.history")}</span>
           </div>
 
-          <div className="hidden md:flex items-center justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-primary-foreground/60">
+          <div className="hidden md:flex items-center justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-primary-foreground/85">
             <span className="inline-flex items-center gap-1.5"><ShieldCheck size={14} /> KYC</span>
             <span className="inline-flex items-center gap-1.5"><MapPin size={14} /> São Tomé · Príncipe</span>
             <span className="inline-flex items-center gap-1.5"><Sparkles size={14} /> Eco · Local</span>
@@ -77,7 +77,7 @@ export function HeroSection() {
         </div>
 
         <div className="flex justify-center mt-14">
-          <ChevronDown size={24} className="text-primary-foreground/60 animate-bounce" />
+          <ChevronDown size={24} className="text-primary-foreground/85 animate-bounce" />
         </div>
       </div>
     </section>
