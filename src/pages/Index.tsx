@@ -11,6 +11,11 @@ import { GuideCTA } from "@/components/home/GuideCTA";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Rotas do Éden — Guias turísticos em São Tomé e Príncipe"
+        description="Marketplace de guias turísticos verificados em São Tomé e Príncipe. Reserve trilhas, mergulho, gastronomia e cultura com confiança."
+        path="/"
+      />
       <Navbar />
       <main className="flex-1">
         <HeroSection />
