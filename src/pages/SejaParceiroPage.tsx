@@ -51,6 +51,15 @@ export default function SejaParceiroPage() {
         title="Seja Parceiro — Guia turístico em São Tomé e Príncipe | Rotas do Éden"
         description="Junte-se à Rotas do Éden como guia parceiro. Receba reservas verificadas, pagamentos protegidos e suporte dedicado em São Tomé e Príncipe."
         path="/seja-parceiro"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }}
       />
       <Navbar />
       <main className="flex-1">
