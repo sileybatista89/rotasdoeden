@@ -131,8 +131,8 @@ export function LegalLayout({ page }: LegalLayoutProps) {
 
             <div className="mt-12 p-6 rounded-xl bg-muted/40 border border-border text-base text-muted-foreground leading-relaxed">
               Para questões relativas a esta política, contacte-nos em{" "}
-              <a href="mailto:info@rotasdoeden.st" className="text-primary font-medium hover:underline">
-                info@rotasdoeden.st
+              <a href="mailto:info@rotasdoeden.com" className="text-primary font-medium hover:underline">
+                info@rotasdoeden.com
               </a>
               .
             </div>

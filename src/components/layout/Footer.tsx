@@ -16,8 +16,7 @@ export function Footer() {
               {t("footer.tagline")}
             </p>
             <div className="flex flex-col gap-2 text-sm text-primary-foreground/85">
-              <div className="flex items-center gap-2"><Mail size={14} /> info@rotasdoeden.st</div>
-              <div className="flex items-center gap-2"><Phone size={14} /> +239 222 0000</div>
+              <div className="flex items-center gap-2"><Mail size={14} /> info@rotasdoeden.com</div>
               <div className="flex items-center gap-2"><MapPin size={14} /> São Tomé, STP</div>
             </div>
             <div className="flex items-center gap-3 mt-4">

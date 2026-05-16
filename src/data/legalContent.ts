@@ -65,7 +65,7 @@ export const legalPages: Record<string, LegalPage> = {
         blocks: [
           {
             type: "p",
-            text: "O utilizador é responsável pela confidencialidade das suas credenciais e por toda a actividade realizada através da sua conta. Qualquer suspeita de acesso não autorizado deve ser comunicada de imediato para info@rotasdoeden.st.",
+            text: "O utilizador é responsável pela confidencialidade das suas credenciais e por toda a actividade realizada através da sua conta. Qualquer suspeita de acesso não autorizado deve ser comunicada de imediato para info@rotasdoeden.com.",
           },
         ],
       },
@@ -189,7 +189,7 @@ export const legalPages: Record<string, LegalPage> = {
           },
           {
             type: "p",
-            text: "Pedidos podem ser enviados para info@rotasdoeden.st.",
+            text: "Pedidos podem ser enviados para info@rotasdoeden.com.",
           },
         ],
       },
