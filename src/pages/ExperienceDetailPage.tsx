@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -82,6 +83,27 @@ export default function ExperienceDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title={`${service.title} | Rotas do Éden`}
+        description={service.description.slice(0, 155)}
+        path={`/experiences/${service.id}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: service.title,
+          description: service.description,
+          image: images,
+          category: categoryLabels[service.category] ?? service.category,
+          brand: { "@type": "Organization", "name": "Rotas do Éden" },
+          offers: {
+            "@type": "Offer",
+            price: Number(service.price_per_person).toFixed(2),
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+            url: `https://rotasdoeden.com/experiences/${service.id}`,
+          },
+        }}
+      />
       <Navbar />
       <main className="flex-1">
         <div className="container py-8">
