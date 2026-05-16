@@ -83,6 +83,27 @@ export default function ExperienceDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title={`${service.title} | Rotas do Éden`}
+        description={service.description.slice(0, 155)}
+        path={`/experiences/${service.id}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: service.title,
+          description: service.description,
+          image: images,
+          category: categoryLabels[service.category] ?? service.category,
+          brand: { "@type": "Organization", "name": "Rotas do Éden" },
+          offers: {
+            "@type": "Offer",
+            price: Number(service.price_per_person).toFixed(2),
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+            url: `https://rotasdoeden.com/experiences/${service.id}`,
+          },
+        }}
+      />
       <Navbar />
       <main className="flex-1">
         <div className="container py-8">
