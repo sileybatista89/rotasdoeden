@@ -189,7 +189,7 @@ export const legalPages: Record<string, LegalPage> = {
           },
           {
             type: "p",
-            text: "Pedidos podem ser enviados para info@rotasdoeden.st.",
+            text: "Pedidos podem ser enviados para info@rotasdoeden.com.",
           },
         ],
       },
