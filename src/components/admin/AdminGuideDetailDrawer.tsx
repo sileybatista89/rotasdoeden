@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShieldCheck, Ban, CheckCircle2, FileText, Mail, Phone, Globe2, Calendar } from "lucide-react";
+import { ShieldCheck, Ban, CheckCircle2, FileText, Mail, Globe2, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
