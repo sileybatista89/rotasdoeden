@@ -33,6 +33,9 @@ export function Navbar() {
           <Link to="/guides" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("nav.guides")}
           </Link>
+          <Link to="/sobre-sao-tome" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            O destino
+          </Link>
           <a href="/#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("nav.how")}
           </a>
@@ -117,6 +120,11 @@ export function Navbar() {
                 <SheetClose asChild>
                   <Link to="/guides" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
                     {t("nav.guides")}
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/sobre-sao-tome" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
+                    O destino
                   </Link>
                 </SheetClose>
                 <SheetClose asChild>

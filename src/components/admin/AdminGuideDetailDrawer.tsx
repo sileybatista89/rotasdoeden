@@ -132,7 +132,7 @@ export function AdminGuideDetailDrawer({
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground"><Calendar size={14} /> Registo: {new Date(guide.created_at).toLocaleDateString("pt-PT")}</div>
             {guide.country && <div className="flex items-center gap-2 text-muted-foreground"><Globe2 size={14} /> {guide.country}</div>}
-            {guide.phone && <div className="flex items-center gap-2 text-muted-foreground"><Phone size={14} /> {guide.phone}</div>}
+            {/* telefone removido da UI por política do site */}
           </div>
 
           {guide.bio && (
