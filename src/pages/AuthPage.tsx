@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
@@ -18,13 +19,24 @@ const emailSchema = z.string().trim().email("Email inválido").max(255);
 const passwordSchema = z.string().min(8, "Mínimo 8 caracteres").max(72);
 const nameSchema = z.string().trim().min(2, "Mínimo 2 caracteres").max(100);
 
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.62z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86a5.3 5.3 0 01-4.98-3.66H1.02v2.3A9 9 0 009 18z"/>
+      <path fill="#FBBC05" d="M4.02 10.76A5.4 5.4 0 013.74 9c0-.61.1-1.2.28-1.76V4.94H1.02A9 9 0 000 9c0 1.45.35 2.83.96 4.06l3.06-2.3z"/>
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 009 0 9 9 0 001.02 4.94l3 2.3A5.3 5.3 0 019 3.58z"/>
+    </svg>
+  );
+}
+
 export default function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
 
-  const initialMode = params.get("mode") === "register" ? "register" : "login";
+  const initialMode = params.get("mode") === "login" ? "login" : "register";
   const initialRole = params.get("role") === "guide" ? "guide" : "tourist";
   const next = useMemo(() => {
     const q = params.get("next");
@@ -34,21 +46,42 @@ export default function AuthPage() {
 
   const [tab, setTab] = useState<"login" | "register">(initialMode);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
-  // login
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPwd, setLoginPwd] = useState("");
 
-  // register
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [role, setRole] = useState<"tourist" | "guide">(initialRole);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+
   useEffect(() => {
     if (!loading && user) navigate(next, { replace: true });
   }, [user, loading, next, navigate]);
+
+  async function handleGoogle() {
+    setGoogleBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Não foi possível iniciar sessão com Google.");
+        setGoogleBusy(false);
+        return;
+      }
+      // se redirected, o browser navega para o Google
+    } catch {
+      toast.error("Erro ao contactar o Google.");
+      setGoogleBusy(false);
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -85,59 +118,73 @@ export default function AuthPage() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Conta criada — pode iniciar sessão.");
+    toast.success("Conta criada — verifica o teu email para confirmar.");
     setTab("login");
     setLoginEmail(email);
+  }
+
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    const parsed = emailSchema.safeParse(forgotEmail);
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    setForgotBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Verifica o teu email para repor a password.");
+    setForgotOpen(false);
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/40 via-background to-primary/5 flex items-center justify-center p-4">
       <SEO
         title="Entrar ou criar conta | Rotas do Éden"
-        description="Aceda à sua conta Rotas do Éden ou registe-se como turista ou guia parceiro em São Tomé e Príncipe."
+        description="Acede à tua conta Rotas do Éden ou regista-te como turista ou guia parceiro em São Tomé e Príncipe."
         path="/auth"
       />
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <Logo size="lg" />
+          <Logo size="lg" to="/" />
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-          {tab === "register" && role === "guide" && (
-            <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
-              <p className="font-display font-semibold mb-1">Candidatura a Guia Parceiro</p>
-              <p className="text-muted-foreground text-xs leading-relaxed">
-                Cria a tua conta de guia. Depois vais submeter os documentos KYC (BI/passaporte,
-                licença e selfie) e, após aprovação pela equipa, podes publicar as tuas experiências.
-              </p>
-            </div>
-          )}
           <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "register")}>
             <TabsList className="grid grid-cols-2 w-full mb-6">
+              <TabsTrigger value="register">Criar conta</TabsTrigger>
               <TabsTrigger value="login">Entrar</TabsTrigger>
-              <TabsTrigger value="register">Registar</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="le">Email</Label>
-                  <Input id="le" type="email" autoComplete="email" required
-                    value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lp">Password</Label>
-                  <Input id="lp" type="password" autoComplete="current-password" required
-                    value={loginPwd} onChange={(e) => setLoginPwd(e.target.value)} />
-                </div>
-                <Button type="submit" variant="hero" className="w-full" disabled={busy}>
-                  {busy && <Loader2 className="animate-spin mr-2" size={16} />}
-                  Entrar
-                </Button>
-              </form>
-            </TabsContent>
+            {/* Google sign-in em destaque */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mb-4 gap-2 h-11"
+              onClick={handleGoogle}
+              disabled={googleBusy}
+            >
+              {googleBusy ? <Loader2 className="animate-spin" size={16} /> : <GoogleIcon />}
+              Continuar com Google
+            </Button>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">ou com email</span>
+              </div>
+            </div>
 
             <TabsContent value="register">
+              {role === "guide" && (
+                <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+                  <p className="font-display font-semibold mb-1">Candidatura a Guia Parceiro</p>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    Cria a tua conta. Depois submetes os documentos KYC e, após aprovação, podes publicar experiências.
+                  </p>
+                </div>
+              )}
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="rn">Nome completo</Label>
@@ -157,11 +204,11 @@ export default function AuthPage() {
                   <Label>Tipo de conta</Label>
                   <RadioGroup value={role} onValueChange={(v) => setRole(v as "tourist" | "guide")}
                     className="grid grid-cols-2 gap-3">
-                    <label className="flex items-center gap-2 border border-border rounded-lg p-3 cursor-pointer hover:bg-muted">
+                    <label className="flex items-center gap-2 border border-border rounded-lg p-3 cursor-pointer hover:bg-muted transition-colors">
                       <RadioGroupItem value="tourist" id="rt" />
                       <span className="text-sm">Turista</span>
                     </label>
-                    <label className="flex items-center gap-2 border border-border rounded-lg p-3 cursor-pointer hover:bg-muted">
+                    <label className="flex items-center gap-2 border border-border rounded-lg p-3 cursor-pointer hover:bg-muted transition-colors">
                       <RadioGroupItem value="guide" id="rg" />
                       <span className="text-sm">Guia turístico</span>
                     </label>
@@ -177,23 +224,76 @@ export default function AuthPage() {
                   <Label htmlFor="terms" className="text-xs leading-relaxed text-muted-foreground font-normal cursor-pointer">
                     Li e aceito os{" "}
                     <Link to="/legal/termos" target="_blank" className="text-primary font-medium hover:underline">
-                      Termos de Serviço
+                      Termos
                     </Link>{" "}
                     e a{" "}
                     <Link to="/legal/privacidade" target="_blank" className="text-primary font-medium hover:underline">
                       Política de Privacidade
-                    </Link>
-                    .
+                    </Link>.
                   </Label>
                 </div>
-                <Button type="submit" variant="hero" className="w-full" disabled={busy || !acceptedTerms}>
+                <Button type="submit" variant="hero" className="w-full h-11" disabled={busy || !acceptedTerms}>
                   {busy && <Loader2 className="animate-spin mr-2" size={16} />}
                   Criar conta
                 </Button>
               </form>
             </TabsContent>
+
+            <TabsContent value="login">
+              {!forgotOpen ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="le">Email</Label>
+                    <Input id="le" type="email" autoComplete="email" required
+                      value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="lp">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => { setForgotEmail(loginEmail); setForgotOpen(true); }}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Esqueci-me
+                      </button>
+                    </div>
+                    <Input id="lp" type="password" autoComplete="current-password" required
+                      value={loginPwd} onChange={(e) => setLoginPwd(e.target.value)} />
+                  </div>
+                  <Button type="submit" variant="hero" className="w-full h-11" disabled={busy}>
+                    {busy && <Loader2 className="animate-spin mr-2" size={16} />}
+                    Entrar
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleForgot} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fe">Email da conta</Label>
+                    <Input id="fe" type="email" required
+                      value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} />
+                    <p className="text-xs text-muted-foreground">
+                      Enviamos um link para repores a tua password.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" className="flex-1" onClick={() => setForgotOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" variant="hero" className="flex-1" disabled={forgotBusy}>
+                      {forgotBusy && <Loader2 className="animate-spin mr-2" size={16} />}
+                      Enviar
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </TabsContent>
           </Tabs>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          Ao continuar, concordas em proteger a tua conta e seguir os Termos de uso.
+        </p>
       </div>
     </div>
   );
