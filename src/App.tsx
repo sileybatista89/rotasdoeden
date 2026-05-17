@@ -32,6 +32,9 @@ import ServiceFormPage from "./pages/ServiceFormPage.tsx";
 import ExperiencesPage from "./pages/ExperiencesPage.tsx";
 import ExperienceDetailPage from "./pages/ExperienceDetailPage.tsx";
 import MyBookingsPage from "./pages/MyBookingsPage.tsx";
+import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,7 @@ const App = () => (
         <LanguageProvider>
         <AuthProvider>
           <PaymentTestModeBanner />
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/guides" element={<GuidesPage />} />
@@ -52,6 +56,8 @@ const App = () => (
             <Route path="/experiences/:id" element={<ExperienceDetailPage />} />
             <Route path="/seja-parceiro" element={<SejaParceiroPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
             } />

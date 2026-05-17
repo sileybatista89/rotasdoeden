@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShieldCheck, Ban, CheckCircle2, FileText, Mail, Phone, Globe2, Calendar } from "lucide-react";
+import { ShieldCheck, Ban, CheckCircle2, FileText, Mail, Globe2, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -132,7 +132,7 @@ export function AdminGuideDetailDrawer({
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground"><Calendar size={14} /> Registo: {new Date(guide.created_at).toLocaleDateString("pt-PT")}</div>
             {guide.country && <div className="flex items-center gap-2 text-muted-foreground"><Globe2 size={14} /> {guide.country}</div>}
-            {guide.phone && <div className="flex items-center gap-2 text-muted-foreground"><Phone size={14} /> {guide.phone}</div>}
+            {/* telefone removido da UI por política do site */}
           </div>
 
           {guide.bio && (
