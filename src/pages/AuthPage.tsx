@@ -156,25 +156,6 @@ export default function AuthPage() {
               <TabsTrigger value="login">Entrar</TabsTrigger>
             </TabsList>
 
-            {/* Google sign-in em destaque */}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mb-4 gap-2 h-11"
-              onClick={handleGoogle}
-              disabled={googleBusy}
-            >
-              {googleBusy ? <Loader2 className="animate-spin" size={16} /> : <GoogleIcon />}
-              Continuar com Google
-            </Button>
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">ou com email</span>
-              </div>
-            </div>
 
             <TabsContent value="register">
               {role === "guide" && (
