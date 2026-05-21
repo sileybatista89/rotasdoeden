@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
@@ -19,16 +19,6 @@ const emailSchema = z.string().trim().email("Email inválido").max(255);
 const passwordSchema = z.string().min(8, "Mínimo 8 caracteres").max(72);
 const nameSchema = z.string().trim().min(2, "Mínimo 2 caracteres").max(100);
 
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.62z"/>
-      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86a5.3 5.3 0 01-4.98-3.66H1.02v2.3A9 9 0 009 18z"/>
-      <path fill="#FBBC05" d="M4.02 10.76A5.4 5.4 0 013.74 9c0-.61.1-1.2.28-1.76V4.94H1.02A9 9 0 000 9c0 1.45.35 2.83.96 4.06l3.06-2.3z"/>
-      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 009 0 9 9 0 001.02 4.94l3 2.3A5.3 5.3 0 019 3.58z"/>
-    </svg>
-  );
-}
 
 export default function AuthPage() {
   const { user, loading } = useAuth();
@@ -46,7 +36,7 @@ export default function AuthPage() {
 
   const [tab, setTab] = useState<"login" | "register">(initialMode);
   const [busy, setBusy] = useState(false);
-  const [googleBusy, setGoogleBusy] = useState(false);
+  
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPwd, setLoginPwd] = useState("");
@@ -65,23 +55,6 @@ export default function AuthPage() {
     if (!loading && user) navigate(next, { replace: true });
   }, [user, loading, next, navigate]);
 
-  async function handleGoogle() {
-    setGoogleBusy(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error("Não foi possível iniciar sessão com Google.");
-        setGoogleBusy(false);
-        return;
-      }
-      // se redirected, o browser navega para o Google
-    } catch {
-      toast.error("Erro ao contactar o Google.");
-      setGoogleBusy(false);
-    }
-  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
