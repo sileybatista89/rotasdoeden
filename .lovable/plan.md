@@ -1,63 +1,97 @@
-# Plano de melhorias — Rotas do Éden
+# Polish da Rotas do Éden — fase 2
 
-Trabalho dividido em 7 frentes. Faço tudo numa única passagem.
+Objetivo: tornar o site mais bonito, real, interativo e totalmente traduzido, sem partir o que já funciona.
 
-## 1. Logo oficial (novo, fundo transparente)
-- Copio a imagem enviada para `src/assets/logo-rotas-eden.png` (substitui a actual).
-- Verifico que aparece bem em: Navbar, Footer, AuthPage, favicons (mantenho favicon actual, só actualizo o logo principal).
-- Ajusto tamanhos se necessário para o novo aspect ratio.
+## 1. Logo maior e mais presente
+- Aumentar o logo no navbar (de `h-11` para `h-14` desktop / `h-12` mobile).
+- Aumentar também no footer e nos emails.
+- Garantir que o ficheiro PNG continua nítido (já é premium transparente).
 
-## 2. Email único + sem telefone
-- Confirmo que **todas** as ocorrências usam `info@rotasdoeden.com` (já está em Footer, Legal, mas faço varredura completa em `src/`, `index.html`, `public/`, edge functions e mock data).
-- Removo qualquer número de telefone restante (auditoria a `src/`, dados mock de guias — `phone` em `mockGuides`/`AdminGuideDetailDrawer` — e ajusto UI para não mostrar campo telefone).
-- Removo menção a "telefone" em textos de aviso onde fizer sentido (mantenho no `AntiFraudBanner` porque é educacional sobre não partilhar contactos externos).
+## 2. Tradução completa (PT / EN / FR / DE / ZH / KO)
+Problema actual: muitas secções têm texto hard-coded em português e não passam pelo sistema `useT()`. Quando o utilizador muda de idioma, só o que está em `translations.ts` muda.
 
-## 3. Fluxo "Criar conta" simplificado + Google sign-in
-- Adiciono **Sign in with Google** via `supabase--configure_social_auth` (managed, sem precisar de credenciais).
-- Refaço `AuthPage.tsx`:
-  - Quando o utilizador clica "Criar conta" no site, vai directo ao tab **Registar** (já suportado via `?mode=register`, garanto que todos os CTAs usam isso).
-  - Botão "Continuar com Google" em destaque no topo (1 clique).
-  - Formulário email/password mais curto e claro abaixo.
-  - Mantenho aceitação de Termos + escolha turista/guia.
-- Email de verificação fica **activo** (segurança). Adiciono página `/reset-password` para reset de password (em falta hoje) e link "Esqueci-me" no login.
-- Activo **HIBP password check** (`configure_auth` com `password_hibp_enabled: true`) para bloquear passwords vazadas.
+Componentes a internacionalizar (auditoria completa):
+- `DescobreStpSection` (Pico Cão Grande, Praias do Sul, Roças, etc.) — actualmente 100% hard-coded em PT
+- `SobreSaoTomePage` inteira
+- `StatsSection`, `GuidesComingSoon`, `TrustBlock`, `HowItWorks`, `GuideCTA`
+- `Footer` (links, copyright, contactos)
+- `ExperiencesPage`, `GuidesPage`, `SejaParceiroPage`
+- Páginas legais (manter PT como original, mas adicionar chaves para títulos de menu)
+- `AuthPage`, mensagens de erro/sucesso (toasts)
 
-## 4. Cliques mortos / navegação fluída
-- Faço auditoria a todos os `<Link>`, `<a href>` e `onClick` em `src/` para garantir que todos os destinos existem (rotas reais em `App.tsx`).
-- Verifico CTAs do Hero, cards de guias, cards de experiências, navegação footer, links legais.
-- Adiciono `<Suspense>` + lazy loading com fallback rápido às rotas pesadas (`ExperiencesPage`, `GuidesPage`, `ExperienceDetailPage`) para reduzir percepção de lentidão.
-- Faço scroll-to-top em mudança de rota (helper simples no `App.tsx`).
+Acção: extrair todos os textos para `src/i18n/translations.ts` em 6 idiomas, substituir por `t("chave")`.
 
-## 5. Conteúdo autêntico São Tomé e Príncipe
-- **Nova secção na homepage**: bloco "Descobre São Tomé e Príncipe" com 4-6 destaques (Pico Cão Grande, Roça Agostinho Neto, praias do sul, cacau, biodiversidade, gastronomia — calulu, banana frita).
-- **Nova página `/sobre-sao-tome`**: hero + secções (História breve, Geografia & ilhas, Cultura & gastronomia, Natureza & biodiversidade, Quando visitar, Como chegar). Linkada da Navbar e Footer. Adicionada ao `sitemap.xml`.
-- **Enriquecer Experiências**: descrições mais ricas no `mockServices` com contexto local (locais reais, duração, dificuldade, o que esperar).
-- Tudo em PT-PT, sem fluff.
+## 3. Hero dinâmico com praias reais de STP
+Substituir a imagem única do hero por **carrossel fluido** com 3-4 fotos reais de São Tomé e Príncipe:
+- Praia Banana (Ilhéu das Rolas) — vista aérea
+- Praia Bateria (Ilhéu das Rolas) — vista de cima
+- Praia Jalé ou Praia Piscina — águas cristalinas
+- Pico Cão Grande (manter como uma das opções)
 
-## 6. Polish visual (paleta actual mantida)
-- Refino na homepage: espaçamentos consistentes, hover/transição suave (200-250ms ease-out) em cards, botões e links.
-- Cards de guias/experiências: shadow mais subtil, scale 1.02 em hover, badge "Verificado" mais elegante.
-- Anima entrada de secções com fade-up via `framer-motion` (já no projecto via deps? — adiciono se não estiver).
-- Skeleton states em vez de spinners nas listas.
-- Hero: melhor ritmo tipográfico, CTA com micro-interaction.
+Transições suaves (fade 1.2s, ken-burns lento), autoplay 6s, pausa em hover. Pré-load para não piscar. Imagens optimizadas (WebP, ~250kb cada).
 
-## 7. Pagamentos & Segurança (go-live + auditoria)
-- **Go-live Stripe**: chamo `payments--get_go_live_status` e mostro-te os passos exactos que tens de completar no Stripe (claim conta, onboarding, install app na conta live). A activação é tua, eu deixo tudo preparado.
-- Verifico fluxo end-to-end de reserva: data picker → checkout embedded → confirmação → my-bookings. Confirmo webhook funciona.
-- **Auditoria de segurança**: corro `security--run_security_scan` e `supabase--linter`. Corrijo achados (RLS, exposição de dados, etc.).
-- Verifico que o chat (`MessagesPage`, `ConversationPage`, filtro anti-fraude) está operacional.
+**Nota sobre as imagens**: vou pesquisar fotos reais com licença livre (Unsplash/Wikimedia) dessas praias específicas de STP. Se não houver foto licenciada de uma praia específica, uso outra praia real de STP em vez de inventar.
+
+## 4. Secção "Descobre STP" com fotos em vez de ícones
+Trocar os 6 ícones Lucide (Mountain, Waves, etc.) por mini-fotos reais (160x160) de cada local:
+- Pico Cão Grande → foto real
+- Praias do sul → foto de Praia Jalé
+- Roças → foto de Roça Sundy/Agostinho Neto
+- Gastronomia → foto de calulu
+- Biodiversidade → foto de tordo ou floresta Obô
+- Cacau → foto de cacau em grão
+
+Cards com hover-zoom subtil, overlay verde no hover.
+
+## 5. Dicas práticas — taxa turística do governo
+Adicionar à página `/sobre-sao-tome` (e como aviso visível no checkout) uma secção **"Dicas práticas"** com:
+- **Taxa turística**: actualmente €25-30/pessoa, paga directamente ao governo de STP à chegada/saída (não cobrada pela Rotas do Éden)
+- Visto/autorização de entrada
+- Moeda (Dobra), câmbio aproximado
+- Vacinas recomendadas (febre amarela obrigatória)
+- Melhor altura para visitar
+- Tomadas eléctricas, água, telecomunicações
+
+Vou pesquisar o valor exacto e oficial da taxa antes de publicar.
+
+## 6. Página de Destino enriquecida
+Na `SobreSaoTomePage`, adicionar secções:
+- História (descobrimento 1470, plantações, independência 1975)
+- Geografia (vulcânica, 2 ilhas principais, equador)
+- Cultura (crioulo forro, música, danças tchiloli/danço-congo)
+- Gastronomia (calulu, blá-blá, banana frita, izaquente)
+- Natureza (Obô, endemismos)
+
+Tudo já internacionalizado.
+
+## 7. Auditoria de links mortos
+Rever todos os `<Link>` e `<a>` do site:
+- Navbar, Footer, cards, CTAs, breadcrumbs
+- Detectar `href="#"`, `to="#"`, handlers vazios
+- Corrigir ou remover; adicionar estados `disabled` visuais quando a página ainda não existe
+- Resultado: clicar em qualquer coisa leva sempre a algum lado real
+
+## 8. Polish visual e interactividade (sem partir nada)
+- Transições suaves em todos os cards (`transition-all duration-300`)
+- Hover states consistentes (scale 1.02, shadow elegante)
+- Scroll-reveal subtil em secções (intersection observer, fade-in-up)
+- Botões com micro-interacções
+- Manter paleta eden-green / eden-sand
+- Mobile-first: testar navbar, hero, cards em 375px
+
+---
 
 ## Detalhes técnicos
-- Stack: React + Vite + Tailwind + Supabase + Stripe embedded (já em uso).
-- Mudanças de DB: migration para enable Google provider + HIBP (via tools, sem SQL manual).
-- Sem novas dependências pesadas — `framer-motion` se ainda não estiver.
-- Mantenho design tokens (`--primary` eden-green, `--secondary` eden-sand, Playfair + Source Sans).
+- **i18n**: alargar `src/i18n/translations.ts` com ~120 novas chaves × 6 idiomas. Estrutura por namespace (`descobre.*`, `sobre.*`, `footer.*`, `dicas.*`).
+- **Hero carrossel**: componente novo `HeroCarousel.tsx` com `useEffect` + `setInterval`, CSS transitions (não precisa de framer-motion adicional). Imagens em `src/assets/praias/` ou externalizadas via lovable-assets se >200kb.
+- **Imagens**: pesquisa via websearch por fotos com licença CC0/CC-BY de praias específicas; fallback para fotos genéricas de STP licenciadas.
+- **Links mortos**: grep por `to="#"`, `href="#"`, `onClick={() => {}}` em todo o `src/`.
+- **Sem mudanças de backend** — só frontend, presentation, i18n e assets.
 
-## Ordem de execução
-1. Logo + auditoria email/telefone (rápido, alta visibilidade)
-2. Google auth + AuthPage redesenhada + reset password + HIBP
-3. Página Sobre STP + secção homepage + enriquecimento Experiências
-4. Polish visual + lazy routes + scroll-to-top + verificação de links
-5. Security scan + linter + correcções
-6. Go-live status do Stripe (mostro-te os passos)
-7. Republicar
+## O que NÃO faço
+- Não mexo em auth/Stripe/edge functions
+- Não altero schema da BD
+- Não substituo imagens por fotos não-licenciadas ou inventadas
+- Não adiciono pagamento da taxa turística no checkout (é informativa — paga ao governo, não a nós)
+
+Posso avançar?

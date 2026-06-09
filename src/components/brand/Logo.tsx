@@ -11,9 +11,9 @@ interface LogoProps {
 }
 
 const heightMap = {
-  sm: "h-8",
-  md: "h-11",
-  lg: "h-16",
+  sm: "h-10",
+  md: "h-14 md:h-16",
+  lg: "h-20 md:h-24",
 };
 
 export function LogoMark({ className, size = "md" }: { className?: string; size?: "sm" | "md" | "lg" }) {
