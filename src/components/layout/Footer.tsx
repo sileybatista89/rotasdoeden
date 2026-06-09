@@ -11,7 +11,7 @@ export function Footer() {
       <div className="container py-14">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2">
-            <Logo size="md" variant="light" to="/" />
+            <Logo size="lg" variant="light" to="/" />
             <p className="text-primary-foreground/90 text-sm max-w-sm mb-4 mt-4 leading-relaxed">
               {t("footer.tagline")}
             </p>

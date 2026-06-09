@@ -22,7 +22,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-border/60">
-      <div className="container flex items-center justify-between h-16">
+      <div className="container flex items-center justify-between h-20 md:h-24">
         <Logo size="md" />
 
         {/* Desktop nav */}
@@ -34,7 +34,7 @@ export function Navbar() {
             {t("nav.guides")}
           </Link>
           <Link to="/sobre-sao-tome" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            O destino
+            {t("nav.destino")}
           </Link>
           <a href="/#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("nav.how")}
@@ -124,7 +124,7 @@ export function Navbar() {
                 </SheetClose>
                 <SheetClose asChild>
                   <Link to="/sobre-sao-tome" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
-                    O destino
+                    {t("nav.destino")}
                   </Link>
                 </SheetClose>
                 <SheetClose asChild>
