@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Search, ChevronDown, Sparkles, ShieldCheck, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg.jpg";
 import { useT } from "@/i18n/LanguageProvider";
+import { HeroCarousel } from "./HeroCarousel";
 
 export function HeroSection() {
   const navigate = useNavigate();
@@ -18,11 +18,7 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-      <div className="absolute inset-0">
-        <img src={heroBg} alt="Pico Cão Grande, São Tomé e Príncipe" className="w-full h-full object-cover scale-105" width={1920} height={1080} fetchPriority="high" decoding="async" />
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/35 to-foreground/85" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(153_42%_25%_/_0.35),_transparent_55%)]" />
-      </div>
+      <HeroCarousel />
 
       <div className="container relative py-20 md:py-32">
         <div className="max-w-3xl mx-auto text-center">
