@@ -8,6 +8,7 @@ import { TrustBlock } from "@/components/home/TrustBlock";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuideCTA } from "@/components/home/GuideCTA";
 import { DescobreStpSection } from "@/components/home/DescobreStpSection";
+import { UniformeSection } from "@/components/home/UniformeSection";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
         <DescobreStpSection />
         <GuidesComingSoon />
         <TrustBlock />
+        <UniformeSection />
         <HowItWorks />
         <GuideCTA />
       </main>
