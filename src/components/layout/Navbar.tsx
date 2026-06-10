@@ -22,7 +22,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-border/60">
-      <div className="container flex items-center justify-between h-20 md:h-24">
+      <div className="container flex items-center justify-between h-24 md:h-28">
         <Logo size="md" />
 
         {/* Desktop nav */}
