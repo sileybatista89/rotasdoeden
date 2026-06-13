@@ -3,18 +3,12 @@ import praiaBanana from "@/assets/optimized/praia-banana-hero.webp";
 import praiaJale from "@/assets/optimized/praia-jale-hero.webp";
 import praiaPiscina from "@/assets/optimized/praia-piscina-hero.webp";
 import picoCaoGrande from "@/assets/optimized/pico-cao-grande-hero.webp";
-import cascata from "@/assets/optimized/cascata-sao-nicolau-hero.webp";
-import trilho from "@/assets/optimized/trilho-floresta-hero.webp";
-import tartarugas from "@/assets/optimized/tartarugas-hero.webp";
 
 const slides = [
   { src: praiaBanana, alt: "Praia Banana, Ilhéu das Rolas — meia-lua de areia dourada" },
   { src: praiaJale, alt: "Praia Jalé, sul de São Tomé, refúgio de tartarugas" },
   { src: praiaPiscina, alt: "Praia Piscina — piscina natural rodeada de palmeiras" },
   { src: picoCaoGrande, alt: "Pico Cão Grande, agulha vulcânica na floresta tropical" },
-  { src: cascata, alt: "Cascata São Nicolau, queda de água na floresta do Obô" },
-  { src: trilho, alt: "Trilho na floresta do Obô entre árvores centenárias" },
-  { src: tartarugas, alt: "Tartarugas recém-nascidas a caminho do oceano" },
 ];
 
 interface Props {
@@ -33,7 +27,7 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
   return (
     <div className={`absolute inset-0 overflow-hidden ${className}`} aria-hidden="true">
       {slides.map((s, i) => {
-        const shouldRender = i === index || i === (index + 1) % slides.length || (index > 0 && i === index - 1);
+        const shouldRender = i === index || i === (index + 1) % slides.length;
         if (!shouldRender) return null;
 
         return (
