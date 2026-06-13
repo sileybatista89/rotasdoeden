@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import logoImg from "@/assets/logo-rotas-eden.png";
+import logoImg from "@/assets/optimized/logo-rotas-eden.webp";
 
 interface LogoProps {
   className?: string;
