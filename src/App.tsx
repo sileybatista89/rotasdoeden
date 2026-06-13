@@ -33,6 +33,7 @@ import ExperiencesPage from "./pages/ExperiencesPage.tsx";
 import ExperienceDetailPage from "./pages/ExperienceDetailPage.tsx";
 import MyBookingsPage from "./pages/MyBookingsPage.tsx";
 import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
+import ParceirosPage from "./pages/ParceirosPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
+            <Route path="/parceiros" element={<ParceirosPage />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
             } />
