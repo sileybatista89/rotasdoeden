@@ -33,8 +33,8 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
   return (
     <div className={`absolute inset-0 overflow-hidden ${className}`} aria-hidden="true">
       {slides.map((s, i) => {
-        const distance = Math.min(Math.abs(i - index), slides.length - Math.abs(i - index));
-        if (distance > 1) return null;
+        const shouldRender = i === index || i === (index + 1) % slides.length || (index > 0 && i === index - 1);
+        if (!shouldRender) return null;
 
         return (
           <img
