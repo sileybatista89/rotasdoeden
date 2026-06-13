@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/praias/lagoa-azul.jpg";
+import heroImg from "@/assets/optimized/praia-jale-hero.webp";
 
 const categories = [
   {
