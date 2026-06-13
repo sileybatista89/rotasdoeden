@@ -5,7 +5,7 @@ import praiaPiscina from "@/assets/optimized/praia-piscina-hero.webp";
 import picoCaoGrande from "@/assets/optimized/pico-cao-grande-hero.webp";
 
 const slides = [
-  { src: praiaBanana, alt: "Praia Banana, Ilhéu das Rolas — meia-lua de areia dourada" },
+  { src: praiaBanana, alt: "Praia Banana, Príncipe — meia-lua de areia dourada" },
   { src: praiaJale, alt: "Praia Jalé, sul de São Tomé, refúgio de tartarugas" },
   { src: praiaPiscina, alt: "Praia Piscina — piscina natural rodeada de palmeiras" },
   { src: picoCaoGrande, alt: "Pico Cão Grande, agulha vulcânica na floresta tropical" },
