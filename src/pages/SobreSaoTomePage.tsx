@@ -132,6 +132,40 @@ export default function SobreSaoTomePage() {
             </div>
           </aside>
         </div>
+
+        {/* Parceiros — secção discreta */}
+        <section className="mt-20 md:mt-24 border-t border-border pt-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div className="max-w-xl">
+              <span className="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                Rede Rotas do Éden
+              </span>
+              <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                Onde ficar, onde comer, com quem explorar
+              </h2>
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                Estamos a selecionar hotéis, restaurantes e operadores locais para acompanhar os nossos guias verificados.
+              </p>
+            </div>
+            <Link
+              to="/parceiros"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline shrink-0"
+            >
+              Ver rede de parceiros →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {["Hotéis", "Operadores", "Restaurantes", "Empresas locais"].map((label) => (
+              <div
+                key={label}
+                className="border border-dashed border-border rounded-xl px-4 py-6 text-center text-sm text-muted-foreground bg-card/40"
+              >
+                {label}
+                <span className="block text-[10px] uppercase tracking-wider mt-1 text-primary/70">em curadoria</span>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <Footer />

@@ -2,13 +2,27 @@ import { useEffect, useState } from "react";
 import praiaBanana from "@/assets/praias/praia-banana.jpg";
 import praiaJale from "@/assets/praias/praia-jale.jpg";
 import praiaPiscina from "@/assets/praias/praia-piscina.jpg";
+import praiaInhame from "@/assets/praias/praia-inhame.jpg";
+import ilheuRolas from "@/assets/praias/ilheu-rolas.jpg";
+import lagoaAzul from "@/assets/praias/lagoa-azul.jpg";
 import picoCaoGrande from "@/assets/praias/pico-cao-grande.jpg";
+import cascata from "@/assets/stp/cascata-sao-nicolau.jpg";
+import trilho from "@/assets/stp/trilho-floresta.jpg";
+import barco from "@/assets/stp/passeio-barco.jpg";
+import tartarugas from "@/assets/stp/tartarugas.jpg";
 
 const slides = [
-  { src: praiaBanana, alt: "Praia tropical em forma de meia-lua, São Tomé e Príncipe" },
-  { src: praiaJale, alt: "Praia selvagem com rochas vulcânicas, sul de São Tomé" },
-  { src: praiaPiscina, alt: "Lagoa natural circular rodeada de palmeiras" },
-  { src: picoCaoGrande, alt: "Pico Cão Grande, agulha vulcânica na floresta de São Tomé" },
+  { src: praiaBanana, alt: "Praia Banana, Ilhéu das Rolas — meia-lua de areia dourada" },
+  { src: ilheuRolas, alt: "Ilhéu das Rolas visto de cima, marco do Equador" },
+  { src: praiaJale, alt: "Praia Jalé, sul de São Tomé, refúgio de tartarugas" },
+  { src: praiaInhame, alt: "Praia Inhame ao entardecer, palmeirais e barcos tradicionais" },
+  { src: lagoaAzul, alt: "Lagoa Azul, baobás e águas turquesa no norte de São Tomé" },
+  { src: praiaPiscina, alt: "Praia Piscina — piscina natural rodeada de palmeiras" },
+  { src: picoCaoGrande, alt: "Pico Cão Grande, agulha vulcânica na floresta tropical" },
+  { src: cascata, alt: "Cascata São Nicolau, queda de água na floresta do Obô" },
+  { src: trilho, alt: "Trilho na floresta do Obô entre árvores centenárias" },
+  { src: barco, alt: "Passeio de barco ao pôr do sol com Pico Cão Grande ao fundo" },
+  { src: tartarugas, alt: "Tartarugas recém-nascidas a caminho do oceano" },
 ];
 
 interface Props {
