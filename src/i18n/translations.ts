@@ -30,7 +30,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "Menu",
     "nav.language": "Idioma",
 
-    "hero.badge": "52 000+ visitantes em 2025",
+    "hero.badge": "Mais de 42 000 visitantes em 2025",
     "hero.title.1": "Descobre São Tomé",
     "hero.title.2": "com quem a conhece",
     "hero.title.3": "de verdade.",
@@ -42,7 +42,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "Gastronomia",
     "hero.tag.history": "História",
 
-    "stats.visitors.value": "52 000+",
+    "stats.visitors.value": "42 000+",
     "stats.visitors.label": "Visitantes em 2025",
     "stats.visitors.sub": "Novo recorde histórico",
     "stats.pt.value": "54%",
@@ -184,7 +184,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "Menu",
     "nav.language": "Language",
 
-    "hero.badge": "52,000+ visitors in 2025",
+    "hero.badge": "Over 42,000 visitors in 2025",
     "hero.title.1": "Discover São Tomé",
     "hero.title.2": "with people who truly",
     "hero.title.3": "know it.",
@@ -196,7 +196,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "Food",
     "hero.tag.history": "History",
 
-    "stats.visitors.value": "52,000+",
+    "stats.visitors.value": "42,000+",
     "stats.visitors.label": "Visitors in 2025",
     "stats.visitors.sub": "All-time record",
     "stats.pt.value": "54%",
@@ -338,7 +338,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "Menu",
     "nav.language": "Langue",
 
-    "hero.badge": "52 000+ visiteurs en 2025",
+    "hero.badge": "Plus de 42 000 visiteurs en 2025",
     "hero.title.1": "Découvrez São Tomé",
     "hero.title.2": "avec ceux qui la connaissent",
     "hero.title.3": "vraiment.",
@@ -350,7 +350,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "Gastronomie",
     "hero.tag.history": "Histoire",
 
-    "stats.visitors.value": "52 000+",
+    "stats.visitors.value": "42 000+",
     "stats.visitors.label": "Visiteurs en 2025",
     "stats.visitors.sub": "Nouveau record historique",
     "stats.pt.value": "54%",
@@ -481,7 +481,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "Menü",
     "nav.language": "Sprache",
 
-    "hero.badge": "52.000+ Besucher in 2025",
+    "hero.badge": "Über 42.000 Besucher in 2025",
     "hero.title.1": "Entdecke São Tomé",
     "hero.title.2": "mit denen, die es",
     "hero.title.3": "wirklich kennen.",
@@ -493,7 +493,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "Gastronomie",
     "hero.tag.history": "Geschichte",
 
-    "stats.visitors.value": "52.000+",
+    "stats.visitors.value": "42.000+",
     "stats.visitors.label": "Besucher 2025",
     "stats.visitors.sub": "Neuer historischer Rekord",
     "stats.pt.value": "54%",
@@ -624,7 +624,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "菜单",
     "nav.language": "语言",
 
-    "hero.badge": "2025 年游客超过 52,000 人",
+    "hero.badge": "2025 年游客超过 42,000 人",
     "hero.title.1": "探索圣多美",
     "hero.title.2": "与真正了解她的",
     "hero.title.3": "本地向导。",
@@ -636,7 +636,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "美食",
     "hero.tag.history": "历史",
 
-    "stats.visitors.value": "52,000+",
+    "stats.visitors.value": "42,000+",
     "stats.visitors.label": "2025 年游客数",
     "stats.visitors.sub": "历史新高",
     "stats.pt.value": "54%",
@@ -767,7 +767,7 @@ export const translations: Record<LangCode, Dict> = {
     "nav.menu": "메뉴",
     "nav.language": "언어",
 
-    "hero.badge": "2025년 방문객 52,000명 이상",
+    "hero.badge": "2025년 방문객 42,000명 이상",
     "hero.title.1": "상투메를 만나보세요",
     "hero.title.2": "진정으로 이곳을 아는",
     "hero.title.3": "사람과 함께.",
@@ -779,7 +779,7 @@ export const translations: Record<LangCode, Dict> = {
     "hero.tag.food": "음식",
     "hero.tag.history": "역사",
 
-    "stats.visitors.value": "52,000+",
+    "stats.visitors.value": "42,000+",
     "stats.visitors.label": "2025년 방문객",
     "stats.visitors.sub": "역대 최고 기록",
     "stats.pt.value": "54%",
