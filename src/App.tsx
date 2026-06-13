@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,7 +14,6 @@ import Index from "./pages/Index.tsx";
 import GuidesPage from "./pages/GuidesPage.tsx";
 import GuideProfilePage from "./pages/GuideProfilePage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
-import AdminPage from "./pages/AdminPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import KycPage from "./pages/KycPage.tsx";
 import MessagesPage from "./pages/MessagesPage.tsx";
@@ -38,6 +38,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
+const AdminPage = lazy(() => import("./pages/AdminPage.tsx"));
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -49,6 +50,7 @@ const App = () => (
         <AuthProvider>
           <PaymentTestModeBanner />
           <ScrollToTop />
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/guides" element={<GuidesPage />} />
@@ -99,6 +101,7 @@ const App = () => (
             <Route path="/legal/parcerias" element={<ParceriasPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           <CookieConsent />
         </AuthProvider>
         </LanguageProvider>

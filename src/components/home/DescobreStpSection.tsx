@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useT } from "@/i18n/LanguageProvider";
-import picoImg from "@/assets/praias/pico-cao-grande.jpg";
-import praiaImg from "@/assets/praias/praia-jale.jpg";
-import rocaImg from "@/assets/stp/roca.jpg";
-import calulu from "@/assets/stp/calulu.jpg";
-import bio from "@/assets/stp/biodiversidade.jpg";
-import cacau from "@/assets/stp/cacau.jpg";
+import picoImg from "@/assets/optimized/pico-cao-grande-card.webp";
+import praiaImg from "@/assets/optimized/praia-jale-card.webp";
+import rocaImg from "@/assets/optimized/roca-card.webp";
+import calulu from "@/assets/optimized/calulu-card.webp";
+import bio from "@/assets/optimized/biodiversidade-card.webp";
+import cacau from "@/assets/optimized/cacau-card.webp";
 
 export function DescobreStpSection() {
   const { t } = useT();
