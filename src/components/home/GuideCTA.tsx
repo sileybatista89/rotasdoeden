@@ -25,7 +25,7 @@ export function GuideCTA() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-full px-8 bg-transparent text-primary-foreground border-primary-foreground/40 hover:bg-primary-foreground/10 hover:text-primary-foreground">
-            <Link to="/seja-parceiro">{t("guideCta.secondary")}</Link>
+            <Link to="/guia-parceiro">{t("guideCta.secondary")}</Link>
           </Button>
         </div>
       </div>

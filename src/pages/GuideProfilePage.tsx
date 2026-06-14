@@ -27,7 +27,7 @@ export default function GuideProfilePage() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/seja-parceiro">Tornar-me guia parceiro</Link>
+              <Link to="/guia-parceiro">Tornar-me guia parceiro</Link>
             </Button>
           </div>
         </div>

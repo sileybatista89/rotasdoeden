@@ -9,6 +9,7 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuideCTA } from "@/components/home/GuideCTA";
 import { DescobreStpSection } from "@/components/home/DescobreStpSection";
 import { UniformeSection } from "@/components/home/UniformeSection";
+import { ParceirosCarousel } from "@/components/home/ParceirosCarousel";
 
 const Index = () => {
   return (
@@ -27,6 +28,7 @@ const Index = () => {
         <TrustBlock />
         <UniformeSection />
         <HowItWorks />
+        <ParceirosCarousel />
         <GuideCTA />
       </main>
       <Footer />

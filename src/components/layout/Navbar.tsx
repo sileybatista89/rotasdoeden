@@ -36,6 +36,9 @@ export function Navbar() {
           <Link to="/sobre-sao-tome" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("nav.destino")}
           </Link>
+          <Link to="/parceiros" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Parceiros
+          </Link>
           <a href="/#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("nav.how")}
           </a>
