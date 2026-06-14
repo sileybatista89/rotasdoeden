@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import praiaBanana from "@/assets/optimized/praia-banana-hero.webp";
-import praiaJale from "@/assets/optimized/praia-jale-hero.webp";
-import praiaPiscina from "@/assets/optimized/praia-piscina-hero.webp";
-import picoCaoGrande from "@/assets/optimized/pico-cao-grande-hero.webp";
+import principeBeach from "@/assets/real/principe-beach.jpg.asset.json";
+import praiaBanana from "@/assets/real/praia-banana.webp.asset.json";
+import lagoaAzul from "@/assets/real/lagoa-azul.webp.asset.json";
+import ilheuRolas from "@/assets/real/ilheu-rolas.jpg.asset.json";
+import praiaEscondida from "@/assets/real/praia-escondida.jpg.asset.json";
+import ilhasTinhosas from "@/assets/real/ilhas-tinhosas.jpg.asset.json";
+import santana from "@/assets/real/santana.jpg.asset.json";
 
 const slides = [
-  { src: praiaBanana, alt: "Praia Banana, Príncipe — meia-lua de areia dourada" },
-  { src: praiaJale, alt: "Praia Jalé, sul de São Tomé, refúgio de tartarugas" },
-  { src: praiaPiscina, alt: "Praia Piscina — piscina natural rodeada de palmeiras" },
-  { src: picoCaoGrande, alt: "Pico Cão Grande, agulha vulcânica na floresta tropical" },
+  { src: principeBeach.url, alt: "Praia paradisíaca em Príncipe vista aérea" },
+  { src: praiaBanana.url, alt: "Praia Banana, Príncipe — meia-lua de areia dourada" },
+  { src: lagoaAzul.url, alt: "Lagoa Azul, norte de São Tomé" },
+  { src: ilheuRolas.url, alt: "Praia do Ilhéu das Rolas — equador de São Tomé" },
+  { src: praiaEscondida.url, alt: "Praia escondida no Príncipe" },
+  { src: ilhasTinhosas.url, alt: "Ilhéu vulcânico de São Tomé e Príncipe" },
+  { src: santana.url, alt: "Baía de Santana, costa leste de São Tomé" },
 ];
 
 interface Props {
@@ -35,8 +41,6 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
             key={s.src}
             src={s.src}
             alt={s.alt}
-            width={1280}
-            height={720}
             decoding="async"
             loading={i === 0 ? "eager" : "lazy"}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
