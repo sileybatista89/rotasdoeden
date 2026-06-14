@@ -1,20 +1,20 @@
 import { Link } from "react-router-dom";
 import { useT } from "@/i18n/LanguageProvider";
-import picoImg from "@/assets/optimized/pico-cao-grande-card.webp";
-import praiaImg from "@/assets/optimized/praia-jale-card.webp";
-import rocaImg from "@/assets/optimized/roca-card.webp";
+import picoImg from "@/assets/real/ilhas-tinhosas.jpg.asset.json";
+import praiaImg from "@/assets/real/praia-banana.webp.asset.json";
+import rocaImg from "@/assets/real/santana.jpg.asset.json";
 import calulu from "@/assets/optimized/calulu-card.webp";
-import bio from "@/assets/optimized/biodiversidade-card.webp";
+import bio from "@/assets/real/estrada-norte.webp.asset.json";
 import cacau from "@/assets/optimized/cacau-card.webp";
 
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { img: picoImg, key: "pico" },
-    { img: praiaImg, key: "praias" },
-    { img: rocaImg, key: "rocas" },
+    { img: typeof picoImg === "string" ? picoImg : picoImg.url, key: "pico" },
+    { img: typeof praiaImg === "string" ? praiaImg : praiaImg.url, key: "praias" },
+    { img: typeof rocaImg === "string" ? rocaImg : rocaImg.url, key: "rocas" },
     { img: calulu, key: "sabores" },
-    { img: bio, key: "bio" },
+    { img: typeof bio === "string" ? bio : bio.url, key: "bio" },
     { img: cacau, key: "cacau" },
   ];
 

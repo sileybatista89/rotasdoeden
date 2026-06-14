@@ -144,7 +144,7 @@ export default function SobreSaoTomePage() {
                 Onde ficar, onde comer, com quem explorar
               </h2>
               <p className="text-muted-foreground mt-2 leading-relaxed">
-                Estamos a selecionar hotéis, restaurantes e operadores locais para acompanhar os nossos guias verificados.
+                Hotéis, restaurantes e operadores locais que compõem o ecossistema turístico recomendado pela Rotas do Éden.
               </p>
             </div>
             <Link
@@ -161,7 +161,7 @@ export default function SobreSaoTomePage() {
                 className="border border-dashed border-border rounded-xl px-4 py-6 text-center text-sm text-muted-foreground bg-card/40"
               >
                 {label}
-                <span className="block text-[10px] uppercase tracking-wider mt-1 text-primary/70">em curadoria</span>
+                <span className="block text-[10px] uppercase tracking-wider mt-1 text-primary/70">rede parceira</span>
               </div>
             ))}
           </div>

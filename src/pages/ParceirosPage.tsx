@@ -4,28 +4,28 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/optimized/praia-jale-hero.webp";
+import heroImg from "@/assets/real/principe-beach.jpg.asset.json";
 
 const categories = [
   {
     icon: Hotel,
     title: "Hotéis & Alojamento",
-    text: "Roças históricas, pousadas familiares e resorts à beira-mar. Estamos a selecionar parceiros que partilham o nosso padrão de qualidade e autenticidade.",
+    text: "Roças históricas, pousadas familiares e resorts à beira-mar — alojamentos que partilham o nosso padrão de qualidade e autenticidade santomense.",
   },
   {
     icon: Compass,
     title: "Operadores turísticos",
-    text: "Mergulho, observação de baleias, passeios de barco, expedições ao Pico e safaris fotográficos com operadores licenciados.",
+    text: "Mergulho, observação de baleias, passeios de barco, expedições ao Pico Cão Grande e safaris fotográficos com operadores licenciados.",
   },
   {
     icon: UtensilsCrossed,
     title: "Restaurantes & Sabores",
-    text: "Mesas locais, cacau, bananeiras e marisco fresco. Vamos destacar restaurantes que celebram a cozinha santomense.",
+    text: "Mesas locais, calulu, izaquente e marisco fresco — restaurantes que celebram a verdadeira cozinha santomense.",
   },
   {
     icon: Building2,
     title: "Empresas locais",
-    text: "Transportes, rent-a-car, artesanato, festivais e produtores de cacau. Espaço reservado para empresas santomenses certificadas.",
+    text: "Transportes, rent-a-car, artesanato, festivais e produtores de cacau — o ecossistema turístico que torna cada viagem possível.",
   },
 ];
 
@@ -41,19 +41,19 @@ export default function ParceirosPage() {
 
       <header className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
-          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
+          <img src={heroImg.url} alt="" className="w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-br from-foreground/85 via-foreground/55 to-foreground/35" />
         </div>
         <div className="container relative py-16 md:py-24">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
-            <Sparkles size={12} /> Rede em construção
+            <Sparkles size={12} /> Rede Rotas do Éden
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-primary-foreground max-w-3xl leading-tight drop-shadow-lg">
-            Os parceiros que tornam cada viagem possível
+            O ecossistema turístico de São Tomé e Príncipe
           </h1>
           <p className="text-primary-foreground/90 text-base md:text-lg max-w-2xl mt-5 leading-relaxed drop-shadow">
-            A Rotas do Éden está a construir uma rede curada de hotéis, operadores, restaurantes e empresas locais.
-            Selecionamos com o mesmo critério com que verificamos os nossos guias.
+            Hotéis, operadores, restaurantes e empresas locais que compõem a rede de parceiros
+            recomendados pela Rotas do Éden — experiências complementares para uma viagem completa.
           </p>
         </div>
       </header>
@@ -75,7 +75,7 @@ export default function ParceirosPage() {
                     <h2 className="font-display text-xl font-semibold text-foreground mb-2">{c.title}</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed">{c.text}</p>
                     <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wider text-primary font-semibold mt-4">
-                      Em curadoria
+                      Rede recomendada
                     </span>
                   </div>
                 </div>
