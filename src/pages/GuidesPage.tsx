@@ -141,7 +141,7 @@ export default function GuidesPage() {
               Junta-te à primeira geração de guias verificados da Rotas do Éden.
             </p>
             <Button asChild variant="sand" size="lg" className="rounded-full px-8">
-              <Link to="/seja-parceiro">
+              <Link to="/guia-parceiro">
                 Tornar-me Guia Parceiro <ArrowRight size={18} />
               </Link>
             </Button>
