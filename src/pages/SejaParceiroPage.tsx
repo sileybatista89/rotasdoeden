@@ -1,204 +1,209 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, FileCheck, IdCard, Camera, ShieldCheck, Wallet, MessageSquare, Users, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Building2, Hotel, UtensilsCrossed, Car, Compass, Briefcase, Mail, Sparkles, CheckCircle2 } from "lucide-react";
+import { z } from "zod";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 
-const requirements = [
-  { icon: IdCard, title: "Documento de identificação", text: "Bilhete de identidade ou passaporte válido emitido por autoridade reconhecida." },
-  { icon: FileCheck, title: "Licença DGTH ou equivalente", text: "Comprovativo de licença de guia turístico emitida pela autoridade competente em São Tomé e Príncipe." },
-  { icon: Camera, title: "Foto profissional", text: "Imagem real e actual, em boa qualidade, para o teu perfil público." },
+const PARTNER_EMAIL = "parceiros@rotasdoeden.com";
+
+const categories = [
+  { value: "hotel", label: "Hotel & Alojamento", Icon: Hotel },
+  { value: "restaurante", label: "Restaurante", Icon: UtensilsCrossed },
+  { value: "rent-a-car", label: "Rent-a-car", Icon: Car },
+  { value: "operador", label: "Operador turístico", Icon: Compass },
+  { value: "empresa-local", label: "Empresa local", Icon: Building2 },
+  { value: "parceiro-comercial", label: "Parceiro comercial", Icon: Briefcase },
 ];
 
-const benefits = [
-  { icon: Users, title: "Visibilidade nacional e internacional", text: "Aparece a turistas verificados que procuram experiências autênticas em São Tomé e Príncipe." },
-  { icon: Wallet, title: "Pagamentos protegidos", text: "Recebes o valor após o serviço prestado. Sem intermediários informais nem risco de não pagamento." },
-  { icon: ShieldCheck, title: "Suporte dedicado", text: "Equipa disponível para resolver disputas, ajudar com KYC e apoiar na construção do teu perfil." },
-  { icon: MessageSquare, title: "Comunicação segura", text: "Chat moderado dentro da plataforma — proteges-te a ti e ao turista contra fraudes." },
-];
+const schema = z.object({
+  company: z.string().trim().min(2, "Indique o nome da empresa").max(120),
+  responsible: z.string().trim().min(2, "Indique o nome do responsável").max(120),
+  category: z.string().min(1, "Escolha uma categoria"),
+  phone: z.string().trim().min(6, "Telefone inválido").max(40),
+  email: z.string().trim().email("Email inválido").max(200),
+  website: z.string().trim().max(200).optional().or(z.literal("")),
+  description: z.string().trim().min(10, "Descreva a sua atividade").max(1000),
+  message: z.string().trim().max(1500).optional().or(z.literal("")),
+});
 
-const steps = [
-  { n: "01", title: "Regista-te", text: "Cria a tua conta de guia em menos de 2 minutos." },
-  { n: "02", title: "Submete o KYC", text: "Envia documento de identificação, licença e selfie de verificação." },
-  { n: "03", title: "Entrevista breve", text: "Conversamos contigo para validar experiência e expectativas." },
-  { n: "04", title: "Activação", text: "O teu perfil fica visível e podes começar a receber reservas." },
-];
+type FormState = z.infer<typeof schema>;
 
-const faqs = [
-  {
-    q: "Quanto custa entrar na plataforma?",
-    a: "O registo e a candidatura são gratuitos. A Rotas do Éden cobra uma comissão apenas sobre reservas concluídas — o valor exacto é comunicado por escrito antes da activação do perfil.",
-  },
-  {
-    q: "Quanto tempo demora o processo?",
-    a: "Depois de submeteres todos os documentos, a verificação demora normalmente entre 3 e 7 dias úteis.",
-  },
-  {
-    q: "Posso continuar a trabalhar com agências?",
-    a: "Sim. Não pedimos exclusividade. Apenas exigimos que as reservas feitas através da plataforma sejam geridas dentro da plataforma.",
-  },
-  {
-    q: "O que acontece se houver uma reclamação?",
-    a: "Temos um processo de disputas transparente, descrito na nossa Política de Disputas. Ouvimos sempre as duas partes antes de qualquer decisão.",
-  },
-];
+const initialForm: FormState = {
+  company: "", responsible: "", category: "", phone: "",
+  email: "", website: "", description: "", message: "",
+};
 
 export default function SejaParceiroPage() {
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const [sent, setSent] = useState(false);
+
+  const update = (k: keyof FormState, v: string) => {
+    setForm((p) => ({ ...p, [k]: v }));
+    if (errors[k]) setErrors((p) => ({ ...p, [k]: undefined }));
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = schema.safeParse(form);
+    if (!parsed.success) {
+      const fieldErrors: Partial<Record<keyof FormState, string>> = {};
+      parsed.error.errors.forEach((err) => {
+        const key = err.path[0] as keyof FormState;
+        fieldErrors[key] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+    const cat = categories.find((c) => c.value === form.category)?.label ?? form.category;
+    const subject = `Nova candidatura de parceiro — ${form.company}`;
+    const body =
+      `Empresa: ${form.company}\n` +
+      `Responsável: ${form.responsible}\n` +
+      `Categoria: ${cat}\n` +
+      `Telefone: ${form.phone}\n` +
+      `Email: ${form.email}\n` +
+      `Website: ${form.website || "—"}\n\n` +
+      `Atividade:\n${form.description}\n\n` +
+      `Mensagem:\n${form.message || "—"}\n`;
+    window.location.href = `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setSent(true);
+    toast({ title: "Candidatura preparada", description: "Abrimos o seu email para enviar a candidatura à equipa Rotas do Éden." });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Seja Parceiro — Guia turístico em São Tomé e Príncipe | Rotas do Éden"
-        description="Junte-se à Rotas do Éden como guia parceiro. Receba reservas verificadas, pagamentos protegidos e suporte dedicado em São Tomé e Príncipe."
+        title="Tornar-me parceiro | Rotas do Éden"
+        description="Candidatura de parceiros Rotas do Éden — hotéis, restaurantes, rent-a-car, operadores turísticos e empresas locais de São Tomé e Príncipe."
         path="/seja-parceiro"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: faqs.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }}
       />
       <Navbar />
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-24">
-          <div className="container max-w-4xl text-center">
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full mb-5">
-              <Sparkles size={12} /> Programa de Guias Parceiros
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-5">
-              Sê um dos primeiros guias verificados da Rotas do Éden
-            </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Procuramos guias profissionais de São Tomé e Príncipe que queiram trabalhar
-              com turistas internacionais numa plataforma transparente, segura e construída
-              com critério.
-            </p>
-            <Button asChild variant="hero" size="lg" className="rounded-full px-8">
-              <Link to="/auth?mode=register&role=guide&next=/kyc">
-                Candidatar-me agora <ArrowRight size={18} />
-              </Link>
-            </Button>
-          </div>
-        </section>
 
-        {/* Benefits */}
-        <section className="py-16 md:py-20">
-          <div className="container">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Porquê juntares-te à Rotas do Éden</h2>
-              <p className="text-muted-foreground">Construímos a plataforma a pensar em ti — não apenas no turista.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {benefits.map((b) => (
-                <div key={b.title} className="bg-card border border-border rounded-2xl p-6 flex gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <b.icon size={20} className="text-primary" />
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-eden-green-dark text-primary-foreground">
+        <div className="absolute inset-0">
+          <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-secondary/20 blur-3xl" />
+          <div className="absolute bottom-10 left-10 w-56 h-56 rounded-full bg-primary-foreground/10 blur-3xl" />
+        </div>
+        <div className="container relative py-14 md:py-20 max-w-4xl">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
+            <Sparkles size={12} /> Rede de Parceiros
+          </span>
+          <h1 className="font-display text-3xl md:text-5xl font-bold leading-tight mb-4 drop-shadow">
+            Faça parte da rede Rotas do Éden
+          </h1>
+          <p className="text-primary-foreground/90 text-base md:text-lg max-w-2xl leading-relaxed">
+            Para hotéis, restaurantes, rent-a-car, operadores turísticos e empresas locais
+            de São Tomé e Príncipe que partilham o nosso padrão de qualidade e autenticidade.
+          </p>
+          <p className="mt-4 text-sm text-primary-foreground/70">
+            É um guia turístico? <a href="/guia-parceiro" className="underline font-medium hover:text-secondary">Candidate-se aqui →</a>
+          </p>
+        </div>
+      </header>
+
+      <main className="container py-12 md:py-16 flex-1 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <aside className="lg:col-span-2 space-y-4">
+            <h2 className="font-display text-xl font-semibold">Categorias de parceiros</h2>
+            <ul className="space-y-2">
+              {categories.map(({ value, label, Icon }) => (
+                <li key={value} className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-primary/10 ring-1 ring-primary/15 flex items-center justify-center">
+                    <Icon size={18} className="text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-display font-semibold text-foreground mb-1">{b.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{b.text}</p>
-                  </div>
-                </div>
+                  <span className="text-sm font-medium">{label}</span>
+                </li>
               ))}
+            </ul>
+            <div className="bg-accent/50 border border-border rounded-xl p-4 text-sm text-muted-foreground flex gap-3">
+              <Mail size={18} className="text-primary shrink-0 mt-0.5" />
+              <p>As candidaturas são analisadas pela equipa em <a href={`mailto:${PARTNER_EMAIL}`} className="text-primary font-medium hover:underline">{PARTNER_EMAIL}</a>.</p>
             </div>
-          </div>
-        </section>
+          </aside>
 
-        {/* Requirements */}
-        <section className="py-16 bg-muted/30 border-y border-border">
-          <div className="container">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-3">O que precisas para te candidatares</h2>
-              <p className="text-muted-foreground">Trabalhamos só com profissionais reais. Estes são os requisitos mínimos.</p>
+          <form onSubmit={onSubmit} className="lg:col-span-3 bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
+            <div>
+              <h2 className="font-display text-2xl font-bold">Candidatura de parceiro</h2>
+              <p className="text-sm text-muted-foreground mt-1">Os campos marcados com * são obrigatórios.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {requirements.map((r) => (
-                <div key={r.title} className="bg-card border border-border rounded-2xl p-6 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <r.icon size={22} className="text-primary" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground mb-2">{r.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{r.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Process */}
-        <section id="processo" className="py-16 md:py-20">
-          <div className="container">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Processo de candidatura</h2>
-              <p className="text-muted-foreground">4 passos simples, sem burocracia desnecessária.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="company">Nome da empresa *</Label>
+                <Input id="company" value={form.company} onChange={(e) => update("company", e.target.value)} maxLength={120} />
+                {errors.company && <p className="text-xs text-destructive mt-1">{errors.company}</p>}
+              </div>
+              <div>
+                <Label htmlFor="responsible">Nome do responsável *</Label>
+                <Input id="responsible" value={form.responsible} onChange={(e) => update("responsible", e.target.value)} maxLength={120} />
+                {errors.responsible && <p className="text-xs text-destructive mt-1">{errors.responsible}</p>}
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
-              {steps.map((s) => (
-                <div key={s.n} className="bg-card border border-border rounded-2xl p-6">
-                  <span className="font-display text-3xl font-bold text-primary/40">{s.n}</span>
-                  <h3 className="font-display font-semibold text-foreground mt-2 mb-1">{s.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Commissions */}
-        <section className="py-16 bg-muted/30 border-y border-border">
-          <div className="container max-w-3xl text-center">
-            <h2 className="font-display text-3xl font-bold text-foreground mb-4">Comissões transparentes</h2>
-            <p className="text-muted-foreground leading-relaxed mb-3">
-              Não cobramos qualquer mensalidade nem taxa de adesão. A plataforma sustenta-se
-              de uma comissão fixa sobre cada reserva concluída, comunicada por escrito antes
-              da activação do teu perfil.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Acreditamos em condições justas e adaptadas à realidade do turismo em
-              São Tomé e Príncipe. Sem letras pequenas, sem cobranças surpresa.
-            </p>
-            <Button asChild variant="link" className="mt-4">
-              <Link to="/legal/parcerias#comissoes">Ler a Política de Comissões →</Link>
+            <div>
+              <Label htmlFor="category">Categoria *</Label>
+              <Select value={form.category} onValueChange={(v) => update("category", v)}>
+                <SelectTrigger id="category"><SelectValue placeholder="Escolha uma categoria" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Telefone *</Label>
+                <Input id="phone" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} maxLength={40} />
+                {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
+              </div>
+              <div>
+                <Label htmlFor="email">Email *</Label>
+                <Input id="email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} maxLength={200} />
+                {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="website">Website (opcional)</Label>
+              <Input id="website" type="url" placeholder="https://..." value={form.website ?? ""} onChange={(e) => update("website", e.target.value)} maxLength={200} />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Descrição da atividade *</Label>
+              <Textarea id="description" rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} maxLength={1000} />
+              {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
+            </div>
+
+            <div>
+              <Label htmlFor="message">Mensagem para a equipa</Label>
+              <Textarea id="message" rows={3} value={form.message ?? ""} onChange={(e) => update("message", e.target.value)} maxLength={1500} />
+            </div>
+
+            <Button type="submit" variant="hero" size="lg" className="w-full rounded-full">
+              Enviar candidatura
             </Button>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="py-16 md:py-20">
-          <div className="container max-w-3xl">
-            <h2 className="font-display text-3xl font-bold text-foreground text-center mb-10">Perguntas frequentes</h2>
-            <div className="space-y-4">
-              {faqs.map((f) => (
-                <div key={f.q} className="bg-card border border-border rounded-2xl p-5">
-                  <h3 className="font-display font-semibold text-foreground mb-1.5">{f.q}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{f.a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-20 bg-primary relative overflow-hidden">
-          <div className="container relative text-center">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              Pronto para começar?
-            </h2>
-            <p className="text-primary-foreground/80 max-w-lg mx-auto mb-8 text-lg">
-              Junta-te à primeira geração de guias verificados da Rotas do Éden.
-            </p>
-            <Button asChild variant="sand" size="lg" className="rounded-full px-8">
-              <Link to="/auth?mode=register&role=guide&next=/kyc">
-                Tornar-me Guia Parceiro <ArrowRight size={18} />
-              </Link>
-            </Button>
-          </div>
-        </section>
+            {sent && (
+              <p className="text-sm text-primary flex items-center gap-2">
+                <CheckCircle2 size={16} /> Candidatura preparada — finalize o envio no seu email.
+              </p>
+            )}
+          </form>
+        </div>
       </main>
+
       <Footer />
     </div>
   );
