@@ -41,19 +41,19 @@ export default function ParceirosPage() {
 
       <header className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
-          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
+          <img src={heroImg.url} alt="" className="w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-br from-foreground/85 via-foreground/55 to-foreground/35" />
         </div>
         <div className="container relative py-16 md:py-24">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
-            <Sparkles size={12} /> Rede em construção
+            <Sparkles size={12} /> Rede Rotas do Éden
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-primary-foreground max-w-3xl leading-tight drop-shadow-lg">
-            Os parceiros que tornam cada viagem possível
+            O ecossistema turístico de São Tomé e Príncipe
           </h1>
           <p className="text-primary-foreground/90 text-base md:text-lg max-w-2xl mt-5 leading-relaxed drop-shadow">
-            A Rotas do Éden está a construir uma rede curada de hotéis, operadores, restaurantes e empresas locais.
-            Selecionamos com o mesmo critério com que verificamos os nossos guias.
+            Hotéis, operadores, restaurantes e empresas locais que compõem a rede de parceiros
+            recomendados pela Rotas do Éden — experiências complementares para uma viagem completa.
           </p>
         </div>
       </header>
@@ -75,7 +75,7 @@ export default function ParceirosPage() {
                     <h2 className="font-display text-xl font-semibold text-foreground mb-2">{c.title}</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed">{c.text}</p>
                     <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wider text-primary font-semibold mt-4">
-                      Em curadoria
+                      Rede recomendada
                     </span>
                   </div>
                 </div>
