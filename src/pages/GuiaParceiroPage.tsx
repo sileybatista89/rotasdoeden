@@ -44,13 +44,13 @@ const faqs = [
   },
 ];
 
-export default function SejaParceiroPage() {
+export default function GuiaParceiroPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
         title="Seja Parceiro — Guia turístico em São Tomé e Príncipe | Rotas do Éden"
         description="Junte-se à Rotas do Éden como guia parceiro. Receba reservas verificadas, pagamentos protegidos e suporte dedicado em São Tomé e Príncipe."
-        path="/seja-parceiro"
+        path="/guia-parceiro"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "FAQPage",
