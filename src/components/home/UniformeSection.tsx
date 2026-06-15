@@ -1,6 +1,7 @@
 import { ShieldCheck, BadgeCheck, QrCode } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
-import uniformeImg from "@/assets/guias/uniforme-oficial.jpg";
+import uniformeAsset from "@/assets/guias/uniforme-oficial-hd.jpg.asset.json";
+const uniformeImg = uniformeAsset.url;
 
 export function UniformeSection() {
   const { t } = useT();

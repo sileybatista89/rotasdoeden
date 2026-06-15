@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { useT } from "@/i18n/LanguageProvider";
-import picoImg from "@/assets/real/ilhas-tinhosas.jpg.asset.json";
-import praiaImg from "@/assets/real/praia-banana.webp.asset.json";
-import rocaImg from "@/assets/real/santana.jpg.asset.json";
+import picoImg from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
+import praiaImg from "@/assets/real/praia-sul-hd.jpg.asset.json";
+import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
 import calulu from "@/assets/optimized/calulu-card.webp";
 import bio from "@/assets/real/estrada-norte.webp.asset.json";
 import cacau from "@/assets/optimized/cacau-card.webp";
