@@ -57,6 +57,10 @@ export default {
             light: "hsl(var(--eden-green-light))",
             dark: "hsl(153, 42%, 22%)",
           },
+          tropical: {
+            DEFAULT: "hsl(var(--eden-tropical))",
+            glow: "hsl(var(--eden-tropical-glow))",
+          },
           sand: {
             DEFAULT: "hsl(var(--eden-sand))",
             light: "hsl(var(--eden-sand-light))",
