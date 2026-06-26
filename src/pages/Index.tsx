@@ -9,6 +9,7 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuideCTA } from "@/components/home/GuideCTA";
 import { DescobreStpSection } from "@/components/home/DescobreStpSection";
 import { UniformeSection } from "@/components/home/UniformeSection";
+import { SustentabilidadeSection } from "@/components/home/SustentabilidadeSection";
 import { ParceirosCarousel } from "@/components/home/ParceirosCarousel";
 
 const Index = () => {
@@ -27,6 +28,7 @@ const Index = () => {
         <GuidesComingSoon />
         <TrustBlock />
         <UniformeSection />
+        <SustentabilidadeSection />
         <HowItWorks />
         <ParceirosCarousel />
         <GuideCTA />
