@@ -34,14 +34,19 @@ Deno.serve(async (req) => {
     const userEmail = claimsData.claims.email as string | undefined;
 
     const body = await req.json();
-    const { serviceId, date, numPeople, specialRequests, returnUrl, environment } = body ?? {};
-    if (!serviceId || !date || !numPeople || !returnUrl || (environment !== "sandbox" && environment !== "live")) {
+    const { serviceId, date, numPeople, specialRequests, returnUrl } = body ?? {};
+    if (!serviceId || !date || !numPeople || !returnUrl) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    // Derive Stripe environment server-side. NEVER trust client input — a
+    // direct API caller could otherwise force sandbox and complete fake
+    // payments. Prefer live if the live key is configured.
+    const environment: StripeEnv = Deno.env.get("STRIPE_LIVE_API_KEY") ? "live" : "sandbox";
     const peopleCount = Number(numPeople);
     if (!Number.isInteger(peopleCount) || peopleCount < 1 || peopleCount > 50) {
       return new Response(JSON.stringify({ error: "Invalid numPeople" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
     // Service-role to read service (bypass RLS quirks) and insert booking
     const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -92,7 +97,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Could not create booking" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const stripe = createStripeClient(environment as StripeEnv);
+    const stripe = createStripeClient(environment);
     const session = await stripe.checkout.sessions.create({
       line_items: [{
         price_data: {
@@ -128,6 +133,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("create-checkout error:", e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Payment could not be initialised. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
+
 });

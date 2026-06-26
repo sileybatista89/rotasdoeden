@@ -18,12 +18,7 @@ export function FlaggedMessages() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("messages")
-        .select("id, content, original_content, flagged_reason, created_at, sender_id")
-        .eq("was_filtered", true)
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data } = await supabase.rpc("admin_list_flagged_messages", { _limit: 50 });
       const rows = (data ?? []) as Row[];
       if (rows.length) {
         const { data: profs } = await supabase.from("profiles").select("id, full_name")
@@ -34,6 +29,7 @@ export function FlaggedMessages() {
       setRows(rows);
     })();
   }, []);
+
 
   if (rows.length === 0) {
     return <div className="bg-card border border-border rounded-2xl p-8 text-center text-sm text-muted-foreground">Sem mensagens flagged. 🎉</div>;
