@@ -400,6 +400,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_list_flagged_messages: {
+        Args: { _limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          flagged_reason: string
+          id: string
+          original_content: string
+          sender_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
