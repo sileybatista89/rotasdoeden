@@ -47,6 +47,21 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid numPeople" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Validate date server-side: must be a real date, today or in the future.
+    // Client min={today} can be bypassed by direct API callers.
+    if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return new Response(JSON.stringify({ error: "Invalid date format (expected YYYY-MM-DD)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const bookingDate = new Date(`${date}T00:00:00Z`);
+    if (isNaN(bookingDate.getTime())) {
+      return new Response(JSON.stringify({ error: "Invalid date" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const todayUtc = new Date();
+    todayUtc.setUTCHours(0, 0, 0, 0);
+    if (bookingDate < todayUtc) {
+      return new Response(JSON.stringify({ error: "Booking date must be today or in the future" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
 
     // Service-role to read service (bypass RLS quirks) and insert booking
     const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
