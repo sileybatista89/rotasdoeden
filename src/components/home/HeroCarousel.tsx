@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import principeAerial from "@/assets/real/principe-aerial-hd.jpg.asset.json";
-import praiaBanana from "@/assets/real/praia-banana-hd.jpg.asset.json";
-import lagoaAzul from "@/assets/real/lagoa-azul-hd.jpg.asset.json";
+import principeAerial from "@/assets/real/bom-bom.jpg.asset.json";
+import praiaBanana from "@/assets/real/praia-palmeiras.jpg.asset.json";
+import lagoaAzul from "@/assets/real/lagoa-azul.jpg.asset.json";
 import ilheuRolas from "@/assets/real/ilheu-rolas.jpg.asset.json";
-import praiaEscondida from "@/assets/real/praia-escondida.jpg.asset.json";
-import picoCaoGrande from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
-import santana from "@/assets/real/santana-coast.jpg.asset.json";
+import praiaEscondida from "@/assets/real/praia-rochas.jpg.asset.json";
+import picoCaoGrande from "@/assets/real/pico-cao-grande.jpg.asset.json";
+import santana from "@/assets/real/santana-real.jpg.asset.json";
 
 const slides = [
-  { src: praiaEscondida.url, alt: "Praia escondida no Príncipe" },
-  { src: picoCaoGrande.url, alt: "Pico Cão Grande — agulha vulcânica de São Tomé" },
+  { src: picoCaoGrande.url, alt: "Pico Cão Grande — agulha vulcânica de São Tomé vista do mar" },
+  { src: praiaEscondida.url, alt: "Praia com rochas vulcânicas e água turquesa, Príncipe" },
+  { src: lagoaAzul.url, alt: "Lagoa Azul — baobás centenários e enseada turquesa no norte de São Tomé" },
+  { src: principeAerial.url, alt: "Passadiço de Bom Bom, ilha do Príncipe" },
+  { src: praiaBanana.url, alt: "Praia de palmeiras e areia branca, Príncipe" },
   { src: santana.url, alt: "Baía de Santana, costa leste de São Tomé" },
-  { src: principeAerial.url, alt: "Vista aérea de Príncipe — Pico Papagaio e praia" },
-  { src: praiaBanana.url, alt: "Praia Banana, Príncipe — meia-lua de areia dourada" },
-  { src: lagoaAzul.url, alt: "Lagoa Azul, norte de São Tomé — baobá centenário" },
-  { src: ilheuRolas.url, alt: "Praia do Ilhéu das Rolas — equador de São Tomé" },
+  { src: ilheuRolas.url, alt: "Ilhéu das Rolas — equador de São Tomé" },
 ];
 
 interface Props {
