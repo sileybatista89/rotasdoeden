@@ -50,8 +50,8 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
           />
         );
       })}
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/35 to-foreground/85" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(152_60%_38%_/_0.35),_transparent_55%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/25 to-foreground/80" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--eden-tropical)_/_0.18),_transparent_60%)]" />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
         {slides.map((_, i) => (
           <button
