@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useT } from "@/i18n/LanguageProvider";
-import picoImg from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
-import praiaImg from "@/assets/real/praia-sul-hd.jpg.asset.json";
+import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
+import praiaImg from "@/assets/real/praia-palmeiras.jpg.asset.json";
 import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
 import calulu from "@/assets/optimized/calulu-card.webp";
 import bio from "@/assets/real/estrada-norte.webp.asset.json";
@@ -33,20 +33,21 @@ export function DescobreStpSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {highlights.map((h) => (
             <article
               key={h.key}
-              className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="group bg-card border border-border/70 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
             >
-              <div className="aspect-[16/10] overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src={h.img}
                   alt={t(`descobre.${h.key}.title`)}
                   loading="lazy"
+                  decoding="async"
                   width={640}
-                  height={400}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  height={480}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
               <div className="p-6">

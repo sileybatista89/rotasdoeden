@@ -31,7 +31,7 @@ export function SustentabilidadeSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Visual */}
           <div className="relative order-2 lg:order-1">
-            <div className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-3xl overflow-hidden ring-1 ring-border shadow-2xl">
+            <div className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-2xl overflow-hidden ring-1 ring-border shadow-lg">
               <img
                 src={obo.url}
                 alt="Floresta tropical de São Tomé — vegetação endémica do Parque Natural Obô"
@@ -42,7 +42,7 @@ export function SustentabilidadeSection() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-5 -right-5 sm:-bottom-6 sm:-right-6 bg-card border border-border rounded-2xl shadow-xl p-4 sm:p-5 max-w-[14rem]">
+            <div className="absolute -bottom-5 -right-5 sm:-bottom-6 sm:-right-6 bg-card border border-border rounded-2xl shadow-md p-4 sm:p-5 max-w-[14rem]">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-eden-tropical/20 to-primary/15 flex items-center justify-center">
                   <Leaf size={16} className="text-eden-tropical" />
