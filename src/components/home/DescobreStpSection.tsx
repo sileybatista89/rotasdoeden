@@ -10,12 +10,12 @@ import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { img: typeof picoImg === "string" ? picoImg : picoImg.url, key: "pico" },
-    { img: typeof praiaImg === "string" ? praiaImg : praiaImg.url, key: "praias" },
-    { img: typeof rocaImg === "string" ? rocaImg : rocaImg.url, key: "rocas" },
-    { img: calulu, key: "sabores" },
-    { img: typeof bio === "string" ? bio : bio.url, key: "bio" },
-    { img: cacau, key: "cacau" },
+    { img: picoImg.url, key: "pico" },
+    { img: praiaImg.url, key: "praias" },
+    { img: rocaImg.url, key: "rocas" },
+    { img: calulu.url, key: "sabores" },
+    { img: bio.url, key: "bio" },
+    { img: cacau.url, key: "cacau" },
   ];
 
   return (
