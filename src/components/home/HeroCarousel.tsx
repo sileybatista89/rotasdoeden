@@ -6,12 +6,20 @@ import ilheuRolas from "@/assets/real/ilheu-rolas.jpg.asset.json";
 import praiaEscondida from "@/assets/real/praia-rochas.jpg.asset.json";
 import picoCaoGrande from "@/assets/real/pico-cao-grande.jpg.asset.json";
 import santana from "@/assets/real/santana-real.jpg.asset.json";
+import rochasAerea from "@/assets/real/praia-rochas-aerea.jpg.asset.json";
+import enseada from "@/assets/real/enseada-principe.jpg.asset.json";
+import barco from "@/assets/real/barco-turquesa.jpg.asset.json";
+import banho from "@/assets/real/banho-praia.jpg.asset.json";
 
 const slides = [
   { src: picoCaoGrande.url, alt: "Pico Cão Grande — agulha vulcânica de São Tomé vista do mar" },
+  { src: rochasAerea.url, alt: "Praia de areia clara com rochas vulcânicas vista de cima, São Tomé" },
+  { src: barco.url, alt: "Barco de pesca em água turquesa entre rochas vulcânicas" },
   { src: praiaEscondida.url, alt: "Praia com rochas vulcânicas e água turquesa, Príncipe" },
   { src: lagoaAzul.url, alt: "Lagoa Azul — baobás centenários e enseada turquesa no norte de São Tomé" },
+  { src: enseada.url, alt: "Enseada de floresta densa e praia deserta, ilha do Príncipe" },
   { src: principeAerial.url, alt: "Passadiço de Bom Bom, ilha do Príncipe" },
+  { src: banho.url, alt: "Visitantes a banhar-se numa praia de palmeiras em São Tomé" },
   { src: praiaBanana.url, alt: "Praia de palmeiras e areia branca, Príncipe" },
   { src: santana.url, alt: "Baía de Santana, costa leste de São Tomé" },
   { src: ilheuRolas.url, alt: "Ilhéu das Rolas — equador de São Tomé" },
@@ -50,8 +58,8 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
           />
         );
       })}
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/25 to-foreground/80" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--eden-tropical)_/_0.18),_transparent_60%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-foreground/55 via-foreground/20 to-foreground/75" />
+
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
         {slides.map((_, i) => (
           <button

@@ -34,7 +34,7 @@ export function CookieConsent() {
       className="fixed inset-x-0 bottom-0 z-[100] p-3 sm:p-4 animate-in slide-in-from-bottom-4 duration-500"
     >
       <div className="container max-w-4xl">
-        <div className="relative rounded-2xl border border-border bg-card/95 backdrop-blur-md shadow-2xl shadow-foreground/10 p-4 sm:p-5">
+        <div className="relative rounded-2xl border border-border bg-card/95 backdrop-blur-md shadow-lg p-4 sm:p-5">
           <button
             onClick={() => decide("rejected")}
             aria-label="Fechar"

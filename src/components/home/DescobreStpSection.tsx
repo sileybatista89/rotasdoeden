@@ -3,19 +3,19 @@ import { useT } from "@/i18n/LanguageProvider";
 import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
 import praiaImg from "@/assets/real/praia-palmeiras.jpg.asset.json";
 import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
-import calulu from "@/assets/optimized/calulu-card.webp";
-import bio from "@/assets/real/estrada-norte.webp.asset.json";
-import cacau from "@/assets/optimized/cacau-card.webp";
+import calulu from "@/assets/real/calulu-real.jpg.asset.json";
+import bio from "@/assets/real/costa-floresta.jpg.asset.json";
+import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { img: typeof picoImg === "string" ? picoImg : picoImg.url, key: "pico" },
-    { img: typeof praiaImg === "string" ? praiaImg : praiaImg.url, key: "praias" },
-    { img: typeof rocaImg === "string" ? rocaImg : rocaImg.url, key: "rocas" },
-    { img: calulu, key: "sabores" },
-    { img: typeof bio === "string" ? bio : bio.url, key: "bio" },
-    { img: cacau, key: "cacau" },
+    { img: picoImg.url, key: "pico" },
+    { img: praiaImg.url, key: "praias" },
+    { img: rocaImg.url, key: "rocas" },
+    { img: calulu.url, key: "sabores" },
+    { img: bio.url, key: "bio" },
+    { img: cacau.url, key: "cacau" },
   ];
 
   return (

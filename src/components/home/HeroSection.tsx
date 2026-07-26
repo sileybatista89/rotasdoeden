@@ -22,28 +22,28 @@ export function HeroSection() {
 
       <div className="container relative py-20 md:py-32">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-md text-primary-foreground text-xs sm:text-sm font-medium mb-6 border border-primary-foreground/25 shadow-lg">
-            <Sparkles size={13} className="text-secondary" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/25 text-primary-foreground text-[11px] sm:text-xs font-medium tracking-wide mb-6 border border-primary-foreground/20">
+            <Sparkles size={12} className="text-secondary" />
             {t("hero.badge")}
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-[1.05] mb-6 drop-shadow-2xl">
+          <h1 className="font-display text-[2.5rem] md:text-6xl lg:text-[4.25rem] font-semibold text-primary-foreground leading-[1.08] tracking-[-0.02em] mb-6">
             {t("hero.title.1")}<br />
-            <span className="bg-gradient-to-r from-secondary via-amber-300 to-secondary bg-clip-text text-transparent">
+            <span className="text-secondary">
               {t("hero.title.2")}
             </span><br />
             {t("hero.title.3")}
           </h1>
 
-          <p className="text-base md:text-xl text-primary-foreground/90 max-w-xl mx-auto mb-10 font-body drop-shadow-md leading-relaxed">
+          <p className="text-base md:text-lg text-primary-foreground/90 max-w-xl mx-auto mb-9 font-body leading-relaxed">
             {t("hero.subtitle")}
           </p>
 
           <form
             onSubmit={submit}
-            className="bg-card/95 backdrop-blur-md rounded-2xl shadow-[0_25px_60px_-20px_rgba(0,0,0,0.5)] border border-border/50 p-2 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto"
+            className="bg-card rounded-2xl shadow-[0_16px_40px_-24px_rgba(0,0,0,0.55)] border border-border/60 p-2 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto"
           >
-            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/70">
+            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/60">
               <Search size={18} className="text-primary" />
               <input
                 type="text"
@@ -58,12 +58,13 @@ export function HeroSection() {
             </Button>
           </form>
 
-          <div className="flex items-center justify-center gap-3 sm:gap-6 mt-8 text-xs sm:text-sm text-primary-foreground/80 flex-wrap">
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/15">{t("hero.tag.dive")}</span>
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/15">{t("hero.tag.hike")}</span>
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/15">{t("hero.tag.food")}</span>
-            <span className="px-3 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/15">{t("hero.tag.history")}</span>
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mt-8 text-xs sm:text-sm text-primary-foreground/85 flex-wrap">
+            <span className="px-3 py-1 rounded-full border border-primary-foreground/25">{t("hero.tag.dive")}</span>
+            <span className="px-3 py-1 rounded-full border border-primary-foreground/25">{t("hero.tag.hike")}</span>
+            <span className="px-3 py-1 rounded-full border border-primary-foreground/25">{t("hero.tag.food")}</span>
+            <span className="px-3 py-1 rounded-full border border-primary-foreground/25">{t("hero.tag.history")}</span>
           </div>
+
 
           <div className="hidden md:flex items-center justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-primary-foreground/85">
             <span className="inline-flex items-center gap-1.5"><ShieldCheck size={14} /> KYC</span>
