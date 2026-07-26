@@ -3,9 +3,9 @@ import { useT } from "@/i18n/LanguageProvider";
 import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
 import praiaImg from "@/assets/real/praia-palmeiras.jpg.asset.json";
 import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
-import calulu from "@/assets/optimized/calulu-card.webp";
-import bio from "@/assets/real/estrada-norte.webp.asset.json";
-import cacau from "@/assets/optimized/cacau-card.webp";
+import calulu from "@/assets/real/calulu-real.jpg.asset.json";
+import bio from "@/assets/real/costa-floresta.jpg.asset.json";
+import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 
 export function DescobreStpSection() {
   const { t } = useT();
