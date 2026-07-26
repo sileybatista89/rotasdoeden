@@ -21,7 +21,7 @@ export function Navbar() {
   const initials = user?.email?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <header className="sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-border/60">
+    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border/60">
       <div className="container flex items-center justify-between h-24 md:h-28">
         <Logo size="md" />
 
