@@ -1,5 +1,5 @@
 import { Leaf, Globe2, Bird, TreePine, Waves, ShieldCheck } from "lucide-react";
-import obo from "@/assets/real/estrada-norte.webp.asset.json";
+import obo from "@/assets/real/costa-floresta.jpg.asset.json";
 
 const pillars = [
   {
