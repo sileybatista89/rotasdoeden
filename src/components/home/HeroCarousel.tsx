@@ -52,27 +52,28 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
             decoding="async"
             loading={i === 0 ? "eager" : "lazy"}
             fetchPriority={i === 0 ? "high" : "low"}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1600ms] ease-in-out ${
               i === index ? "opacity-100 scale-105 animate-ken-burns" : "opacity-0 scale-100"
             }`}
           />
         );
       })}
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/55 via-foreground/20 to-foreground/75" />
+      <div className="absolute inset-0 bg-gradient-to-t from-eden-ink/85 via-eden-ink/35 to-eden-ink/45" />
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+      <div className="absolute bottom-7 right-6 md:right-10 flex gap-2 z-10" aria-hidden="false">
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             aria-label={`Ir para imagem ${i + 1}`}
             onClick={() => setIndex(i)}
-            className={`h-1.5 rounded-full transition-all ${
-              i === index ? "w-8 bg-secondary" : "w-1.5 bg-primary-foreground/50 hover:bg-primary-foreground/80"
+            className={`h-px transition-all duration-700 ${
+              i === index ? "w-10 bg-secondary" : "w-4 bg-primary-foreground/45 hover:bg-primary-foreground/80"
             }`}
           />
         ))}
       </div>
+
     </div>
   );
 }
