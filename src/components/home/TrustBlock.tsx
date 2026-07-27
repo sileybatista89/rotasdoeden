@@ -1,5 +1,6 @@
 import { ShieldCheck, BadgeCheck, Users } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
+import { Reveal } from "@/components/ui/reveal";
 
 export function TrustBlock() {
   const { t } = useT();
@@ -10,26 +11,22 @@ export function TrustBlock() {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-b from-card via-card to-muted/40 border-y border-border/60">
+    <section className="py-20 md:py-28 bg-card">
       <div className="container">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold mb-3">{t("trust.eyebrow")}</p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-            {t("trust.title")}
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pillars.map((p) => (
-            <div
-              key={p.title}
-              className="group bg-background border border-border/70 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30"
-            >
-              <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center mb-5">
-                <p.icon size={20} className="text-primary" strokeWidth={1.75} />
+        <Reveal className="max-w-2xl mb-14">
+          <span className="eyebrow mb-6">{t("trust.eyebrow")}</span>
+          <h2 className="display-md text-foreground mt-5">{t("trust.title")}</h2>
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10">
+          {pillars.map((p, i) => (
+            <Reveal key={p.title} delay={i * 100} className="flex gap-5">
+              <p.icon size={20} className="text-primary shrink-0 mt-1" strokeWidth={1.5} />
+              <div>
+                <h3 className="font-display text-xl text-foreground mb-2 leading-snug">{p.title}</h3>
+                <p className="text-[0.93rem] text-muted-foreground leading-[1.8] font-light">{p.text}</p>
               </div>
-              <h3 className="font-display font-semibold text-lg text-foreground mb-2">{p.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{p.text}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
