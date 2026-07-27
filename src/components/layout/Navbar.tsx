@@ -21,31 +21,32 @@ export function Navbar() {
   const initials = user?.email?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border/60">
-      <div className="container flex items-center justify-between h-24 md:h-28">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-[2px] border-b border-border">
+      <div className="container flex items-center justify-between h-20 md:h-24">
         <Logo size="md" />
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7">
-          <Link to="/experiences" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+        <nav className="hidden md:flex items-center gap-8">
+          <Link to="/experiences" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.experiences")}
           </Link>
-          <Link to="/guides" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/guides" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.guides")}
           </Link>
-          <Link to="/sobre-sao-tome" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/sobre-sao-tome" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.destino")}
           </Link>
-          <Link to="/parceiros" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/parceiros" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             Parceiros
           </Link>
-          <a href="/#como-funciona" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <a href="/#como-funciona" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.how")}
           </a>
-          <a href="/#contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <a href="/#contacto" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.contact")}
           </a>
         </nav>
+
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-2">
@@ -61,9 +62,10 @@ export function Navbar() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-eden-green-dark text-primary-foreground font-semibold flex items-center justify-center hover:opacity-90 transition-opacity ring-2 ring-primary/15">
+                <button className="w-9 h-9 rounded-full bg-eden-ink text-primary-foreground font-medium text-sm flex items-center justify-center hover:bg-primary transition-colors duration-500">
                   {initials}
                 </button>
+
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="text-xs">
