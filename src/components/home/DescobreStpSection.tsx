@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
+import { Reveal } from "@/components/ui/reveal";
 import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
 import praiaImg from "@/assets/real/praia-palmeiras.jpg.asset.json";
 import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
@@ -10,60 +12,68 @@ import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { img: picoImg.url, key: "pico" },
-    { img: praiaImg.url, key: "praias" },
-    { img: rocaImg.url, key: "rocas" },
-    { img: calulu.url, key: "sabores" },
-    { img: bio.url, key: "bio" },
-    { img: cacau.url, key: "cacau" },
+    { img: picoImg.url, key: "pico", ratio: "aspect-[4/5]" },
+    { img: praiaImg.url, key: "praias", ratio: "aspect-[4/5]" },
+    { img: rocaImg.url, key: "rocas", ratio: "aspect-[4/5]" },
+    { img: calulu.url, key: "sabores", ratio: "aspect-[4/5]" },
+    { img: bio.url, key: "bio", ratio: "aspect-[4/5]" },
+    { img: cacau.url, key: "cacau", ratio: "aspect-[4/5]" },
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+    <section className="py-20 md:py-32 bg-background">
       <div className="container">
-        <div className="max-w-2xl mb-10 md:mb-14">
-          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-primary mb-3">
-            {t("descobre.eyebrow")}
-          </span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            {t("descobre.title")}
-          </h2>
-          <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
-            {t("descobre.lead")}
-          </p>
-        </div>
+        <Reveal className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end mb-14 md:mb-20">
+          <div className="lg:col-span-7">
+            <span className="eyebrow mb-6">{t("descobre.eyebrow")}</span>
+            <h2 className="display-lg text-foreground mt-5">{t("descobre.title")}</h2>
+          </div>
+          <div className="lg:col-span-5 lg:pb-2">
+            <p className="body-copy">{t("descobre.lead")}</p>
+          </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {highlights.map((h) => (
-            <article
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 md:gap-y-16">
+          {highlights.map((h, i) => (
+            <Reveal
               key={h.key}
-              className="group bg-card border border-border/70 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+              delay={(i % 3) * 90}
+              className={i % 3 === 1 ? "lg:mt-10" : i % 3 === 2 ? "lg:mt-4" : ""}
             >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={h.img}
-                  alt={t(`descobre.${h.key}.title`)}
-                  loading="lazy"
-                  decoding="async"
-                  width={640}
-                  height={480}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-2">{t(`descobre.${h.key}.title`)}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{t(`descobre.${h.key}.text`)}</p>
-              </div>
-            </article>
+              <article className="group">
+                <div className={`${h.ratio} overflow-hidden rounded-md bg-muted`}>
+                  <img
+                    src={h.img}
+                    alt={t(`descobre.${h.key}.title`)}
+                    loading="lazy"
+                    decoding="async"
+                    width={640}
+                    height={800}
+                    className="w-full h-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+                  />
+                </div>
+                <div className="pt-6">
+                  <span className="text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground/70">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-display text-2xl md:text-[1.7rem] font-normal text-foreground mt-2 mb-3 leading-tight">
+                    {t(`descobre.${h.key}.title`)}
+                  </h3>
+                  <p className="text-[0.95rem] text-muted-foreground leading-[1.75] font-light">
+                    {t(`descobre.${h.key}.text`)}
+                  </p>
+                </div>
+              </article>
+            </Reveal>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-16 md:mt-20 pt-10 border-t border-border">
           <Link
             to="/sobre-sao-tome"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            className="link-underline text-sm uppercase tracking-[0.16em] text-foreground hover:text-primary transition-colors"
           >
-            {t("descobre.cta")}
+            {t("descobre.cta")} <ArrowRight size={15} strokeWidth={1.75} />
           </Link>
         </div>
       </div>
