@@ -14,9 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['Source Sans 3', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Times New Roman', 'serif'],
+        body: ['Karla', 'system-ui', 'sans-serif'],
       },
+
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -55,7 +56,7 @@ export default {
           green: {
             DEFAULT: "hsl(var(--eden-green))",
             light: "hsl(var(--eden-green-light))",
-            dark: "hsl(153, 42%, 22%)",
+            dark: "hsl(172, 45%, 12%)",
           },
           tropical: {
             DEFAULT: "hsl(var(--eden-tropical))",
@@ -70,7 +71,10 @@ export default {
             light: "hsl(var(--eden-ocean-light))",
           },
           cocoa: "hsl(var(--eden-cocoa))",
+          ink: "hsl(var(--eden-ink))",
+          paper: "hsl(var(--eden-paper))",
         },
+
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -1,5 +1,7 @@
 import { Leaf, Globe2, Bird, TreePine, Waves, ShieldCheck } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
 import obo from "@/assets/real/costa-floresta.jpg.asset.json";
+
 
 const pillars = [
   {
@@ -26,12 +28,12 @@ const pillars = [
 
 export function SustentabilidadeSection() {
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background via-accent/20 to-background">
+    <section className="py-20 md:py-32 bg-accent/40">
       <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Visual */}
-          <div className="relative order-2 lg:order-1">
-            <div className="aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-2xl overflow-hidden ring-1 ring-border shadow-lg">
+          <Reveal className="relative order-2 lg:order-1 lg:col-span-5">
+            <div className="aspect-[4/5] overflow-hidden rounded-md bg-muted">
               <img
                 src={obo.url}
                 alt="Floresta tropical de São Tomé — vegetação endémica do Parque Natural Obô"
@@ -42,51 +44,40 @@ export function SustentabilidadeSection() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-5 -right-5 sm:-bottom-6 sm:-right-6 bg-card border border-border rounded-2xl shadow-md p-4 sm:p-5 max-w-[14rem]">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-eden-tropical/20 to-primary/15 flex items-center justify-center">
-                  <Leaf size={16} className="text-eden-tropical" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">UNESCO</span>
-              </div>
-              <p className="text-sm font-semibold text-foreground leading-tight">
-                Reserva Mundial da Biosfera
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">Príncipe, desde 2012</p>
+            <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-foreground/15 pt-4">
+              <p className="font-display text-lg text-foreground leading-snug">Reserva Mundial da Biosfera</p>
+              <p className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground shrink-0">Príncipe · 2012</p>
             </div>
-          </div>
+          </Reveal>
 
           {/* Content */}
-          <div className="order-1 lg:order-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-eden-tropical mb-3">
-              <Leaf size={12} /> Sustentabilidade & Biodiversidade
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] font-bold text-foreground leading-tight mb-4">
-              Um dos santuários naturais mais ricos do planeta
-            </h2>
-            <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-8">
-              São Tomé e Príncipe é internacionalmente reconhecido pela sua biodiversidade.
-              A Rotas do Éden apoia o turismo sustentável e a preservação ambiental — cada
-              experiência reservada contribui para a proteção destes ecossistemas únicos.
-            </p>
+          <div className="order-1 lg:order-2 lg:col-span-6 lg:col-start-7">
+            <Reveal>
+              <span className="eyebrow mb-6">
+                <Leaf size={13} strokeWidth={1.75} className="ml-1" /> Sustentabilidade & Biodiversidade
+              </span>
+              <h2 className="display-lg text-foreground mt-5 mb-6">
+                Um dos santuários naturais mais ricos do planeta
+              </h2>
+              <p className="body-copy mb-10">
+                São Tomé e Príncipe é internacionalmente reconhecido pela sua biodiversidade.
+                A Rotas do Éden apoia o turismo sustentável e a preservação ambiental — cada
+                experiência reservada contribui para a proteção destes ecossistemas únicos.
+              </p>
+            </Reveal>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {pillars.map(({ Icon, title, text }) => (
-                <div
-                  key={title}
-                  className="bg-card border border-border rounded-2xl p-5 hover:border-eden-tropical/40 hover:shadow-md transition-all"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-eden-tropical/15 to-primary/10 ring-1 ring-eden-tropical/20 flex items-center justify-center mb-3">
-                    <Icon size={18} className="text-eden-tropical" />
-                  </div>
-                  <h3 className="font-display text-base font-semibold text-foreground mb-1.5 leading-snug">{title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
+              {pillars.map(({ Icon, title, text }, i) => (
+                <Reveal key={title} delay={(i % 2) * 90} className="border-t border-foreground/15 pt-5">
+                  <Icon size={18} className="text-primary mb-4" strokeWidth={1.5} />
+                  <h3 className="font-display text-xl text-foreground mb-2 leading-snug">{title}</h3>
+                  <p className="text-[0.9rem] text-muted-foreground leading-[1.8] font-light">{text}</p>
+                </Reveal>
               ))}
             </div>
 
-            <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck size={14} className="text-primary" />
+            <div className="mt-10 flex items-start gap-3 text-[0.85rem] text-muted-foreground font-light">
+              <ShieldCheck size={15} className="text-primary shrink-0 mt-1" strokeWidth={1.5} />
               <span>Compromisso Rotas do Éden — guias licenciados, trilhos responsáveis, comunidades locais beneficiadas.</span>
             </div>
           </div>
@@ -95,3 +86,4 @@ export function SustentabilidadeSection() {
     </section>
   );
 }
+

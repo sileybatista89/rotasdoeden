@@ -11,6 +11,8 @@ import { DescobreStpSection } from "@/components/home/DescobreStpSection";
 import { UniformeSection } from "@/components/home/UniformeSection";
 import { SustentabilidadeSection } from "@/components/home/SustentabilidadeSection";
 import { ParceirosCarousel } from "@/components/home/ParceirosCarousel";
+import { UnescoSection } from "@/components/home/UnescoSection";
+
 
 const Index = () => {
   return (
@@ -29,7 +31,9 @@ const Index = () => {
         <TrustBlock />
         <UniformeSection />
         <SustentabilidadeSection />
+        <UnescoSection />
         <HowItWorks />
+
         <ParceirosCarousel />
         <GuideCTA />
       </main>

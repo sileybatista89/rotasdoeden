@@ -1,5 +1,6 @@
 import { Search, CreditCard, Compass } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
+import { Reveal } from "@/components/ui/reveal";
 
 export function HowItWorks() {
   const { t } = useT();
@@ -10,30 +11,24 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="como-funciona" className="py-20 bg-muted/40">
+    <section id="como-funciona" className="py-20 md:py-32 bg-accent/40">
       <div className="container">
-        <div className="text-center mb-14">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-tight">
-            {t("how.title")}
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">{t("how.subtitle")}</p>
-        </div>
+        <Reveal className="max-w-2xl mb-14 md:mb-20">
+          <span className="eyebrow mb-6">{t("how.title")}</span>
+          <p className="lead mt-6">{t("how.subtitle")}</p>
+        </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14">
           {steps.map((step, i) => (
-            <div
-              key={i}
-              className="relative bg-card border border-border/70 rounded-3xl p-7 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-secondary text-secondary-foreground text-sm font-bold flex items-center justify-center shadow-md ring-4 ring-card">
-                {i + 1}
-              </div>
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/15 flex items-center justify-center mx-auto mb-5 mt-2">
-                <step.icon size={26} className="text-primary" />
-              </div>
-              <h3 className="font-display font-semibold text-lg text-foreground mb-2">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-            </div>
+            <Reveal key={i} delay={i * 110} className="border-t border-foreground/15 pt-7">
+              <step.icon size={22} className="text-primary mb-6" strokeWidth={1.5} />
+              <h3 className="font-display text-2xl font-normal text-foreground mb-3 leading-tight">
+                {step.title}
+              </h3>
+              <p className="text-[0.95rem] text-muted-foreground leading-[1.8] font-light">
+                {step.description}
+              </p>
+            </Reveal>
           ))}
         </div>
       </div>
