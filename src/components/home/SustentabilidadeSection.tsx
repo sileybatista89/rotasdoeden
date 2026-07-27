@@ -1,5 +1,7 @@
 import { Leaf, Globe2, Bird, TreePine, Waves, ShieldCheck } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
 import obo from "@/assets/real/costa-floresta.jpg.asset.json";
+
 
 const pillars = [
   {
