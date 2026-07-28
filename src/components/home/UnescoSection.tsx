@@ -1,7 +1,8 @@
 import { Landmark, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Reveal } from "@/components/ui/reveal";
-import roca from "@/assets/real/roca-historica.jpg.asset.json";
+import roca from "@/assets/real/roca-casa-grande.jpg.asset.json";
+import rocaPortao from "@/assets/real/roca-portao.jpg.asset.json";
 
 const facts = [
   { k: "Século XIX", v: "Auge das roças de cacau e café, que fizeram das ilhas o maior produtor mundial de cacau." },
