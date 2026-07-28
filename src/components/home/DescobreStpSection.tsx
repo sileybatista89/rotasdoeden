@@ -4,7 +4,7 @@ import { useT } from "@/i18n/LanguageProvider";
 import { Reveal } from "@/components/ui/reveal";
 import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
 import praiaImg from "@/assets/real/praia-palmeiras.jpg.asset.json";
-import rocaImg from "@/assets/real/roca-historica.jpg.asset.json";
+import rocaImg from "@/assets/real/roca-casa-grande.jpg.asset.json";
 import calulu from "@/assets/real/calulu-real.jpg.asset.json";
 import bio from "@/assets/real/costa-floresta.jpg.asset.json";
 import cacau from "@/assets/real/cacau-real.jpg.asset.json";
