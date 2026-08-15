@@ -1,93 +1,57 @@
-## Objetivo
-Elevar a camada visual de "gerado por IA" para "agência premium de turismo", mantendo 100% da arquitetura, rotas, dados, auth, reservas, chat, dashboard e lógica de negócio intactos. Só CSS, componentes de apresentação, imagens e copy mudam.
+# Atualização de produto: perfis profissionais, localização e verificação
 
-## 1. Imagens autênticas (prioridade máxima)
-Substituir imagens com aspeto de IA pelas 6 fotos reais enviadas pelo utilizador:
+Atualização incremental. Mantém-se o design atual (Atlântico Éden, tipografia, cards, botões), a navegação, os fluxos de reserva/pagamento e todos os dados existentes.
 
-- `IMG_3232.jpeg` → Pico Cão Grande (montanha na neblina + pescador em canoa) — substitui `pico-cao-grande-real.jpg` no HeroCarousel e em DescobreStpSection.
-- `IMG_3231.jpeg` → Lagoa Azul (baobás + enseada turquesa + farol) — substitui `lagoa-azul-hd.jpg` no Hero.
-- `IMG_3229.jpeg` → Bom Bom / Príncipe (passadiço de madeira sobre praia) — substitui `principe-aerial-hd.jpg` no Hero.
-- `IMG_3235.jpeg` → Praia com rochas vulcânicas e água turquesa (aérea) — substitui slide "praia escondida Príncipe" no Hero.
-- `IMG_3234.jpeg` → Santana (aérea vila costeira) — substitui `santana-coast.jpg` no Hero.
-- `IMG_3230.jpeg` → Praia "Deixem-me aqui" (palmeiras + areia + turquesa) — substitui `praia-sul-hd.jpg` em DescobreStpSection e `praia-banana-hd.jpg` no Hero.
+## Estado atual (verificado no código)
 
-Upload via `lovable-assets` a partir de `/mnt/user-uploads/`, criando `.asset.json` em `src/assets/real/`. Manter imports existentes (só troca de URL) — zero mudança estrutural.
+- Não existe tabela de perfil profissional: só `profiles` (nome, bio, avatar, país, `kyc_status`), `user_roles`, `services`, `kyc_submissions`.
+- `/guides` é uma página estática "guias em adesão"; `/guides/:id` mostra "perfil ainda não disponível". Não existe diretório nem filtros.
+- `services` não tem localidade, dias/horários nem idiomas.
+- Verificação existente = KYC (`/kyc` + fila no admin) com estados `pending / submitted / verified / rejected`.
 
-Também: auditar `SustentabilidadeSection` (usa `estrada-norte.webp` como floresta) e cards restantes de DescobreStp (`calulu`, `cacau`) — se parecerem IA, marcar para substituição futura mas NÃO gerar novas via IA neste passo (contradiz o pedido do utilizador).
+## O que vai ser feito
 
-## 2. Remover "delatores de IA" na UI
+### 1. Base de dados (migração segura, sem apagar nada)
+- `professional_type` (enum): guia credenciado, guia local, operador turístico, empresa/agência, outro.
+- Nova tabela `professional_profiles` (1 por utilizador): tipo, distrito, localidade, áreas de atuação, tipos de experiência, descrição profissional, idiomas, foto de perfil, galeria de fotos, `verification_status` (`not_verified`, `pending`, `verified`, `rejected`, `expired`), notas do admin.
+- Tabelas territoriais `districts` e `localities` (país → distrito → localidade), com `slug` normalizado (sem acentos/maiúsculas) para evitar duplicados como "Agua Ize"/"Água Izé", e nome oficial de apresentação. Geridas pelo admin.
+- Seed dos 7 distritos oficiais e das localidades conhecidas de cada um; a lista fica editável no painel admin em vez de fixa no código.
+- `services`: novos campos opcionais de distrito, localidade, ponto de partida, dias e horários disponíveis, idiomas.
+- Tabela `admin_audit_log` para registar aprovações, rejeições, mudanças de classificação e correções de localidade.
+- Perfis antigos: tipo e localidade a `null`, `verification_status = not_verified`. Nada é bloqueado nem removido.
+- RLS + GRANTs: o próprio profissional gere o seu perfil; público lê apenas perfis verificados e não suspensos; documentos privados nunca são públicos; admin tem acesso total via `has_role`.
 
-**TrustBlock (`src/components/home/TrustBlock.tsx`)**: remover numeração decorativa `01/02/03` — substituir por ícones outline consistentes (ShieldCheck, BadgeCheck, MapPin) da família lucide já em uso.
+### 2. Fluxo do profissional
+- Nova página "O meu perfil profissional": tipo de profissional (obrigatório), campos que se adaptam ao tipo escolhido, seletor Distrito → Localidade encadeado, descrição, idiomas, áreas de atuação.
+- Upload de foto de perfil e galeria de fotos de experiências/serviços já realizados (bucket público) — sem exigir reservas anteriores na plataforma.
+- Botão "Solicitar verificação": reutiliza o fluxo/bucket privado do KYC, aceitando documento de identificação, credencial, certificado e outros documentos. Estado visível no painel.
+- Experiências (`/my-services`): formulário existente estendido com localidade, dias/horários, idiomas e informações adicionais. Preços e disponibilidade continuam 100% definidos pelo profissional.
 
-**Glassmorphism / glows / gradientes agressivos**: reduzir em:
-- `HeroCarousel` — overlay radial verde tropical suavizado (opacidade 0.35 → 0.18).
-- Badges "Verificado", cards com `backdrop-blur` — reduzir blur e ring opacity.
-- `--eden-tropical-glow` — dessaturar levemente para evitar aspeto neon.
+### 3. Perfil público e diretório
+- `/guides` passa a diretório real de profissionais verificados, com os cards no estilo atual. Se não houver perfis verificados, mantém-se a mensagem "em adesão" atual.
+- Filtros: tipo de profissional, distrito, localidade, idioma, preço, verificação (arquitetura preparada para experiência e disponibilidade).
+- `/guides/:id` passa a perfil real: selo único "🟢 Perfil Verificado", classificação e localização ("Guia Local · Água Izé · Cantagalo"), galeria, experiências, preços, avaliações.
+- Um só selo. O texto do selo passa a "Perfil e informações profissionais analisados pela Rotas do Éden" — deixa de afirmar credenciação governamental. Guia Local nunca é convertido automaticamente em Guia Credenciado.
 
-**Sombras**: unificar para elevação subtil (`shadow-sm` / `shadow-md`) em vez de `shadow-2xl` difuso nos cards de Descobre, Parceiros, Sustentabilidade.
+### 4. Painel de administração
+- Fila de verificação unificada: rever documentos, aprovar, rejeitar, expirar.
+- Alterar classificação profissional, corrigir distrito/localidade, suspender perfil, remover conteúdo.
+- Gestão da lista de distritos/localidades (criar, renomear, fundir duplicados).
+- Todas estas ações ficam registadas no log de auditoria.
 
-## 3. Cards — padrão Airbnb Experiences
+### 5. Mobile e qualidade
+- Formulário de cadastro em passos curtos, seletores nativos amigáveis em telemóvel, upload de fotos otimizado.
+- Sem dados fictícios: nenhum guia, avaliação, reserva ou foto inventada.
 
-Em `DescobreStpSection`, `ParceirosCarousel`, `GuidesComingSoon`:
-- Aspect ratio consistente (`aspect-[4/5]` ou `4/3`, escolher um e aplicar).
-- Título forte + descrição curta, sem eyebrow decorativo em cada card.
-- Hover: leve zoom da imagem + subida de 2-4px, sem borda colorida a piscar.
-- Border-radius uniforme (`rounded-2xl` em todos, sem misturar com `rounded-3xl`).
+## Ordem de execução
 
-## 4. Tipografia e hierarquia
+1. Migração da base de dados + seed territorial (aprovação necessária).
+2. Perfil profissional + localização encadeada.
+3. Fotos e experiências.
+4. Pedido de verificação + painel admin + auditoria.
+5. Diretório público, filtros e perfil público.
+6. Teste do fluxo completo: registo → guia local → distrito → localidade → perfil → foto → experiência → preço → disponibilidade → pedido de verificação → aprovação → perfil público com selo.
 
-Manter Playfair Display + Source Sans 3. Ajustar em `index.css` / componentes:
-- Section eyebrows: uppercase, tracking-widest, tamanho reduzido, opacity 0.7.
-- H2 de secção: tamanhos mais controlados (`text-3xl md:text-4xl`, não maiores).
-- Leading corpo: `leading-relaxed` consistente (1.7).
-- Reduzir peso de `font-bold` para `font-semibold` em títulos de card (menos "AI-marketing").
+## Nota sobre as localidades
 
-## 5. Copy — tom humano
-
-Rever `src/i18n/translations.ts` (PT primeiro, depois espelhar em outros idiomas apenas nas chaves alteradas):
-- Remover superlativos genéricos ("o arquipélago mais bonito de África", "aventura garantida", "paraíso escondido").
-- Manter factos: 42 000+ visitantes, 18 dias, licença DGTH, UNESCO 2012, taxa turística €20-30.
-- Tom: direto, primeira mão, sem exclamações. Ex: "Duas ilhas no Golfo da Guiné. Floresta primária, praias vazias, roças coloniais em ruína." em vez de "Descobre o paraíso tropical mais autêntico!".
-
-Secções revistas: Hero, StatsSection, DescobreStp (6 cards), Sustentabilidade (4 pilares), Uniforme, HowItWorks, TrustBlock, GuideCTA.
-
-## 6. Paleta — dessaturar
-
-Em `src/index.css`:
-- `--eden-tropical`: 152 60% 42% → 152 42% 38% (menos neon).
-- `--eden-tropical-glow`: reduzir luminosidade.
-- Gradientes hero: substituir radial tropical por overlay preto sutil + vinheta leve, mais editorial.
-
-Primary (`eden-green` #2D6A4F) e sand (#F4A261) mantêm-se.
-
-## 7. Microinterações
-
-- Transições: `duration-300` uniforme (não misturar 200/500/700).
-- Botões: hover translate-y-[-1px] + brightness leve, sem ring colorido.
-- Loading states: skeletons cinza-claro, sem shimmer arco-íris.
-
-## 8. Mobile / performance
-
-- Confirmar `loading="lazy"` + `decoding="async"` em todas as `<img>` fora do primeiro slide do Hero.
-- Reduzir densidade de blur/backdrop-filter em mobile (`md:backdrop-blur-sm` em vez de sempre).
-- Padding secções mobile: `py-12` → `py-16` uniforme para respiração.
-
-## Fora de scope (não tocar)
-- Routing, App.tsx, hooks, providers, Supabase, edge functions, tipos, RLS.
-- Painel admin, dashboard de guia, chat, reservas, checkout.
-- Logo, nome da marca, família tipográfica.
-- Geração de novas imagens IA (utilizador rejeitou explicitamente).
-
-## Detalhes técnicos
-Ficheiros afetados (apresentação apenas):
-- `src/assets/real/*.asset.json` (novos pointers para as 6 fotos)
-- `src/components/home/HeroCarousel.tsx` (só imports)
-- `src/components/home/DescobreStpSection.tsx` (só imports + classes)
-- `src/components/home/TrustBlock.tsx` (remover numeração, uniformizar ícones)
-- `src/components/home/SustentabilidadeSection.tsx` (sombras/blur)
-- `src/components/home/StatsSection.tsx`, `HowItWorks.tsx`, `GuideCTA.tsx`, `UniformeSection.tsx`, `ParceirosCarousel.tsx`, `GuidesComingSoon.tsx` (polish visual + copy)
-- `src/i18n/translations.ts` (reescrita de copy, todas as línguas nas chaves tocadas)
-- `src/index.css` + `tailwind.config.ts` (tokens dessaturados, sombras)
-
-## Resultado
-Mesmo site, mesmas funcionalidades, mesma estrutura — mas com fotografia real de STP, copy mais humano, UI sem tics de IA (numeração decorativa, glassmorphism, glows, sombras difusas) e hierarquia visual afinada ao padrão Airbnb Experiences / GetYourGuide.
+As localidades serão semeadas a partir das divisões administrativas conhecidas de cada um dos 7 distritos (ex.: Cantagalo → Santana, Ribeira Afonso, Água Izé, Praia Melão). Nada será inventado: onde houver dúvida, a localidade não entra no seed e pode ser adicionada pelo admin.
