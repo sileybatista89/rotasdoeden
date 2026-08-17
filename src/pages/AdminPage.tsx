@@ -6,6 +6,8 @@ import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { KycQueue } from "@/components/admin/KycQueue";
+import { VerificationQueue } from "@/components/admin/VerificationQueue";
+import { TerritoryManager } from "@/components/admin/TerritoryManager";
 import { FlaggedMessages } from "@/components/admin/FlaggedMessages";
 import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
@@ -128,6 +130,28 @@ export default function AdminPage() {
               description="Submissões de guias à espera de revisão. Aprova ou rejeita após verificar os documentos."
             />
             <KycQueue />
+          </>
+        )}
+
+        {section === "verificacao" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Verificação"
+              title="Perfis profissionais a verificar"
+              description="Pedidos de verificação com documentos confidenciais. Aprova, recusa e deixa notas para o profissional."
+            />
+            <VerificationQueue />
+          </>
+        )}
+
+        {section === "territorio" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Território"
+              title="Distritos e localidades"
+              description="Gere a lista oficial de distritos e localidades de São Tomé e Príncipe usada nos perfis e experiências."
+            />
+            <TerritoryManager />
           </>
         )}
 

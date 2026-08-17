@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           commission_amount: number | null
@@ -112,6 +142,39 @@ export type Database = {
           },
         ]
       }
+      districts: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flagged_messages: {
         Row: {
           action_taken: string | null
@@ -208,6 +271,44 @@ export type Database = {
         }
         Relationships: []
       }
+      localities: {
+        Row: {
+          created_at: string
+          district_id: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          district_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          district_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "localities_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -245,6 +346,99 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_profiles: {
+        Row: {
+          admin_notes: string | null
+          areas_of_activity: string[]
+          company_name: string | null
+          created_at: string
+          description: string | null
+          district_id: string | null
+          experience_types: string[]
+          gallery_urls: string[]
+          headline: string | null
+          id: string
+          languages: string[]
+          locality_id: string | null
+          professional_type:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          profile_photo_url: string | null
+          suspended: boolean
+          updated_at: string
+          user_id: string
+          verification_expires_at: string | null
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          areas_of_activity?: string[]
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string | null
+          experience_types?: string[]
+          gallery_urls?: string[]
+          headline?: string | null
+          id?: string
+          languages?: string[]
+          locality_id?: string | null
+          professional_type?:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          profile_photo_url?: string | null
+          suspended?: boolean
+          updated_at?: string
+          user_id: string
+          verification_expires_at?: string | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          admin_notes?: string | null
+          areas_of_activity?: string[]
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          district_id?: string | null
+          experience_types?: string[]
+          gallery_urls?: string[]
+          headline?: string | null
+          id?: string
+          languages?: string[]
+          locality_id?: string | null
+          professional_type?:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          profile_photo_url?: string | null
+          suspended?: boolean
+          updated_at?: string
+          user_id?: string
+          verification_expires_at?: string | null
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_profiles_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
             referencedColumns: ["id"]
           },
         ]
@@ -290,10 +484,14 @@ export type Database = {
       }
       services: {
         Row: {
+          additional_info: string | null
+          available_days: string[]
+          available_times: string[]
           category: Database["public"]["Enums"]["service_category"]
           created_at: string
           currency: string
           description: string
+          district_id: string | null
           duration_hours: number
           excludes: string[] | null
           guide_id: string
@@ -301,6 +499,8 @@ export type Database = {
           images: string[]
           includes: string[] | null
           is_active: boolean
+          languages: string[]
+          locality_id: string | null
           max_people: number
           meeting_point: string | null
           min_people: number
@@ -309,10 +509,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          additional_info?: string | null
+          available_days?: string[]
+          available_times?: string[]
           category: Database["public"]["Enums"]["service_category"]
           created_at?: string
           currency?: string
           description: string
+          district_id?: string | null
           duration_hours: number
           excludes?: string[] | null
           guide_id: string
@@ -320,6 +524,8 @@ export type Database = {
           images?: string[]
           includes?: string[] | null
           is_active?: boolean
+          languages?: string[]
+          locality_id?: string | null
           max_people?: number
           meeting_point?: string | null
           min_people?: number
@@ -328,10 +534,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          additional_info?: string | null
+          available_days?: string[]
+          available_times?: string[]
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           currency?: string
           description?: string
+          district_id?: string | null
           duration_hours?: number
           excludes?: string[] | null
           guide_id?: string
@@ -339,6 +549,8 @@ export type Database = {
           images?: string[]
           includes?: string[] | null
           is_active?: boolean
+          languages?: string[]
+          locality_id?: string | null
           max_people?: number
           meeting_point?: string | null
           min_people?: number
@@ -346,7 +558,22 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "services_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -365,6 +592,66 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          created_at: string
+          credential_url: string | null
+          experience_summary: string | null
+          id: string
+          id_document_url: string | null
+          other_document_urls: string[]
+          professional_photo_url: string | null
+          professional_type:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          training_certificate_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_url?: string | null
+          experience_summary?: string | null
+          id?: string
+          id_document_url?: string | null
+          other_document_urls?: string[]
+          professional_photo_url?: string | null
+          professional_type?:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          training_certificate_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_url?: string | null
+          experience_summary?: string | null
+          id?: string
+          id_document_url?: string | null
+          other_document_urls?: string[]
+          professional_photo_url?: string | null
+          professional_type?:
+            | Database["public"]["Enums"]["professional_type"]
+            | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          training_certificate_url?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -430,6 +717,12 @@ export type Database = {
         | "cancelled"
         | "refunded"
       kyc_status: "pending" | "submitted" | "verified" | "rejected"
+      professional_type:
+        | "guia_credenciado"
+        | "guia_local"
+        | "operador_turistico"
+        | "empresa_agencia"
+        | "outro"
       service_category:
         | "tour"
         | "experience"
@@ -444,6 +737,12 @@ export type Database = {
         | "gastronomy"
         | "culture"
         | "nightlife"
+      verification_status:
+        | "not_verified"
+        | "pending"
+        | "verified"
+        | "rejected"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -580,6 +879,13 @@ export const Constants = {
         "refunded",
       ],
       kyc_status: ["pending", "submitted", "verified", "rejected"],
+      professional_type: [
+        "guia_credenciado",
+        "guia_local",
+        "operador_turistico",
+        "empresa_agencia",
+        "outro",
+      ],
       service_category: [
         "tour",
         "experience",
@@ -594,6 +900,13 @@ export const Constants = {
         "gastronomy",
         "culture",
         "nightlife",
+      ],
+      verification_status: [
+        "not_verified",
+        "pending",
+        "verified",
+        "rejected",
+        "expired",
       ],
     },
   },

@@ -84,9 +84,16 @@ export function Navbar() {
                     <DropdownMenuItem onClick={() => navigate("/my-services")}>
                       <Briefcase size={14} className="mr-2" /> {t("nav.myServices")}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/perfil-profissional")}>
+                      <Briefcase size={14} className="mr-2" /> Perfil profissional
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/verificacao")}>
+                      <ShieldCheck size={14} className="mr-2" /> Verificação
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/kyc")}>
                       <ShieldCheck size={14} className="mr-2" /> {t("nav.kyc")}
                     </DropdownMenuItem>
+
                   </>
                 )}
                 {role === "admin" && (
@@ -164,6 +171,16 @@ export function Navbar() {
                         <ShieldCheck size={16} /> {t("nav.kyc")}
                       </Link>
                     </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/perfil-profissional" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                        <Briefcase size={16} /> Perfil profissional
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/verificacao" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                        <ShieldCheck size={16} /> Verificação
+                      </Link>
+                    </SheetClose>
                   </>}
                   {role === "admin" && <SheetClose asChild>
                     <Link to="/admin" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
@@ -171,6 +188,7 @@ export function Navbar() {
                     </Link>
                   </SheetClose>}
                 </>}
+
               </nav>
               <div className="mt-auto flex flex-col gap-2 pb-4">
                 {!user ? <>
