@@ -38,6 +38,7 @@ import ParceirosPage from "./pages/ParceirosPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
 import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
+import SupportConversationPage from "./pages/SupportConversationPage.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,9 @@ const App = () => (
             } />
             <Route path="/messages/:conversationId" element={
               <ProtectedRoute><ConversationPage /></ProtectedRoute>
+            } />
+            <Route path="/support/:conversationId" element={
+              <ProtectedRoute><SupportConversationPage /></ProtectedRoute>
             } />
             <Route path="/admin" element={
               <ProtectedRoute requireRole="admin"><AdminPage /></ProtectedRoute>
