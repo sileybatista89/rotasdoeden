@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, ShieldCheck, Upload } from "lucide-react";
+import { FileWarning, Loader2, MessageSquare, ShieldCheck, Upload } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -25,16 +25,19 @@ export default function VerificationRequestPage() {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [requests, setRequests] = useState<Array<{ id: string; label: string; note: string; status: string }>>([]);
+  const [requestFiles, setRequestFiles] = useState<Record<string, File | null>>({});
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [{ data: prof }, { data: req }] = await Promise.all([
+      const [{ data: prof }, { data: req }, { data: missingDocs }] = await Promise.all([
         supabase.from("professional_profiles")
           .select("professional_type, verification_status").eq("user_id", user.id).maybeSingle(),
         supabase.from("verification_requests")
           .select("status, reviewer_notes").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("document_requests").select("id,label,note,status").eq("user_id", user.id).eq("status", "open").order("created_at"),
       ]);
       if (prof) {
         setHasProfile(true);
@@ -42,6 +45,7 @@ export default function VerificationRequestPage() {
         setStatus(prof.verification_status);
       }
       if (req) setLatestRequest(req);
+      setRequests(missingDocs ?? []);
       setLoading(false);
     })();
   }, [user]);
@@ -51,6 +55,21 @@ export default function VerificationRequestPage() {
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file);
     if (error) throw error;
     return path;
+  }
+
+  async function fulfillRequest(requestId: string) {
+    const file = requestFiles[requestId];
+    if (!file) return toast.error("Escolhe o documento solicitado");
+    setBusy(true);
+    try {
+      const documentUrl = await upload(file, `documento-pedido-${requestId}`);
+      const { error } = await supabase.rpc("fulfill_document_request", { _request_id: requestId, _document_url: documentUrl });
+      if (error) throw error;
+      setRequests((current) => current.filter((request) => request.id !== requestId));
+      toast.success("Documento reenviado para análise");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao reenviar documento");
+    } finally { setBusy(false); }
   }
 
   async function submit(e: React.FormEvent) {
@@ -103,6 +122,19 @@ export default function VerificationRequestPage() {
           <Badge variant="outline">{professionalTypeLabel(profType)}</Badge>
         </div>
 
+        {requests.length > 0 && <section className="border border-secondary/40 bg-secondary/10 rounded-lg p-5 mb-6" aria-labelledby="missing-documents-title">
+          <div className="flex gap-3 mb-4"><FileWarning className="text-secondary-foreground shrink-0" /><div>
+            <h2 id="missing-documents-title" className="font-display text-xl font-semibold text-foreground">Documentos em falta</h2>
+            <p className="text-sm text-muted-foreground">A equipa de verificação precisa dos documentos abaixo para continuar.</p>
+          </div></div>
+          <div className="space-y-4">{requests.map((request) => <div key={request.id} className="bg-card border border-border rounded-lg p-4">
+            <p className="font-medium text-foreground">{request.label}</p><p className="text-sm text-muted-foreground mt-1 mb-3">{request.note}</p>
+            <FileField label="Enviar documento" file={requestFiles[request.id] ?? null} onChange={(file) => setRequestFiles((current) => ({ ...current, [request.id]: file }))} required />
+            <Button className="mt-3" size="sm" disabled={busy} onClick={() => fulfillRequest(request.id)}>Reenviar para análise</Button>
+          </div>)}</div>
+          <Button asChild variant="outline" className="mt-4"><Link to="/messages"><MessageSquare size={16} className="mr-2" /> Falar com o suporte</Link></Button>
+        </section>}
+
         {!hasProfile ? (
           <div className="bg-card border border-border rounded-2xl p-6 text-center">
             <p className="text-foreground mb-4">Cria primeiro o teu perfil profissional.</p>
@@ -113,9 +145,9 @@ export default function VerificationRequestPage() {
             <ShieldCheck className="mx-auto text-primary mb-2" size={40} />
             <p className="font-medium text-foreground">O teu perfil está verificado e visível publicamente.</p>
           </div>
-        ) : latestRequest?.status === "pending" ? (
+        ) : (latestRequest?.status === "pending" || latestRequest?.status === "changes_requested") ? (
           <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-6 text-center">
-            <p className="font-medium text-foreground">Pedido em análise. Recebes uma resposta assim que a revisão terminar.</p>
+             <p className="font-medium text-foreground">{requests.length ? "Aguardamos o reenvio dos documentos indicados acima." : "Pedido em análise. Recebes uma resposta assim que a revisão terminar."}</p>
           </div>
         ) : (
           <form onSubmit={submit} className="bg-card border border-border rounded-2xl p-6 space-y-5">

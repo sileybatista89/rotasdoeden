@@ -104,17 +104,16 @@ export function VerificationQueue() {
     if (error) { setBusy(null); return toast.error(error.message); }
 
     const { error: pErr } = await supabase.from("professional_profiles").update({
-      verification_status: decision,
-      verified_at: decision === "verified" ? new Date().toISOString() : null,
-      verification_expires_at: decision === "verified"
-        ? new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString() : null,
+      verification_status: "rejected",
+      verified_at: null,
+      verification_expires_at: null,
       admin_notes: note,
     }).eq("user_id", r.user_id);
     if (pErr) { setBusy(null); return toast.error(pErr.message); }
 
     await supabase.from("admin_audit_log").insert({
       admin_id: user?.id ?? "",
-      action: decision === "verified" ? "verificar_perfil" : "recusar_perfil",
+      action: "recusar_perfil",
       entity_type: "professional_profiles",
       entity_id: r.id,
       details: { user_id: r.user_id, note },
