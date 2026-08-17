@@ -36,6 +36,8 @@ import MyBookingsPage from "./pages/MyBookingsPage.tsx";
 import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
 import ParceirosPage from "./pages/ParceirosPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
+import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -81,6 +83,12 @@ const App = () => (
             } />
             <Route path="/my-services/:id/edit" element={
               <ProtectedRoute requireRole="guide"><ServiceFormPage /></ProtectedRoute>
+            } />
+            <Route path="/perfil-profissional" element={
+              <ProtectedRoute requireRole="guide"><ProfessionalProfilePage /></ProtectedRoute>
+            } />
+            <Route path="/verificacao" element={
+              <ProtectedRoute requireRole="guide"><VerificationRequestPage /></ProtectedRoute>
             } />
             <Route path="/my-bookings" element={
               <ProtectedRoute><MyBookingsPage /></ProtectedRoute>

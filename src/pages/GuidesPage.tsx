@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
+import { ProfessionalDirectory } from "@/components/professionals/ProfessionalDirectory";
 
 const pillars = [
   { icon: IdCard, title: "Verificação manual de licença", text: "Cada licença é validada com a autoridade competente antes da activação do perfil." },
@@ -36,6 +37,7 @@ export default function GuidesPage() {
       />
       <Navbar />
       <main className="flex-1">
+        <ProfessionalDirectory />
         {/* Hero */}
         <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-20">
           <div className="container max-w-3xl text-center">
