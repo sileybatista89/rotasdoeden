@@ -84,9 +84,16 @@ export function Navbar() {
                     <DropdownMenuItem onClick={() => navigate("/my-services")}>
                       <Briefcase size={14} className="mr-2" /> {t("nav.myServices")}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/perfil-profissional")}>
+                      <Briefcase size={14} className="mr-2" /> Perfil profissional
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/verificacao")}>
+                      <ShieldCheck size={14} className="mr-2" /> Verificação
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/kyc")}>
                       <ShieldCheck size={14} className="mr-2" /> {t("nav.kyc")}
                     </DropdownMenuItem>
+
                   </>
                 )}
                 {role === "admin" && (
