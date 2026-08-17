@@ -17,7 +17,7 @@ export default function VerificationRequestPage() {
   const [profType, setProfType] = useState<ProfessionalType | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
   const [status, setStatus] = useState<VerificationStatus>("not_verified");
-  const [latestRequest, setLatestRequest] = useState<{ status: VerificationStatus; reviewer_notes: string | null } | null>(null);
+  const [latestRequest, setLatestRequest] = useState<{ status: string; reviewer_notes: string | null } | null>(null);
   const [idDoc, setIdDoc] = useState<File | null>(null);
   const [credential, setCredential] = useState<File | null>(null);
   const [training, setTraining] = useState<File | null>(null);
