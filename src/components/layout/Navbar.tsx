@@ -181,8 +181,14 @@ export function Navbar() {
                         <ShieldCheck size={16} /> Verificação
                       </Link>
                     </SheetClose>
-
+                  </>}
+                  {role === "admin" && <SheetClose asChild>
+                    <Link to="/admin" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                      <LayoutDashboard size={16} /> {t("nav.admin")}
+                    </Link>
+                  </SheetClose>}
                 </>}
+
               </nav>
               <div className="mt-auto flex flex-col gap-2 pb-4">
                 {!user ? <>
