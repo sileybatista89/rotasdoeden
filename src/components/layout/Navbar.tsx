@@ -171,12 +171,17 @@ export function Navbar() {
                         <ShieldCheck size={16} /> {t("nav.kyc")}
                       </Link>
                     </SheetClose>
-                  </>}
-                  {role === "admin" && <SheetClose asChild>
-                    <Link to="/admin" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
-                      <LayoutDashboard size={16} /> {t("nav.admin")}
-                    </Link>
-                  </SheetClose>}
+                    <SheetClose asChild>
+                      <Link to="/perfil-profissional" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                        <Briefcase size={16} /> Perfil profissional
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/verificacao" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2">
+                        <ShieldCheck size={16} /> Verificação
+                      </Link>
+                    </SheetClose>
+
                 </>}
               </nav>
               <div className="mt-auto flex flex-col gap-2 pb-4">
