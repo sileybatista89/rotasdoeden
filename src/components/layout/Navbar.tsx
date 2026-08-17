@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/brand/Logo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useT } from "@/i18n/LanguageProvider";
 
 export function Navbar() {
@@ -51,6 +52,7 @@ export function Navbar() {
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-2">
           <LanguageSwitcher />
+          <NotificationCenter />
           {!user ? (
             <>
               <Button asChild variant="ghost" size="sm" className="rounded-full">
@@ -113,6 +115,7 @@ export function Navbar() {
         {/* Mobile actions */}
         <div className="flex md:hidden items-center gap-1">
           <LanguageSwitcher compact />
+          <NotificationCenter />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label={t("nav.menu")}>

@@ -28,8 +28,13 @@ export function ProtectedRoute({
       .select("banned")
       .eq("id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) throw error;
         if (!cancelled) setBanned(data?.banned === true);
+      })
+      .catch((error) => {
+        console.error("Não foi possível validar o estado da conta", error);
+        if (!cancelled) setBanned(false);
       });
     return () => {
       cancelled = true;
