@@ -889,6 +889,10 @@ export type Database = {
         }
         Returns: string
       }
+      fulfill_document_request: {
+        Args: { _document_url: string; _request_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
