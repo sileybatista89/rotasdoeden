@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.admin_list_flagged_messages(integer) FROM PUBLIC, anon;

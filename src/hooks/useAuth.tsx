@@ -27,36 +27,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     // Listener FIRST
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      if (!active) return;
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
         // defer role fetch
-        setTimeout(() => fetchRole(s.user.id), 0);
+        setTimeout(() => { fetchRole(s.user.id).catch(() => setRole("tourist")); }, 0);
       } else {
         setRole(null);
+        setLoading(false);
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(({ data: { session: s }, error }) => {
+      if (error) throw error;
+      if (!active) return;
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) fetchRole(s.user.id).finally(() => setLoading(false));
       else setLoading(false);
+    }).catch((error) => {
+      console.error("Não foi possível restaurar a sessão", error);
+      if (active) { setSession(null); setUser(null); setRole(null); setLoading(false); }
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
   async function fetchRole(uid: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", uid)
       .order("role", { ascending: true })
       .limit(1)
       .maybeSingle();
+    if (error) throw error;
     setRole((data?.role as AppRole) ?? "tourist");
   }
 

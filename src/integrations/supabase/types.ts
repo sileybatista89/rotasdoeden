@@ -175,6 +175,59 @@ export type Database = {
         }
         Relationships: []
       }
+      document_requests: {
+        Row: {
+          created_at: string
+          document_type: string
+          document_url: string | null
+          fulfilled_at: string | null
+          id: string
+          label: string
+          note: string
+          requested_by: string
+          status: string
+          updated_at: string
+          user_id: string
+          verification_request_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          document_url?: string | null
+          fulfilled_at?: string | null
+          id?: string
+          label: string
+          note: string
+          requested_by: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          verification_request_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          document_url?: string | null
+          fulfilled_at?: string | null
+          id?: string
+          label?: string
+          note?: string
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verification_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_verification_request_id_fkey"
+            columns: ["verification_request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flagged_messages: {
         Row: {
           action_taken: string | null
@@ -349,6 +402,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          dedupe_key: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dedupe_key?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       professional_profiles: {
         Row: {
@@ -575,6 +670,85 @@ export type Database = {
           },
         ]
       }
+      support_conversations: {
+        Row: {
+          assigned_admin_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          last_message_at: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+          verification_request_id: string | null
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          last_message_at?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+          verification_request_id?: string | null
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          last_message_at?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+          verification_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_conversations_verification_request_id_fkey"
+            columns: ["verification_request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -698,6 +872,27 @@ export type Database = {
           sender_id: string
         }[]
       }
+      approve_professional_verification: {
+        Args: { _note?: string; _verification_request_id: string }
+        Returns: undefined
+      }
+      create_notification: {
+        Args: {
+          _body: string
+          _dedupe_key?: string
+          _entity_id?: string
+          _entity_type?: string
+          _link?: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      fulfill_document_request: {
+        Args: { _document_url: string; _request_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -707,6 +902,14 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      request_verification_documents: {
+        Args: {
+          _items: Json
+          _message: string
+          _verification_request_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "guide" | "tourist"

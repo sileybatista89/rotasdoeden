@@ -23,14 +23,17 @@ export function ProtectedRoute({
       return;
     }
     let cancelled = false;
-    supabase
-      .from("profiles")
-      .select("banned")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
+    const validateAccount = async () => {
+      try {
+        const { data, error } = await supabase.from("profiles").select("banned").eq("id", user.id).maybeSingle();
+        if (error) throw error;
         if (!cancelled) setBanned(data?.banned === true);
-      });
+      } catch (error) {
+        console.error("Não foi possível validar o estado da conta", error);
+        if (!cancelled) setBanned(false);
+      }
+    };
+    validateAccount();
     return () => {
       cancelled = true;
     };

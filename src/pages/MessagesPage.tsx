@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageSquare, ShieldCheck } from "lucide-react";
+import { Headphones, MessageSquare, ShieldCheck } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,14 +20,15 @@ export default function MessagesPage() {
   const { user } = useAuth();
   const [convs, setConvs] = useState<ConvRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [support, setSupport] = useState<Array<{ id: string; subject: string; last_message_at: string; status: string }>>([]);
 
   async function load() {
     if (!user) return;
-    const { data } = await supabase
+    const [{ data }, { data: supportRows }] = await Promise.all([supabase
       .from("conversations")
       .select("*")
       .or(`tourist_id.eq.${user.id},guide_id.eq.${user.id}`)
-      .order("last_message_at", { ascending: false });
+      .order("last_message_at", { ascending: false }), supabase.from("support_conversations").select("id,subject,last_message_at,status").order("last_message_at", { ascending: false })]);
 
     const rows = (data ?? []) as ConvRow[];
     const ids = Array.from(new Set(rows.flatMap((r) => [r.tourist_id, r.guide_id])));
@@ -55,6 +56,7 @@ export default function MessagesPage() {
       guide: map.get(r.guide_id) as ConvRow["guide"],
       preview: previews.get(r.id),
     })));
+    setSupport(supportRows ?? []);
     setLoading(false);
   }
 
@@ -66,6 +68,8 @@ export default function MessagesPage() {
       .channel("messages-page")
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_conversations" }, load)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_messages" }, load)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user]);
@@ -81,15 +85,19 @@ export default function MessagesPage() {
           <ShieldCheck size={14} className="text-primary" /> Toda a comunicação ocorre dentro da plataforma.
         </p>
 
+        {!loading && support.length > 0 && <section className="mb-7" aria-labelledby="support-title"><h2 id="support-title" className="text-sm font-semibold text-foreground mb-2">Suporte</h2><ul className="space-y-2">{support.map((conversation) => <li key={conversation.id}>
+          <Link to={`/support/${conversation.id}`} className="flex items-center gap-3 bg-card border border-border rounded-lg p-3 hover:border-primary transition-colors"><span className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center"><Headphones size={20} /></span><div className="flex-1 min-w-0"><p className="font-medium text-foreground truncate">{conversation.subject}</p><p className="text-xs text-muted-foreground">Equipa Rotas do Éden · {conversation.status === "open" ? "Em aberto" : "Concluído"}</p></div></Link>
+        </li>)}</ul></section>}
+
         {loading ? (
           <div className="bg-card border border-border rounded-2xl p-12 text-center text-sm text-muted-foreground">A carregar…</div>
-        ) : convs.length === 0 ? (
+        ) : convs.length === 0 && support.length === 0 ? (
           <div className="bg-gradient-to-br from-primary/5 via-card to-secondary/10 border border-border rounded-2xl p-12 text-center">
             <MessageSquare size={32} className="mx-auto text-primary/40 mb-3" />
             <p className="font-display text-lg text-foreground mb-1">Sem conversas ainda</p>
             <p className="text-sm text-muted-foreground">Reserva ou contacta um guia para começar uma conversa.</p>
           </div>
-        ) : (
+        ) : convs.length > 0 ? (
           <ul className="space-y-2">
             {convs.map((c) => {
               const other = user!.id === c.tourist_id ? c.guide : c.tourist;
@@ -114,7 +122,7 @@ export default function MessagesPage() {
               );
             })}
           </ul>
-        )}
+        ) : null}
       </main>
       <Footer />
     </div>

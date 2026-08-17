@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { professionalTypeLabel, type ProfessionalType } from "@/lib/professional";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Req {
   id: string;
@@ -21,13 +22,22 @@ interface Req {
   full_name?: string;
 }
 
+const REQUIRED_DOCS = [
+  { key: "id_document", label: "Documento de identificação" },
+  { key: "tourism_license", label: "Licença / credencial de turismo" },
+  { key: "training_certificate", label: "Certificado de formação" },
+  { key: "commercial_registration", label: "Registo comercial da empresa" },
+] as const;
+
 export function VerificationQueue() {
   const { user } = useAuth();
   const [reqs, setReqs] = useState<Req[]>([]);
   const [signed, setSigned] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [missing, setMissing] = useState<Record<string, string[]>>({});
+  const [busy, setBusy] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     const { data } = await supabase
       .from("verification_requests").select("*").eq("status", "pending")
       .order("created_at", { ascending: false });
@@ -49,37 +59,68 @@ export function VerificationQueue() {
       setSigned(sm);
     }
     setReqs(rows);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  function toggleMissing(requestId: string, key: string) {
+    setMissing((current) => {
+      const selected = current[requestId] ?? [];
+      return { ...current, [requestId]: selected.includes(key) ? selected.filter((item) => item !== key) : [...selected, key] };
+    });
   }
 
-  useEffect(() => { load(); }, []);
+  async function requestDocuments(r: Req) {
+    const selected = missing[r.id] ?? [];
+    const message = notes[r.id]?.trim();
+    if (!selected.length) return toast.error("Seleciona pelo menos um documento em falta");
+    if (!message) return toast.error("Escreve uma mensagem para o profissional");
+    setBusy(r.id);
+    const items = selected.map((key) => ({ document_type: key, label: REQUIRED_DOCS.find((doc) => doc.key === key)?.label ?? key }));
+    const { error } = await supabase.rpc("request_verification_documents", {
+      _verification_request_id: r.id, _items: items, _message: message,
+    });
+    setBusy(null);
+    if (error) return toast.error(error.message);
+    toast.success("Pedido de documentos enviado e conversa de suporte aberta");
+    load();
+  }
 
   async function review(r: Req, decision: "verified" | "rejected") {
     const note = notes[r.id]?.trim() || null;
     if (decision === "rejected" && !note) return toast.error("Indica o motivo da recusa");
 
-    const { error } = await supabase.from("verification_requests").update({
-      status: decision, reviewer_notes: note, reviewed_by: user?.id, reviewed_at: new Date().toISOString(),
-    }).eq("id", r.id);
-    if (error) return toast.error(error.message);
+    setBusy(r.id);
+    if (decision === "verified") {
+      const { error } = await supabase.rpc("approve_professional_verification", { _verification_request_id: r.id, _note: note });
+      setBusy(null);
+      if (error) return toast.error(error.message);
+      toast.success("Perfil verificado");
+      load();
+      return;
+    }
+
+    const { error } = await supabase.from("verification_requests").update({ status: decision, reviewer_notes: note, reviewed_by: user?.id, reviewed_at: new Date().toISOString() }).eq("id", r.id);
+    if (error) { setBusy(null); return toast.error(error.message); }
 
     const { error: pErr } = await supabase.from("professional_profiles").update({
-      verification_status: decision,
-      verified_at: decision === "verified" ? new Date().toISOString() : null,
-      verification_expires_at: decision === "verified"
-        ? new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString() : null,
+      verification_status: "rejected",
+      verified_at: null,
+      verification_expires_at: null,
       admin_notes: note,
     }).eq("user_id", r.user_id);
-    if (pErr) return toast.error(pErr.message);
+    if (pErr) { setBusy(null); return toast.error(pErr.message); }
 
     await supabase.from("admin_audit_log").insert({
-      admin_id: user!.id,
-      action: decision === "verified" ? "verificar_perfil" : "recusar_perfil",
+      admin_id: user?.id ?? "",
+      action: "recusar_perfil",
       entity_type: "professional_profiles",
       entity_id: r.id,
       details: { user_id: r.user_id, note },
     });
 
-    toast.success(decision === "verified" ? "Perfil verificado" : "Pedido recusado");
+    setBusy(null);
+    toast.success("Pedido recusado");
     load();
   }
 
@@ -128,9 +169,21 @@ export function VerificationQueue() {
               value={notes[r.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
               className="mb-3" maxLength={1000} />
 
+            <div className="border border-border rounded-lg p-3 mb-3">
+              <p className="text-sm font-medium text-foreground mb-2">Documentos em falta</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {REQUIRED_DOCS.map((doc) => <label key={doc.key} className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                  <Checkbox checked={(missing[r.id] ?? []).includes(doc.key)} onCheckedChange={() => toggleMissing(r.id, doc.key)} />{doc.label}
+                </label>)}
+              </div>
+              <Button className="mt-3" size="sm" variant="secondary" disabled={busy === r.id} onClick={() => requestDocuments(r)}>
+                Pedir documentos e abrir suporte
+              </Button>
+            </div>
+
             <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="outline" onClick={() => review(r, "rejected")}>Recusar</Button>
-              <Button size="sm" variant="hero" onClick={() => review(r, "verified")}>Verificar</Button>
+              <Button size="sm" variant="outline" disabled={busy === r.id} onClick={() => review(r, "rejected")}>Recusar</Button>
+              <Button size="sm" variant="hero" disabled={busy === r.id} onClick={() => review(r, "verified")}>Verificar</Button>
             </div>
           </div>
         );
