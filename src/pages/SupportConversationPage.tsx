@@ -34,7 +34,7 @@ export default function SupportConversationPage() {
   useEffect(() => {
     load();
     if (!conversationId) return;
-    const channel = supabase.channel(`support:${conversationId}`)
+    const channel = supabase.channel(`support:${conversationId}:${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_messages", filter: `conversation_id=eq.${conversationId}` }, load).subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [conversationId, load]);
