@@ -22,7 +22,7 @@ export function NotificationCenter() {
       if (active && !error) setNotices((data ?? []) as Notice[]);
     };
     load();
-    const channel = supabase.channel(`notificacoes:${user.id}`)
+    const channel = supabase.channel(`notificacoes:${user.id}:${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
     return () => { active = false; supabase.removeChannel(channel); };
   }, [user]);
