@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star, FileText } from "lucide-react";
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
@@ -13,30 +13,76 @@ import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { bookingsPerMonth } from "@/data/mockBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+interface Activity { id: string; icon: "booking" | "doc" | "verification"; title: string; detail: string }
 
 export default function AdminPage() {
   const [section, setSection] = useState<AdminSection>("dashboard");
   const { user } = useAuth();
   const [liveStats, setLiveStats] = useState(defaultStats);
+  const [chart, setChart] = useState<{ month: string; reservas: number }[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [{ count: guides }, { count: bookings }, { count: pendingKyc }] = await Promise.all([
+      const [{ count: guides }, { count: bookingsCount }, { count: pendingKyc }, { count: pendingVerif }] = await Promise.all([
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "guide"),
         supabase.from("bookings").select("id", { count: "exact", head: true }),
         supabase.from("kyc_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+        supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setLiveStats((prev) => prev.map((s, i) => {
-        if (i === 0) return { ...s, value: String(guides ?? 0), delta: "Guias registados" };
-        if (i === 1) return { ...s, value: String(bookings ?? 0), delta: "Reservas totais" };
-        if (i === 2) return { ...s, value: String(pendingKyc ?? 0), delta: "KYC a rever" };
-        return s;
+        if (i === 0) return { ...s, value: String(guides ?? 0) };
+        if (i === 1) return { ...s, value: String(bookingsCount ?? 0) };
+        if (i === 2) return { ...s, value: String(pendingKyc ?? 0) };
+        return { ...s, value: String(pendingVerif ?? 0) };
       }));
+
+      // Reservas por mês — últimos 6 meses, a partir de dados reais
+      const since = new Date();
+      since.setMonth(since.getMonth() - 5, 1);
+      const buckets: { month: string; reservas: number }[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(since.getFullYear(), since.getMonth() + i, 1);
+        buckets.push({ month: MONTH_LABELS[d.getMonth()], reservas: 0 });
+      }
+      const { data: recent } = await supabase
+        .from("bookings")
+        .select("id, service_title, created_at, status")
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: false });
+      (recent ?? []).forEach((b) => {
+        const d = new Date(b.created_at);
+        const idx = (d.getFullYear() - since.getFullYear()) * 12 + d.getMonth() - since.getMonth();
+        if (idx >= 0 && idx < 6) buckets[idx].reservas += 1;
+      });
+      setChart(buckets);
+
+      const [{ data: docs }, { data: verifs }] = await Promise.all([
+        supabase.from("document_requests").select("id, label, status, created_at").order("created_at", { ascending: false }).limit(3),
+        supabase.from("verification_requests").select("id, status, created_at").order("created_at", { ascending: false }).limit(3),
+      ]);
+      const feed: Activity[] = [
+        ...(recent ?? []).slice(0, 3).map((b) => ({
+          id: `b-${b.id}`, icon: "booking" as const, title: "Reserva registada", detail: b.service_title,
+        })),
+        ...(docs ?? []).map((d) => ({
+          id: `d-${d.id}`, icon: "doc" as const,
+          title: d.status === "open" ? "Documento solicitado" : "Documento recebido", detail: d.label,
+        })),
+        ...(verifs ?? []).map((v) => ({
+          id: `v-${v.id}`, icon: "verification" as const,
+          title: "Pedido de verificação", detail: `Estado: ${v.status}`,
+        })),
+      ].slice(0, 6);
+      setActivity(feed);
     })();
   }, []);
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-muted/40 via-background to-primary/5">
