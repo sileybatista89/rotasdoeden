@@ -1,4 +1,4 @@
-import { Users, Calendar, DollarSign, Star } from "lucide-react";
+import { Users, Calendar, ShieldCheck, FileClock } from "lucide-react";
 
 interface Stat {
   label: string;
