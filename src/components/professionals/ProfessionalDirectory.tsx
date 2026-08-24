@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Search, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
+
+
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -66,7 +68,12 @@ export function ProfessionalDirectory() {
     return true;
   }), [pros, names, search, type, district, locality, area]);
 
-  if (loading || pros.length === 0) return null;
+  if (loading) return null;
+
+  // Page-level empty state already explains the situation — avoid duplicating it here.
+  if (pros.length === 0) return null;
+
+
 
   return (
     <section className="py-14 md:py-20 border-b border-border">

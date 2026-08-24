@@ -1,4 +1,4 @@
-import { Users, Calendar, DollarSign, Star } from "lucide-react";
+import { Users, Calendar, ShieldCheck, FileClock } from "lucide-react";
 
 interface Stat {
   label: string;
@@ -46,8 +46,9 @@ export function StatsCards({ stats }: Props) {
 }
 
 export const defaultStats: Stat[] = [
-  { label: "Guias activos", value: "6", delta: "+2 este mês", icon: Users, tone: "primary" },
-  { label: "Reservas pendentes", value: "3", delta: "Requer atenção", icon: Calendar, tone: "secondary" },
-  { label: "Receita (Abr)", value: "€13.2k", delta: "+34% vs Mar", icon: DollarSign, tone: "ocean" },
-  { label: "Rating médio", value: "4.86", delta: "Estável", icon: Star, tone: "muted" },
+  { label: "Guias registados", value: "—", delta: "Contas com papel de guia", icon: Users, tone: "primary" },
+  { label: "Reservas", value: "—", delta: "Total na plataforma", icon: Calendar, tone: "secondary" },
+  { label: "KYC a rever", value: "—", delta: "Submissões pendentes", icon: ShieldCheck, tone: "ocean" },
+  { label: "Verificações pendentes", value: "—", delta: "Perfis à espera de análise", icon: FileClock, tone: "muted" },
 ];
+

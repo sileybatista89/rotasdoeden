@@ -29,9 +29,20 @@ const REQUIRED_DOCS = [
   { key: "commercial_registration", label: "Registo comercial da empresa" },
 ] as const;
 
+interface DocReq {
+  id: string;
+  verification_request_id: string;
+  label: string;
+  note: string;
+  status: string;
+  document_url: string | null;
+  created_at: string;
+}
+
 export function VerificationQueue() {
   const { user } = useAuth();
   const [reqs, setReqs] = useState<Req[]>([]);
+  const [docReqs, setDocReqs] = useState<DocReq[]>([]);
   const [signed, setSigned] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [missing, setMissing] = useState<Record<string, string[]>>({});
@@ -47,19 +58,33 @@ export function VerificationQueue() {
       const map = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
       rows.forEach((r) => (r.full_name = map.get(r.user_id) ?? undefined));
 
-      const paths = rows.flatMap((r) => [
-        r.id_document_url, r.credential_url, r.training_certificate_url, r.professional_photo_url,
-        ...r.other_document_urls,
-      ].filter(Boolean) as string[]);
+      const { data: dr } = await supabase
+        .from("document_requests")
+        .select("id, verification_request_id, label, note, status, document_url, created_at")
+        .in("verification_request_id", rows.map((r) => r.id))
+        .order("created_at", { ascending: false });
+      const docRows = (dr ?? []) as DocReq[];
+      setDocReqs(docRows);
+
+      const paths = [
+        ...rows.flatMap((r) => [
+          r.id_document_url, r.credential_url, r.training_certificate_url, r.professional_photo_url,
+          ...r.other_document_urls,
+        ]),
+        ...docRows.map((d) => d.document_url),
+      ].filter(Boolean) as string[];
       const sm: Record<string, string> = {};
       await Promise.all(paths.map(async (p) => {
         const { data } = await supabase.storage.from("kyc-documents").createSignedUrl(p, 600);
         if (data) sm[p] = data.signedUrl;
       }));
       setSigned(sm);
+    } else {
+      setDocReqs([]);
     }
     setReqs(rows);
   }, []);
+
 
   useEffect(() => { load(); }, [load]);
 
@@ -164,6 +189,34 @@ export function VerificationQueue() {
                 </a>
               ))}
             </div>
+
+            {docReqs.filter((d) => d.verification_request_id === r.id).length > 0 && (
+              <div className="border border-border rounded-lg p-3 mb-3">
+                <p className="text-sm font-medium text-foreground mb-2">Documentos solicitados</p>
+                <ul className="space-y-2">
+                  {docReqs.filter((d) => d.verification_request_id === r.id).map((d) => (
+                    <li key={d.id} className="flex items-center justify-between gap-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="text-foreground truncate">{d.label}</p>
+                        <p className="text-xs text-muted-foreground truncate">{d.note}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs">
+                          {d.status === "open" ? "Aguarda envio" : "Recebido"}
+                        </Badge>
+                        {d.document_url && signed[d.document_url] && (
+                          <a className="text-xs text-primary underline" href={signed[d.document_url]} target="_blank" rel="noreferrer">
+                            Abrir
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+
 
             <Textarea rows={2} placeholder="Notas para o profissional (obrigatório em caso de recusa)"
               value={notes[r.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}

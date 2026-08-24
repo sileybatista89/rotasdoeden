@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star, FileText } from "lucide-react";
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
@@ -13,30 +13,76 @@ import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { bookingsPerMonth } from "@/data/mockBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+interface Activity { id: string; icon: "booking" | "doc" | "verification"; title: string; detail: string }
 
 export default function AdminPage() {
   const [section, setSection] = useState<AdminSection>("dashboard");
   const { user } = useAuth();
   const [liveStats, setLiveStats] = useState(defaultStats);
+  const [chart, setChart] = useState<{ month: string; reservas: number }[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [{ count: guides }, { count: bookings }, { count: pendingKyc }] = await Promise.all([
+      const [{ count: guides }, { count: bookingsCount }, { count: pendingKyc }, { count: pendingVerif }] = await Promise.all([
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "guide"),
         supabase.from("bookings").select("id", { count: "exact", head: true }),
         supabase.from("kyc_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+        supabase.from("verification_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
       ]);
       setLiveStats((prev) => prev.map((s, i) => {
-        if (i === 0) return { ...s, value: String(guides ?? 0), delta: "Guias registados" };
-        if (i === 1) return { ...s, value: String(bookings ?? 0), delta: "Reservas totais" };
-        if (i === 2) return { ...s, value: String(pendingKyc ?? 0), delta: "KYC a rever" };
-        return s;
+        if (i === 0) return { ...s, value: String(guides ?? 0) };
+        if (i === 1) return { ...s, value: String(bookingsCount ?? 0) };
+        if (i === 2) return { ...s, value: String(pendingKyc ?? 0) };
+        return { ...s, value: String(pendingVerif ?? 0) };
       }));
+
+      // Reservas por mês — últimos 6 meses, a partir de dados reais
+      const since = new Date();
+      since.setMonth(since.getMonth() - 5, 1);
+      const buckets: { month: string; reservas: number }[] = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(since.getFullYear(), since.getMonth() + i, 1);
+        buckets.push({ month: MONTH_LABELS[d.getMonth()], reservas: 0 });
+      }
+      const { data: recent } = await supabase
+        .from("bookings")
+        .select("id, service_title, created_at, status")
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: false });
+      (recent ?? []).forEach((b) => {
+        const d = new Date(b.created_at);
+        const idx = (d.getFullYear() - since.getFullYear()) * 12 + d.getMonth() - since.getMonth();
+        if (idx >= 0 && idx < 6) buckets[idx].reservas += 1;
+      });
+      setChart(buckets);
+
+      const [{ data: docs }, { data: verifs }] = await Promise.all([
+        supabase.from("document_requests").select("id, label, status, created_at").order("created_at", { ascending: false }).limit(3),
+        supabase.from("verification_requests").select("id, status, created_at").order("created_at", { ascending: false }).limit(3),
+      ]);
+      const feed: Activity[] = [
+        ...(recent ?? []).slice(0, 3).map((b) => ({
+          id: `b-${b.id}`, icon: "booking" as const, title: "Reserva registada", detail: b.service_title,
+        })),
+        ...(docs ?? []).map((d) => ({
+          id: `d-${d.id}`, icon: "doc" as const,
+          title: d.status === "open" ? "Documento solicitado" : "Documento recebido", detail: d.label,
+        })),
+        ...(verifs ?? []).map((v) => ({
+          id: `v-${v.id}`, icon: "verification" as const,
+          title: "Pedido de verificação", detail: `Estado: ${v.status}`,
+        })),
+      ].slice(0, 6);
+      setActivity(feed);
     })();
   }, []);
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-muted/40 via-background to-primary/5">
@@ -46,12 +92,12 @@ export default function AdminPage() {
         {section === "dashboard" && (
           <div className="space-y-8">
             <AdminSectionHeader
-              eyebrow="Visão geral · Abril 2026"
-              title={`Olá, ${user?.user_metadata?.full_name?.split(" ")[0] ?? "Admin"} 🌿`}
-              description="Acompanha em tempo real o que se passa na plataforma — guias, reservas, KYC e moderação."
+              eyebrow="Visão geral"
+              title={`Olá, ${user?.user_metadata?.full_name?.split(" ")[0] ?? "Admin"}`}
+              description="Acompanha o que se passa na plataforma — guias, reservas, verificações e moderação."
               actions={
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 gap-1">
-                  <Sparkles size={12} /> Live
+                  <Sparkles size={12} /> Dados reais
                 </Badge>
               }
             />
@@ -66,7 +112,7 @@ export default function AdminPage() {
                 </div>
                 <div className="w-full h-72 mt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={bookingsPerMonth}>
+                    <BarChart data={chart}>
                       <defs>
                         <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.95} />
@@ -75,7 +121,7 @@ export default function AdminPage() {
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
                       <XAxis dataKey="month" className="text-xs" stroke="hsl(var(--muted-foreground))" />
-                      <YAxis className="text-xs" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis allowDecimals={false} className="text-xs" stroke="hsl(var(--muted-foreground))" />
                       <Tooltip
                         contentStyle={{
                           background: "hsl(var(--card))",
@@ -90,23 +136,31 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-primary/10 via-card to-secondary/10 border border-border rounded-3xl p-6 shadow-sm">
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
                 <h2 className="font-display font-semibold text-lg text-foreground mb-4">Actividade recente</h2>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0"><CheckCircle2 size={14} className="text-primary" /></span>
-                    <div><p className="text-foreground">Nova reserva confirmada</p><p className="text-xs text-muted-foreground">Mergulho nos Recifes</p></div>
-                  </li>
-              <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-secondary/25 flex items-center justify-center flex-shrink-0"><Star size={14} className="text-secondary-foreground" /></span>
-                    <div><p className="text-foreground">Aguardando primeiras reviews</p><p className="text-xs text-muted-foreground">após reservas concluídas</p></div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-destructive/15 flex items-center justify-center flex-shrink-0"><ShieldAlert size={14} className="text-destructive" /></span>
-                    <div><p className="text-foreground">Verificações KYC em curso</p><p className="text-xs text-muted-foreground">candidaturas em adesão</p></div>
-                  </li>
-                </ul>
+                {activity.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Ainda sem actividade registada. Reservas, pedidos de documentos e verificações aparecem aqui.
+                  </p>
+                ) : (
+                  <ul className="space-y-3 text-sm">
+                    {activity.map((a) => (
+                      <li key={a.id} className="flex items-start gap-3">
+                        <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          {a.icon === "booking" ? <CheckCircle2 size={14} className="text-primary" />
+                            : a.icon === "doc" ? <FileText size={14} className="text-secondary-foreground" />
+                            : <ShieldAlert size={14} className="text-destructive" />}
+                        </span>
+                        <div>
+                          <p className="text-foreground">{a.title}</p>
+                          <p className="text-xs text-muted-foreground">{a.detail}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
+
             </div>
           </div>
         )}
@@ -182,7 +236,7 @@ export default function AdminPage() {
             <AdminSectionHeader
               eyebrow="Operações"
               title="Reservas"
-              description="Histórico completo de reservas (dados de demonstração até integração de pagamentos)."
+              description="Todas as reservas reais da plataforma, com guia, viajante, valor e estado do pagamento."
             />
             <BookingsTable />
           </>

@@ -122,17 +122,28 @@ export default function ExperiencesPage() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16">
+              <div className="text-center py-16 max-w-xl mx-auto">
                 <h3 className="font-display text-2xl font-semibold mb-2">
-                  {services.length === 0 ? "Ainda sem experiências publicadas" : "Sem resultados"}
+                  {services.length === 0
+                    ? "Descubra São Tomé através de experiências locais"
+                    : "Não encontrámos resultados para esta pesquisa"}
                 </h3>
                 <p className="text-muted-foreground mb-6">
                   {services.length === 0
-                    ? "Os primeiros guias parceiros estão a publicar as suas experiências. Volte em breve."
-                    : "Tente ajustar a pesquisa ou os filtros."}
+                    ? "Estamos a selecionar e verificar os primeiros parceiros da Rotas do Éden. As primeiras experiências serão disponibilizadas progressivamente."
+                    : "Tente outra palavra ou limpe os filtros para ver tudo o que está disponível."}
                 </p>
-                <Button asChild variant="outline"><Link to="/guides">Conhecer os guias</Link></Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {services.length > 0 && (
+                    <Button variant="outline" onClick={() => { setSearch(""); setCategory("all"); }}>
+                      Limpar filtros
+                    </Button>
+                  )}
+                  <Button asChild variant="hero"><Link to="/seja-parceiro">Quero ser parceiro</Link></Button>
+                  <Button asChild variant="outline"><Link to="/sobre-sao-tome">Explorar o destino</Link></Button>
+                </div>
               </div>
+
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((s) => (
