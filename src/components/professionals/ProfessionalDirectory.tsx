@@ -66,7 +66,28 @@ export function ProfessionalDirectory() {
     return true;
   }), [pros, names, search, type, district, locality, area]);
 
-  if (loading || pros.length === 0) return null;
+  if (loading) return null;
+
+  if (pros.length === 0) {
+    return (
+      <section className="py-14 md:py-20 border-b border-border">
+        <div className="container max-w-2xl text-center">
+          <h2 className="font-display text-3xl font-bold text-foreground mb-3">
+            Os primeiros guias verificados estão a chegar
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Cada guia, operador ou agência passa por verificação de identidade, licença e experiência antes de
+            aparecer publicamente. Estamos a concluir as primeiras candidaturas.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild variant="hero"><Link to="/seja-parceiro">Quero ser parceiro</Link></Button>
+            <Button asChild variant="outline"><Link to="/sobre-sao-tome">Explorar o destino</Link></Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
 
   return (
     <section className="py-14 md:py-20 border-b border-border">
