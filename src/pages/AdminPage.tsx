@@ -92,12 +92,12 @@ export default function AdminPage() {
         {section === "dashboard" && (
           <div className="space-y-8">
             <AdminSectionHeader
-              eyebrow="Visão geral · Abril 2026"
-              title={`Olá, ${user?.user_metadata?.full_name?.split(" ")[0] ?? "Admin"} 🌿`}
-              description="Acompanha em tempo real o que se passa na plataforma — guias, reservas, KYC e moderação."
+              eyebrow="Visão geral"
+              title={`Olá, ${user?.user_metadata?.full_name?.split(" ")[0] ?? "Admin"}`}
+              description="Acompanha o que se passa na plataforma — guias, reservas, verificações e moderação."
               actions={
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 gap-1">
-                  <Sparkles size={12} /> Live
+                  <Sparkles size={12} /> Dados reais
                 </Badge>
               }
             />
@@ -112,7 +112,7 @@ export default function AdminPage() {
                 </div>
                 <div className="w-full h-72 mt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={bookingsPerMonth}>
+                    <BarChart data={chart}>
                       <defs>
                         <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.95} />
@@ -121,7 +121,7 @@ export default function AdminPage() {
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
                       <XAxis dataKey="month" className="text-xs" stroke="hsl(var(--muted-foreground))" />
-                      <YAxis className="text-xs" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis allowDecimals={false} className="text-xs" stroke="hsl(var(--muted-foreground))" />
                       <Tooltip
                         contentStyle={{
                           background: "hsl(var(--card))",
@@ -136,23 +136,31 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-primary/10 via-card to-secondary/10 border border-border rounded-3xl p-6 shadow-sm">
+              <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
                 <h2 className="font-display font-semibold text-lg text-foreground mb-4">Actividade recente</h2>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0"><CheckCircle2 size={14} className="text-primary" /></span>
-                    <div><p className="text-foreground">Nova reserva confirmada</p><p className="text-xs text-muted-foreground">Mergulho nos Recifes</p></div>
-                  </li>
-              <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-secondary/25 flex items-center justify-center flex-shrink-0"><Star size={14} className="text-secondary-foreground" /></span>
-                    <div><p className="text-foreground">Aguardando primeiras reviews</p><p className="text-xs text-muted-foreground">após reservas concluídas</p></div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-full bg-destructive/15 flex items-center justify-center flex-shrink-0"><ShieldAlert size={14} className="text-destructive" /></span>
-                    <div><p className="text-foreground">Verificações KYC em curso</p><p className="text-xs text-muted-foreground">candidaturas em adesão</p></div>
-                  </li>
-                </ul>
+                {activity.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Ainda sem actividade registada. Reservas, pedidos de documentos e verificações aparecem aqui.
+                  </p>
+                ) : (
+                  <ul className="space-y-3 text-sm">
+                    {activity.map((a) => (
+                      <li key={a.id} className="flex items-start gap-3">
+                        <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          {a.icon === "booking" ? <CheckCircle2 size={14} className="text-primary" />
+                            : a.icon === "doc" ? <FileText size={14} className="text-secondary-foreground" />
+                            : <ShieldAlert size={14} className="text-destructive" />}
+                        </span>
+                        <div>
+                          <p className="text-foreground">{a.title}</p>
+                          <p className="text-xs text-muted-foreground">{a.detail}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
+
             </div>
           </div>
         )}
