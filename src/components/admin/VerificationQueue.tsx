@@ -190,6 +190,34 @@ export function VerificationQueue() {
               ))}
             </div>
 
+            {docReqs.filter((d) => d.verification_request_id === r.id).length > 0 && (
+              <div className="border border-border rounded-lg p-3 mb-3">
+                <p className="text-sm font-medium text-foreground mb-2">Documentos solicitados</p>
+                <ul className="space-y-2">
+                  {docReqs.filter((d) => d.verification_request_id === r.id).map((d) => (
+                    <li key={d.id} className="flex items-center justify-between gap-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="text-foreground truncate">{d.label}</p>
+                        <p className="text-xs text-muted-foreground truncate">{d.note}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-xs">
+                          {d.status === "open" ? "Aguarda envio" : "Recebido"}
+                        </Badge>
+                        {d.document_url && signed[d.document_url] && (
+                          <a className="text-xs text-primary underline" href={signed[d.document_url]} target="_blank" rel="noreferrer">
+                            Abrir
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+
+
             <Textarea rows={2} placeholder="Notas para o profissional (obrigatório em caso de recusa)"
               value={notes[r.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
               className="mb-3" maxLength={1000} />
