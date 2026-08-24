@@ -184,7 +184,10 @@ export type Database = {
           id: string
           label: string
           note: string
+          rejection_reason: string | null
           requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: string
           updated_at: string
           user_id: string
@@ -198,7 +201,10 @@ export type Database = {
           id?: string
           label: string
           note: string
+          rejection_reason?: string | null
           requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -212,7 +218,10 @@ export type Database = {
           id?: string
           label?: string
           note?: string
+          rejection_reason?: string | null
           requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -448,6 +457,8 @@ export type Database = {
       professional_profiles: {
         Row: {
           admin_notes: string | null
+          applied_at: string
+          approved_at: string | null
           areas_of_activity: string[]
           company_name: string | null
           created_at: string
@@ -463,6 +474,8 @@ export type Database = {
             | Database["public"]["Enums"]["professional_type"]
             | null
           profile_photo_url: string | null
+          status: Database["public"]["Enums"]["guide_status"]
+          status_changed_at: string
           suspended: boolean
           updated_at: string
           user_id: string
@@ -473,6 +486,8 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          applied_at?: string
+          approved_at?: string | null
           areas_of_activity?: string[]
           company_name?: string | null
           created_at?: string
@@ -488,6 +503,8 @@ export type Database = {
             | Database["public"]["Enums"]["professional_type"]
             | null
           profile_photo_url?: string | null
+          status?: Database["public"]["Enums"]["guide_status"]
+          status_changed_at?: string
           suspended?: boolean
           updated_at?: string
           user_id: string
@@ -498,6 +515,8 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          applied_at?: string
+          approved_at?: string | null
           areas_of_activity?: string[]
           company_name?: string | null
           created_at?: string
@@ -513,6 +532,8 @@ export type Database = {
             | Database["public"]["Enums"]["professional_type"]
             | null
           profile_photo_url?: string | null
+          status?: Database["public"]["Enums"]["guide_status"]
+          status_changed_at?: string
           suspended?: boolean
           updated_at?: string
           user_id?: string
@@ -599,6 +620,9 @@ export type Database = {
           max_people: number
           meeting_point: string | null
           min_people: number
+          moderated_at: string | null
+          moderation_notes: string | null
+          moderation_status: string
           price_per_person: number
           title: string
           updated_at: string
@@ -624,6 +648,9 @@ export type Database = {
           max_people?: number
           meeting_point?: string | null
           min_people?: number
+          moderated_at?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string
           price_per_person: number
           title: string
           updated_at?: string
@@ -649,6 +676,9 @@ export type Database = {
           max_people?: number
           meeting_point?: string | null
           min_people?: number
+          moderated_at?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string
           price_per_person?: number
           title?: string
           updated_at?: string
@@ -872,6 +902,35 @@ export type Database = {
           sender_id: string
         }[]
       }
+      admin_message_guide: {
+        Args: { _message: string; _subject: string; _user_id: string }
+        Returns: string
+      }
+      admin_moderate_service: {
+        Args: { _approve: boolean; _note?: string; _service_id: string }
+        Returns: undefined
+      }
+      admin_request_document: {
+        Args: {
+          _document_type: string
+          _label: string
+          _message: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      admin_review_document: {
+        Args: { _approve: boolean; _reason?: string; _request_id: string }
+        Returns: undefined
+      }
+      admin_set_guide_status: {
+        Args: {
+          _note?: string
+          _status: Database["public"]["Enums"]["guide_status"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       approve_professional_verification: {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
@@ -919,6 +978,15 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "refunded"
+      guide_status:
+        | "candidatura_recebida"
+        | "em_analise"
+        | "documentacao_pendente"
+        | "verificacao_em_curso"
+        | "aprovado"
+        | "rejeitado"
+        | "suspenso"
+        | "banido"
       kyc_status: "pending" | "submitted" | "verified" | "rejected"
       professional_type:
         | "guia_credenciado"
@@ -1080,6 +1148,16 @@ export const Constants = {
         "completed",
         "cancelled",
         "refunded",
+      ],
+      guide_status: [
+        "candidatura_recebida",
+        "em_analise",
+        "documentacao_pendente",
+        "verificacao_em_curso",
+        "aprovado",
+        "rejeitado",
+        "suspenso",
+        "banido",
       ],
       kyc_status: ["pending", "submitted", "verified", "rejected"],
       professional_type: [
