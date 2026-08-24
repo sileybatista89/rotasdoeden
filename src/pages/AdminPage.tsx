@@ -236,7 +236,7 @@ export default function AdminPage() {
             <AdminSectionHeader
               eyebrow="Operações"
               title="Reservas"
-              description="Histórico completo de reservas (dados de demonstração até integração de pagamentos)."
+              description="Todas as reservas reais da plataforma, com guia, viajante, valor e estado do pagamento."
             />
             <BookingsTable />
           </>
