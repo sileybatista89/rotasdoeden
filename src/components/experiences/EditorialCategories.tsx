@@ -1,39 +1,73 @@
-import praias from "@/assets/optimized/praia-jale-card.webp";
-import trilhos from "@/assets/optimized/pico-cao-grande-card.webp";
-import cacau from "@/assets/optimized/cacau-card.webp";
-import rocas from "@/assets/optimized/roca-card.webp";
-import mar from "@/assets/optimized/biodiversidade-card.webp";
-import gastronomia from "@/assets/optimized/calulu-card.webp";
+import costaMar from "@/assets/real/costa-mar-real.jpeg.asset.json";
+import passeioGruta from "@/assets/real/passeio-gruta-real.jpeg.asset.json";
+import praiaBanana from "@/assets/real/praia-banana-hd.jpg.asset.json";
+import costaFloresta from "@/assets/real/costa-floresta.jpg.asset.json";
+import picoCaoGrande from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
+import cacau from "@/assets/real/cacau-real.jpg.asset.json";
+import roca from "@/assets/real/roca-casa-grande.jpg.asset.json";
 
 const CATEGORIES = [
-  { img: praias, title: "Praias e natureza", text: "Praia Jalé, Praia Banana e enseadas de areia clara no sul da ilha." },
-  { img: trilhos, title: "Trilhos e floresta", text: "Caminhadas até ao Pico Cão Grande e à floresta do Obô, com guia local." },
-  { img: rocas, title: "Roças e história", text: "Agua Izé, Monte Café e a arquitetura das antigas roças de cacau." },
-  { img: cacau, title: "Cacau e café", text: "Da fermentação ao chocolate — visitas a produtores são-tomenses." },
-  { img: mar, title: "Vida marinha", text: "Mergulho, tartarugas em desova e saídas de barco pela costa." },
-  { img: gastronomia, title: "Gastronomia", text: "Calulu, banana cozida, peixe fresco e mesas de família." },
+  {
+    img: passeioGruta.url,
+    title: "Vida Marinha",
+    text: "Conheça a costa a partir do mar, as grutas vulcânicas e as águas do arquipélago.",
+  },
+  {
+    img: praiaBanana.url,
+    title: "Praias e Ilhas",
+    text: "Descubra praias entre coqueiros, pequenas enseadas e ilhéus de origem vulcânica.",
+  },
+  {
+    img: costaFloresta.url,
+    title: "Natureza e Floresta",
+    text: "Explore paisagens onde a floresta tropical encontra diretamente o Atlântico.",
+  },
+  {
+    img: picoCaoGrande.url,
+    title: "Trilhos e Aventura",
+    text: "Conheça os caminhos do Obô e as paisagens em redor do Pico Cão Grande.",
+  },
+  {
+    img: cacau.url,
+    title: "Cacau e Gastronomia",
+    text: "Descubra o cacau são-tomense, os produtos locais e os sabores preparados nas ilhas.",
+  },
+  {
+    img: roca.url,
+    title: "Cultura e Património",
+    text: "Explore as roças históricas, a arquitetura e as tradições vivas das comunidades.",
+  },
 ];
 
 export function EditorialCategories() {
   return (
-    <section className="py-14 border-t border-border">
+    <section className="py-12 md:py-16" aria-labelledby="explore-destino-title">
       <div className="container">
-        <div className="max-w-2xl mb-8">
-          <h2 className="font-display text-3xl font-bold text-foreground mb-2">O que se faz em São Tomé e Príncipe</h2>
-          <p className="text-muted-foreground">
-            Estas são as experiências que estamos a organizar com parceiros locais. Ainda não há reservas abertas em todas
-            as categorias — mostramos apenas o que existe de verdade no destino.
+        <div className="max-w-2xl mb-8 md:mb-10">
+          <span className="eyebrow mb-3">Conheça as ilhas</span>
+          <h2 id="explore-destino-title" className="font-display text-3xl md:text-4xl font-medium text-foreground mb-3">
+            Explore o destino
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Uma introdução ao que pode descobrir em São Tomé e Príncipe. Este conteúdo é inspiracional e não representa
+            experiências disponíveis para reserva.
           </p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {CATEGORIES.map((c) => (
-            <article key={c.title} className="bg-card border border-border rounded-2xl overflow-hidden">
-              <div className="aspect-[4/3] bg-muted overflow-hidden">
-                <img src={c.img} alt={c.title} loading="lazy" className="w-full h-full object-cover" />
+            <article key={c.title} className="group">
+              <div className="aspect-[4/3] bg-muted overflow-hidden rounded-md">
+                <img
+                  src={c.img}
+                  alt={`Fotografia real de ${c.title.toLowerCase()} em São Tomé e Príncipe`}
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                />
               </div>
-              <div className="p-5">
-                <h3 className="font-display font-semibold text-lg text-foreground mb-1">{c.title}</h3>
-                <p className="text-sm text-muted-foreground">{c.text}</p>
+              <div className="pt-4">
+                <p className="text-xs font-semibold uppercase text-primary mb-1">Descubra</p>
+                <h3 className="font-display font-medium text-xl text-foreground mb-1">{c.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>
               </div>
             </article>
           ))}
