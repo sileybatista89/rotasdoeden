@@ -3,7 +3,7 @@ import { LogoMark } from "@/components/brand/Logo";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
+export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "servicos" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
 
 interface Props {
   active: AdminSection;
@@ -16,6 +16,7 @@ const items: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "guias", label: "Guias", icon: Users },
   { id: "kyc", label: "Verificação KYC", icon: ShieldCheck },
   { id: "verificacao", label: "Perfis a verificar", icon: BadgeCheck },
+  { id: "servicos", label: "Moderar serviços", icon: BadgeCheck },
   { id: "territorio", label: "Distritos e localidades", icon: MapPin },
   { id: "reservas", label: "Reservas", icon: Calendar },
   { id: "chats", label: "Moderação Chat", icon: MessageSquare },

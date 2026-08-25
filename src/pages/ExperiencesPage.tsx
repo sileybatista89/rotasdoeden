@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Constants, type Tables } from "@/integrations/supabase/types";
 import { SEO } from "@/components/SEO";
+import { EditorialCategories } from "@/components/experiences/EditorialCategories";
 
 type Service = Tables<"services">;
 type ProfilePub = Tables<"profiles_public">;
@@ -194,6 +195,8 @@ export default function ExperiencesPage() {
             )}
           </div>
         </section>
+
+        {!loading && services.length === 0 && <EditorialCategories />}
       </main>
       <Footer />
     </div>

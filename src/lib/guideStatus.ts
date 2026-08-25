@@ -48,3 +48,14 @@ export function missingForPublication(pro: {
   if (!pro.headline && !pro.description) missing.push("Apresentação");
   return missing;
 }
+
+/** Estado de moderação de um serviço. */
+export const moderationLabel = (s?: string | null) =>
+  s === "approved" ? "Aprovado" : s === "rejected" ? "Alterações pedidas" : "Em revisão";
+
+export const moderationClass = (s?: string | null) =>
+  s === "approved"
+    ? "bg-primary/10 text-primary border-primary/30"
+    : s === "rejected"
+      ? "bg-destructive/10 text-destructive border-destructive/30"
+      : "bg-secondary/20 text-secondary-foreground border-secondary/40";

@@ -25,7 +25,7 @@ export default function VerificationRequestPage() {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [requests, setRequests] = useState<Array<{ id: string; label: string; note: string; status: string }>>([]);
+  const [requests, setRequests] = useState<Array<{ id: string; label: string; note: string; status: string; rejection_reason: string | null }>>([]);
   const [requestFiles, setRequestFiles] = useState<Record<string, File | null>>({});
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function VerificationRequestPage() {
         supabase.from("verification_requests")
           .select("status, reviewer_notes").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("document_requests").select("id,label,note,status").eq("user_id", user.id).eq("status", "open").order("created_at"),
+        supabase.from("document_requests").select("id,label,note,status,rejection_reason").eq("user_id", user.id).in("status", ["open", "rejected"]).order("created_at"),
       ]);
       if (prof) {
         setHasProfile(true);
@@ -125,10 +125,12 @@ export default function VerificationRequestPage() {
         {requests.length > 0 && <section className="border border-secondary/40 bg-secondary/10 rounded-lg p-5 mb-6" aria-labelledby="missing-documents-title">
           <div className="flex gap-3 mb-4"><FileWarning className="text-secondary-foreground shrink-0" /><div>
             <h2 id="missing-documents-title" className="font-display text-xl font-semibold text-foreground">Documentos em falta</h2>
-            <p className="text-sm text-muted-foreground">A equipa de verificação precisa dos documentos abaixo para continuar.</p>
+            <p className="text-sm text-muted-foreground">A equipa de verificação precisa dos documentos abaixo para continuar. Documentos recusados aparecem aqui com o motivo.</p>
           </div></div>
           <div className="space-y-4">{requests.map((request) => <div key={request.id} className="bg-card border border-border rounded-lg p-4">
-            <p className="font-medium text-foreground">{request.label}</p><p className="text-sm text-muted-foreground mt-1 mb-3">{request.note}</p>
+            <p className="font-medium text-foreground">{request.label}</p><p className="text-sm text-muted-foreground mt-1">{request.note}</p>
+            {request.status === "rejected" && request.rejection_reason && <p className="text-sm text-destructive mt-1">Documento recusado: {request.rejection_reason}</p>}
+            <div className="mb-3" />
             <FileField label="Enviar documento" file={requestFiles[request.id] ?? null} onChange={(file) => setRequestFiles((current) => ({ ...current, [request.id]: file }))} required />
             <Button className="mt-3" size="sm" disabled={busy} onClick={() => fulfillRequest(request.id)}>Reenviar para análise</Button>
           </div>)}</div>
