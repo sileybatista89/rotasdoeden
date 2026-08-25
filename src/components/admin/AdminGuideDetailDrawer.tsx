@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   GUIDE_STATUSES, DOCUMENT_TYPES, guideStatusClass, guideStatusLabel,
+  documentStatusClass, documentStatusLabel,
   missingForPublication, type GuideStatus,
 } from "@/lib/guideStatus";
 
