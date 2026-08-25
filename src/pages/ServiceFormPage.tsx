@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { useTerritory } from "@/hooks/useTerritory";
+import { LANGUAGES } from "@/lib/professional";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
@@ -75,6 +77,10 @@ export default function ServiceFormPage() {
   const [excludesText, setExcludesText] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [images, setImages] = useState<string[]>([]);
+  const [districtId, setDistrictId] = useState<string>("");
+  const [localityId, setLocalityId] = useState<string>("");
+  const [languages, setLanguages] = useState<string[]>([]);
+  const { districts, localitiesOf } = useTerritory();
 
   useEffect(() => {
     if (!isEdit || !user) return;
@@ -101,6 +107,9 @@ export default function ServiceFormPage() {
       setExcludesText((data.excludes ?? []).join("\n"));
       setIsActive(data.is_active);
       setImages(data.images ?? []);
+      setDistrictId(data.district_id ?? "");
+      setLocalityId(data.locality_id ?? "");
+      setLanguages(data.languages ?? []);
       setLoading(false);
     })();
   }, [id, isEdit, user, navigate, toast]);
@@ -167,6 +176,9 @@ export default function ServiceFormPage() {
       guide_id: user.id,
       currency: "EUR",
       images,
+      district_id: districtId || null,
+      locality_id: localityId || null,
+      languages,
       includes: includesText.split("\n").map((s) => s.trim()).filter(Boolean),
       excludes: excludesText.split("\n").map((s) => s.trim()).filter(Boolean),
     };
@@ -248,6 +260,38 @@ export default function ServiceFormPage() {
 
           <Card className="p-6 space-y-4">
             <h2 className="font-semibold">Detalhes</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="district">Distrito</Label>
+                <Select value={districtId} onValueChange={(v) => { setDistrictId(v); setLocalityId(""); }}>
+                  <SelectTrigger id="district"><SelectValue placeholder="Escolhe o distrito" /></SelectTrigger>
+                  <SelectContent>
+                    {districts.filter((d) => d.is_active).map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="locality">Localidade</Label>
+                <Select value={localityId} onValueChange={setLocalityId} disabled={!districtId}>
+                  <SelectTrigger id="locality"><SelectValue placeholder={districtId ? "Escolhe a localidade" : "Escolhe primeiro o distrito"} /></SelectTrigger>
+                  <SelectContent>
+                    {localitiesOf(districtId).map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Idiomas da experiência</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {LANGUAGES.map((l) => (
+                  <button key={l} type="button"
+                    onClick={() => setLanguages((cur) => cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l])}
+                    className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${languages.includes(l) ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary"}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div>
               <Label htmlFor="meeting">Ponto de encontro</Label>
               <Input id="meeting" value={meetingPoint} onChange={(e) => setMeetingPoint(e.target.value)} maxLength={300} placeholder="Ex: Praça da Independência, São Tomé" />
