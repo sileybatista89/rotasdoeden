@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Star, Eye, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
+import { Eye, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AdminGuideDetailDrawer, type AdminGuide } from "./AdminGuideDetailDrawer";
+import { guideStatusClass, guideStatusLabel, type GuideStatus } from "@/lib/guideStatus";
 
 export function AdminGuideTable() {
   const [rows, setRows] = useState<AdminGuide[]>([]);
@@ -20,12 +21,16 @@ export function AdminGuideTable() {
     if (guideIds.length === 0) {
       setRows([]); setLoading(false); return;
     }
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url, kyc_status, banned, created_at, country, bio, phone")
-      .in("id", guideIds)
-      .order("created_at", { ascending: false });
-    setRows((profs ?? []) as AdminGuide[]);
+    const [{ data: profs }, { data: pros }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url, kyc_status, banned, created_at, country, bio, phone")
+        .in("id", guideIds)
+        .order("created_at", { ascending: false }),
+      supabase.from("professional_profiles").select("user_id, status").in("user_id", guideIds),
+    ]);
+    const statusByUser = Object.fromEntries((pros ?? []).map((p) => [p.user_id, p.status as GuideStatus]));
+    setRows(((profs ?? []) as AdminGuide[]).map((p) => ({ ...p, guide_status: statusByUser[p.id] ?? null })));
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
@@ -49,6 +54,7 @@ export function AdminGuideTable() {
     load();
   }
 
+
   return (
     <>
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
@@ -57,9 +63,11 @@ export function AdminGuideTable() {
             <TableRow className="bg-muted/40">
               <TableHead>Guia</TableHead>
               <TableHead className="hidden sm:table-cell">País</TableHead>
-              <TableHead>KYC</TableHead>
-              <TableHead className="hidden md:table-cell">Estado</TableHead>
+              <TableHead>Estado do guia</TableHead>
+              <TableHead className="hidden lg:table-cell">KYC</TableHead>
+              <TableHead className="hidden md:table-cell">Conta</TableHead>
               <TableHead className="text-right">Acções</TableHead>
+
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,12 +96,18 @@ export function AdminGuideTable() {
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{g.country ?? "—"}</TableCell>
                 <TableCell>
+                  <Badge variant="outline" className={`text-xs ${guideStatusClass(g.guide_status)}`}>
+                    {guideStatusLabel(g.guide_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
                   {g.kyc_status === "verified" && <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs gap-1"><ShieldCheck size={11} /> Verificado</Badge>}
                   {g.kyc_status === "submitted" && <Badge variant="outline" className="bg-secondary/20 text-secondary-foreground border-secondary/40 text-xs">A rever</Badge>}
                   {g.kyc_status === "pending" && <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-xs">Pendente</Badge>}
                   {g.kyc_status === "rejected" && <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/30 text-xs">Rejeitado</Badge>}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
+
                   {g.banned
                     ? <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/30 text-xs gap-1"><Ban size={11} /> Banido</Badge>
                     : <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">Activo</Badge>}
