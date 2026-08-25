@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, Sparkles, IdCard, Wallet, Users } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -28,6 +30,19 @@ const steps = [
 ];
 
 export default function GuidesPage() {
+  const [hasPublished, setHasPublished] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { count } = await supabase
+        .from("professional_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("verification_status", "verified")
+        .eq("suspended", false);
+      setHasPublished((count ?? 0) > 0);
+    })();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
@@ -37,9 +52,9 @@ export default function GuidesPage() {
       />
       <Navbar />
       <main className="flex-1">
-        <ProfessionalDirectory />
+        {hasPublished && <ProfessionalDirectory />}
         {/* Hero */}
-        <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-20">
+        {hasPublished === false && <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-20">
           <div className="container max-w-3xl text-center">
             <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full mb-5">
               <Sparkles size={12} /> Novos parceiros em adesão
@@ -53,7 +68,7 @@ export default function GuidesPage() {
               comprovada a preencher esta página com perfis sem garantias.
             </p>
           </div>
-        </section>
+        </section>}
 
         {/* Why we wait */}
         <section className="py-16 md:py-20">
