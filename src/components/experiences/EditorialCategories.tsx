@@ -1,6 +1,6 @@
+import costaMar from "@/assets/real/costa-mar-real.jpeg.asset.json";
 import passeioGruta from "@/assets/real/passeio-gruta-real.jpeg.asset.json";
 import praiaBanana from "@/assets/real/praia-banana-hd.jpg.asset.json";
-import costaFloresta from "@/assets/real/costa-floresta.jpg.asset.json";
 import picoCaoGrande from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
 import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 import roca from "@/assets/real/roca-casa-grande.jpg.asset.json";
@@ -17,7 +17,7 @@ const CATEGORIES = [
     text: "Descubra praias entre coqueiros, pequenas enseadas e ilhéus de origem vulcânica.",
   },
   {
-    img: costaFloresta.url,
+    img: costaMar.url,
     title: "Natureza e Floresta",
     text: "Explore paisagens onde a floresta tropical encontra diretamente o Atlântico.",
   },
