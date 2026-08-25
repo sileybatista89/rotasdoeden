@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Clock, Users, MapPin, Sparkles, Search } from "lucide-react";
+import { Clock, Users, MapPin, Search } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
@@ -75,23 +75,31 @@ export default function ExperiencesPage() {
       />
       <Navbar />
       <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-14">
-          <div className="container max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full mb-4">
-              <Sparkles size={12} /> Experiências verificadas
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
+        <section className="border-b border-border py-12 md:py-16">
+          <div className="container max-w-4xl">
+            <span className="eyebrow mb-4">São Tomé e Príncipe</span>
+            <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground mb-4">
               Experiências em São Tomé e Príncipe
             </h1>
-            <p className="text-muted-foreground text-lg">
-              Reserva directamente com guias locais verificados. Pagamento seguro pela plataforma.
+            <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
+              Descubra as ilhas através da natureza, da cultura e do conhecimento local. As ofertas publicadas por parceiros
+              verificados aparecem separadamente quando estão disponíveis.
             </p>
           </div>
         </section>
 
-        {/* Filters */}
-        <section className="border-b border-border bg-card sticky top-16 z-30">
+        <EditorialCategories />
+
+        <section className="border-y border-border bg-card" aria-labelledby="available-experiences-title">
+          <div className="container pt-12 md:pt-16 pb-7">
+            <span className="eyebrow mb-3">Parceiros locais</span>
+            <h2 id="available-experiences-title" className="font-display text-3xl md:text-4xl font-medium text-foreground mb-3">
+              Experiências disponíveis
+            </h2>
+            <p className="text-muted-foreground max-w-2xl">
+              Apenas serviços criados por parceiros reais e aprovados pela equipa da Rotas do Éden são publicados aqui.
+            </p>
+          </div>
           <div className="container py-4 flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -114,8 +122,7 @@ export default function ExperiencesPage() {
           </div>
         </section>
 
-        {/* Results */}
-        <section className="py-12">
+        <section className="py-10 md:py-12">
           <div className="container">
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -124,10 +131,10 @@ export default function ExperiencesPage() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16 max-w-xl mx-auto">
+              <div className="py-8 md:py-10 max-w-2xl">
                 <h3 className="font-display text-2xl font-semibold mb-2">
                   {services.length === 0
-                    ? "Descubra São Tomé através de experiências locais"
+                    ? "Os primeiros parceiros estão a ser selecionados"
                     : "Não encontrámos resultados para esta pesquisa"}
                 </h3>
                 <p className="text-muted-foreground mb-6">
@@ -135,7 +142,7 @@ export default function ExperiencesPage() {
                     ? "Estamos a selecionar e verificar os primeiros parceiros da Rotas do Éden. As primeiras experiências serão disponibilizadas progressivamente."
                     : "Tente outra palavra ou limpe os filtros para ver tudo o que está disponível."}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 mt-5">
                   {services.length > 0 && (
                     <Button variant="outline" onClick={() => { setSearch(""); setCategory("all"); }}>
                       Limpar filtros
@@ -197,7 +204,6 @@ export default function ExperiencesPage() {
           </div>
         </section>
 
-        {!loading && services.length === 0 && <EditorialCategories />}
       </main>
       <Footer />
     </div>
