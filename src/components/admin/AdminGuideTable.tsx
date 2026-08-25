@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Star, Eye, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
+import { Eye, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AdminGuideDetailDrawer, type AdminGuide } from "./AdminGuideDetailDrawer";
+import { guideStatusClass, guideStatusLabel, type GuideStatus } from "@/lib/guideStatus";
 
 export function AdminGuideTable() {
   const [rows, setRows] = useState<AdminGuide[]>([]);
@@ -20,12 +21,16 @@ export function AdminGuideTable() {
     if (guideIds.length === 0) {
       setRows([]); setLoading(false); return;
     }
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url, kyc_status, banned, created_at, country, bio, phone")
-      .in("id", guideIds)
-      .order("created_at", { ascending: false });
-    setRows((profs ?? []) as AdminGuide[]);
+    const [{ data: profs }, { data: pros }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url, kyc_status, banned, created_at, country, bio, phone")
+        .in("id", guideIds)
+        .order("created_at", { ascending: false }),
+      supabase.from("professional_profiles").select("user_id, status").in("user_id", guideIds),
+    ]);
+    const statusByUser = Object.fromEntries((pros ?? []).map((p) => [p.user_id, p.status as GuideStatus]));
+    setRows(((profs ?? []) as AdminGuide[]).map((p) => ({ ...p, guide_status: statusByUser[p.id] ?? null })));
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
@@ -48,6 +53,7 @@ export function AdminGuideTable() {
     toast.success(!g.banned ? "Guia banido" : "Guia desbanido");
     load();
   }
+
 
   return (
     <>
