@@ -96,12 +96,18 @@ export function AdminGuideTable() {
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{g.country ?? "—"}</TableCell>
                 <TableCell>
+                  <Badge variant="outline" className={`text-xs ${guideStatusClass(g.guide_status)}`}>
+                    {guideStatusLabel(g.guide_status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
                   {g.kyc_status === "verified" && <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs gap-1"><ShieldCheck size={11} /> Verificado</Badge>}
                   {g.kyc_status === "submitted" && <Badge variant="outline" className="bg-secondary/20 text-secondary-foreground border-secondary/40 text-xs">A rever</Badge>}
                   {g.kyc_status === "pending" && <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-xs">Pendente</Badge>}
                   {g.kyc_status === "rejected" && <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/30 text-xs">Rejeitado</Badge>}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
+
                   {g.banned
                     ? <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/30 text-xs gap-1"><Ban size={11} /> Banido</Badge>
                     : <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">Activo</Badge>}
