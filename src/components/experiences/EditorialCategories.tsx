@@ -1,4 +1,3 @@
-import costaMar from "@/assets/real/costa-mar-real.jpeg.asset.json";
 import passeioGruta from "@/assets/real/passeio-gruta-real.jpeg.asset.json";
 import praiaBanana from "@/assets/real/praia-banana-hd.jpg.asset.json";
 import costaFloresta from "@/assets/real/costa-floresta.jpg.asset.json";
