@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { VERIFICATION_LABELS, professionalTypeLabel, type ProfessionalType, type VerificationStatus } from "@/lib/professional";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { documentStatusClass, documentStatusLabel } from "@/lib/guideStatus";
 
 export default function VerificationRequestPage() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function VerificationRequestPage() {
         supabase.from("verification_requests")
           .select("status, reviewer_notes").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("document_requests").select("id,label,note,status,rejection_reason").eq("user_id", user.id).in("status", ["open", "rejected"]).order("created_at"),
+        supabase.from("document_requests").select("id,label,note,status,rejection_reason").eq("user_id", user.id).neq("status", "approved").order("created_at"),
       ]);
       if (prof) {
         setHasProfile(true);
@@ -65,7 +66,7 @@ export default function VerificationRequestPage() {
       const documentUrl = await upload(file, `documento-pedido-${requestId}`);
       const { error } = await supabase.rpc("fulfill_document_request", { _request_id: requestId, _document_url: documentUrl });
       if (error) throw error;
-      setRequests((current) => current.filter((request) => request.id !== requestId));
+      setRequests((current) => current.map((request) => request.id === requestId ? { ...request, status: "fulfilled", rejection_reason: null } : request));
       toast.success("Documento reenviado para análise");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao reenviar documento");

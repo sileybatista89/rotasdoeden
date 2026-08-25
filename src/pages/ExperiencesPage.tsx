@@ -36,6 +36,7 @@ export default function ExperiencesPage() {
         .from("services")
         .select("*")
         .eq("is_active", true)
+        .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
       const list = svcs ?? [];
       setServices(list);

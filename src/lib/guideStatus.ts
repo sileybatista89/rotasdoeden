@@ -59,3 +59,24 @@ export const moderationClass = (s?: string | null) =>
     : s === "rejected"
       ? "bg-destructive/10 text-destructive border-destructive/30"
       : "bg-secondary/20 text-secondary-foreground border-secondary/40";
+
+/** Ciclo de vida de um documento pedido pela equipa. */
+export const DOC_STATUS_LABELS: Record<string, string> = {
+  open: "Solicitado",
+  fulfilled: "Enviado",
+  in_review: "Em análise",
+  approved: "Aprovado",
+  rejected: "Recusado",
+  expired: "Expirado",
+};
+
+export const documentStatusLabel = (s?: string | null) => DOC_STATUS_LABELS[s ?? ""] ?? "Pendente";
+
+export const documentStatusClass = (s?: string | null) =>
+  s === "approved"
+    ? "bg-primary/10 text-primary border-primary/30"
+    : s === "rejected" || s === "expired"
+      ? "bg-destructive/10 text-destructive border-destructive/30"
+      : s === "fulfilled" || s === "in_review"
+        ? "bg-secondary/20 text-secondary-foreground border-secondary/40"
+        : "bg-muted text-muted-foreground border-border";
