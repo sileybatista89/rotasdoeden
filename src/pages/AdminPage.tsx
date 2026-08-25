@@ -7,6 +7,7 @@ import { BookingsTable } from "@/components/admin/BookingsTable";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { KycQueue } from "@/components/admin/KycQueue";
 import { VerificationQueue } from "@/components/admin/VerificationQueue";
+import { ServiceModeration } from "@/components/admin/ServiceModeration";
 import { TerritoryManager } from "@/components/admin/TerritoryManager";
 import { FlaggedMessages } from "@/components/admin/FlaggedMessages";
 import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
@@ -195,6 +196,17 @@ export default function AdminPage() {
               description="Pedidos de verificação com documentos confidenciais. Aprova, recusa e deixa notas para o profissional."
             />
             <VerificationQueue />
+          </>
+        )}
+
+        {section === "servicos" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Qualidade"
+              title="Moderação de serviços"
+              description="Revê as experiências criadas pelos guias. Só serviços aprovados ficam visíveis publicamente."
+            />
+            <ServiceModeration />
           </>
         )}
 
