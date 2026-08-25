@@ -136,8 +136,18 @@ export default function MyServicesPage() {
                     <Badge variant={svc.is_active ? "default" : "secondary"}>
                       {svc.is_active ? "Ativo" : "Inativo"}
                     </Badge>
+                    <Badge variant="outline" className={moderationClass(svc.moderation_status)}>
+                      {moderationLabel(svc.moderation_status)}
+                    </Badge>
                     <Badge variant="outline">{categoryLabels[svc.category] ?? svc.category}</Badge>
                   </div>
+                  {svc.moderation_status === "rejected" && svc.moderation_notes && (
+                    <p className="text-xs text-destructive mt-1">Alterações pedidas: {svc.moderation_notes}</p>
+                  )}
+                  {svc.moderation_status === "pending" && (
+                    <p className="text-xs text-muted-foreground mt-1">Em revisão pela equipa — fica público após aprovação.</p>
+                  )}
+
                   <p className="text-sm text-muted-foreground mt-1">
                     {svc.price_per_person.toFixed(2)} {svc.currency} / pessoa · {svc.duration_hours}h · {svc.min_people}-{svc.max_people} pessoas
                   </p>
