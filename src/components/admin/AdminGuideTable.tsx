@@ -63,9 +63,11 @@ export function AdminGuideTable() {
             <TableRow className="bg-muted/40">
               <TableHead>Guia</TableHead>
               <TableHead className="hidden sm:table-cell">País</TableHead>
-              <TableHead>KYC</TableHead>
-              <TableHead className="hidden md:table-cell">Estado</TableHead>
+              <TableHead>Estado do guia</TableHead>
+              <TableHead className="hidden lg:table-cell">KYC</TableHead>
+              <TableHead className="hidden md:table-cell">Conta</TableHead>
               <TableHead className="text-right">Acções</TableHead>
+
             </TableRow>
           </TableHeader>
           <TableBody>
