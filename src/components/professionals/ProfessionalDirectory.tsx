@@ -30,6 +30,7 @@ export function ProfessionalDirectory() {
   const { districts, localities, localitiesOf } = useTerritory();
   const [pros, setPros] = useState<Pro[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [avatars, setAvatars] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [type, setType] = useState<string>(ALL);
@@ -48,8 +49,9 @@ export function ProfessionalDirectory() {
       const rows = (data ?? []) as Pro[];
       setPros(rows);
       if (rows.length) {
-        const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", rows.map((r) => r.user_id));
+        const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", rows.map((r) => r.user_id));
         setNames(Object.fromEntries((profs ?? []).map((p) => [p.id, p.full_name ?? "Profissional"])));
+        setAvatars(Object.fromEntries((profs ?? []).map((p) => [p.id, p.avatar_url])));
       }
       setLoading(false);
     })();
@@ -130,10 +132,14 @@ export function ProfessionalDirectory() {
             {filtered.map((p) => (
               <Link key={p.id} to={`/guides/${p.user_id}`}
                 className="group bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-44 bg-muted overflow-hidden">
-                  {p.profile_photo_url && (
-                    <img src={p.profile_photo_url} alt={names[p.user_id] ?? "Profissional verificado"}
+                <div className="h-44 bg-muted overflow-hidden flex items-center justify-center">
+                  {(p.profile_photo_url || avatars[p.user_id]) ? (
+                    <img src={(p.profile_photo_url || avatars[p.user_id]) as string} alt={names[p.user_id] ?? "Profissional verificado"}
                       loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <span className="font-display text-4xl text-muted-foreground">
+                      {(names[p.user_id] ?? p.company_name ?? "?").charAt(0).toUpperCase()}
+                    </span>
                   )}
                 </div>
                 <div className="p-5">

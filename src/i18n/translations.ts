@@ -51,6 +51,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18 dias",
     "stats.stay.label": "Estadia média",
     "stats.stay.sub": "Tempo para explorar",
+    "stats.source": "Fonte: dados oficiais de turismo de São Tomé e Príncipe (2025). Não são métricas da plataforma.",
 
     "coming.eyebrow": "Novos parceiros em adesão",
     "coming.title": "Estamos a selecionar os primeiros guias locais verificados",
@@ -205,6 +206,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18 days",
     "stats.stay.label": "Average stay",
     "stats.stay.sub": "Time to truly explore",
+    "stats.source": "Source: official São Tomé and Príncipe tourism data (2025). These are not platform metrics.",
 
     "coming.eyebrow": "New partners onboarding",
     "coming.title": "We're handpicking the first verified local guides",
@@ -359,6 +361,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18 jours",
     "stats.stay.label": "Séjour moyen",
     "stats.stay.sub": "Le temps d'explorer",
+    "stats.source": "Source : données officielles du tourisme de São Tomé-et-Principe (2025). Ce ne sont pas des statistiques de la plateforme.",
 
     "coming.eyebrow": "Nouveaux partenaires en adhésion",
     "coming.title": "Nous sélectionnons les premiers guides locaux vérifiés",
@@ -502,6 +505,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18 Tage",
     "stats.stay.label": "Durchschnittlicher Aufenthalt",
     "stats.stay.sub": "Zeit zum Erkunden",
+    "stats.source": "Quelle: offizielle Tourismusdaten von São Tomé und Príncipe (2025). Keine Plattformkennzahlen.",
 
     "coming.eyebrow": "Neue Partner in Aufnahme",
     "coming.title": "Wir wählen sorgfältig die ersten verifizierten Guides aus",
@@ -645,6 +649,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18 天",
     "stats.stay.label": "平均停留",
     "stats.stay.sub": "充分探索的时间",
+    "stats.source": "来源：圣多美和普林西比官方旅游数据（2025）。非平台数据。",
 
     "coming.eyebrow": "新伙伴加入中",
     "coming.title": "我们正在精心挑选首批本地向导",
@@ -788,6 +793,7 @@ export const translations: Record<LangCode, Dict> = {
     "stats.stay.value": "18일",
     "stats.stay.label": "평균 체류",
     "stats.stay.sub": "충분히 탐험할 시간",
+    "stats.source": "출처: 상투메 프린시페 공식 관광 통계(2025). 플랫폼 지표가 아닙니다.",
 
     "coming.eyebrow": "새 파트너 모집 중",
     "coming.title": "최초의 검증된 현지 가이드를 선별하고 있습니다",

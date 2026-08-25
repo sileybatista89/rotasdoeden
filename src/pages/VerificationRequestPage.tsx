@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { VERIFICATION_LABELS, professionalTypeLabel, type ProfessionalType, type VerificationStatus } from "@/lib/professional";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { documentStatusClass, documentStatusLabel } from "@/lib/guideStatus";
 
 export default function VerificationRequestPage() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function VerificationRequestPage() {
         supabase.from("verification_requests")
           .select("status, reviewer_notes").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("document_requests").select("id,label,note,status,rejection_reason").eq("user_id", user.id).in("status", ["open", "rejected"]).order("created_at"),
+        supabase.from("document_requests").select("id,label,note,status,rejection_reason").eq("user_id", user.id).neq("status", "approved").order("created_at"),
       ]);
       if (prof) {
         setHasProfile(true);
@@ -65,7 +66,7 @@ export default function VerificationRequestPage() {
       const documentUrl = await upload(file, `documento-pedido-${requestId}`);
       const { error } = await supabase.rpc("fulfill_document_request", { _request_id: requestId, _document_url: documentUrl });
       if (error) throw error;
-      setRequests((current) => current.filter((request) => request.id !== requestId));
+      setRequests((current) => current.map((request) => request.id === requestId ? { ...request, status: "fulfilled", rejection_reason: null } : request));
       toast.success("Documento reenviado para análise");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao reenviar documento");
@@ -124,15 +125,23 @@ export default function VerificationRequestPage() {
 
         {requests.length > 0 && <section className="border border-secondary/40 bg-secondary/10 rounded-lg p-5 mb-6" aria-labelledby="missing-documents-title">
           <div className="flex gap-3 mb-4"><FileWarning className="text-secondary-foreground shrink-0" /><div>
-            <h2 id="missing-documents-title" className="font-display text-xl font-semibold text-foreground">Documentos em falta</h2>
-            <p className="text-sm text-muted-foreground">A equipa de verificação precisa dos documentos abaixo para continuar. Documentos recusados aparecem aqui com o motivo.</p>
+            <h2 id="missing-documents-title" className="font-display text-xl font-semibold text-foreground">Documentos pedidos pela equipa</h2>
+            <p className="text-sm text-muted-foreground">Cada documento tem o seu estado. Os recusados aparecem com o motivo e podes voltar a enviá-los.</p>
           </div></div>
           <div className="space-y-4">{requests.map((request) => <div key={request.id} className="bg-card border border-border rounded-lg p-4">
-            <p className="font-medium text-foreground">{request.label}</p><p className="text-sm text-muted-foreground mt-1">{request.note}</p>
-            {request.status === "rejected" && request.rejection_reason && <p className="text-sm text-destructive mt-1">Documento recusado: {request.rejection_reason}</p>}
-            <div className="mb-3" />
-            <FileField label="Enviar documento" file={requestFiles[request.id] ?? null} onChange={(file) => setRequestFiles((current) => ({ ...current, [request.id]: file }))} required />
-            <Button className="mt-3" size="sm" disabled={busy} onClick={() => fulfillRequest(request.id)}>Reenviar para análise</Button>
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <p className="font-medium text-foreground">{request.label}</p>
+              <Badge variant="outline" className={`text-xs ${documentStatusClass(request.status)}`}>{documentStatusLabel(request.status)}</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">{request.note}</p>
+            {request.rejection_reason && <p className="text-sm text-destructive mt-1">Motivo da recusa: {request.rejection_reason}</p>}
+            {["open", "rejected", "expired"].includes(request.status) ? (<>
+              <div className="mb-3" />
+              <FileField label="Enviar documento" file={requestFiles[request.id] ?? null} onChange={(file) => setRequestFiles((current) => ({ ...current, [request.id]: file }))} required />
+              <Button className="mt-3" size="sm" disabled={busy} onClick={() => fulfillRequest(request.id)}>Enviar para análise</Button>
+            </>) : (
+              <p className="text-sm text-muted-foreground mt-2">Documento entregue — a equipa está a analisar.</p>
+            )}
           </div>)}</div>
           <Button asChild variant="outline" className="mt-4"><Link to="/messages"><MessageSquare size={16} className="mr-2" /> Falar com o suporte</Link></Button>
         </section>}

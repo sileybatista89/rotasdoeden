@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { missingForPublication } from "@/lib/guideStatus";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -172,6 +173,25 @@ export default function ProfessionalProfilePage() {
         <p className="text-sm text-muted-foreground mb-6">
           Este é o perfil que os turistas veem. Fica público apenas depois de verificado pela nossa equipa.
         </p>
+
+        {(() => {
+          const missing = missingForPublication({
+            profile_photo_url: form.profile_photo_url || null,
+            district_id: form.district_id || null,
+            languages: form.languages,
+            headline: form.headline || null,
+            description: form.description || null,
+          });
+          if (status === "verified" || missing.length === 0) return null;
+          return (
+            <div className="mb-6 rounded-2xl border border-secondary/40 bg-secondary/10 p-4 text-sm text-foreground">
+              <strong className="block mb-1">Falta preencher para o perfil poder ser publicado</strong>
+              <ul className="list-disc pl-5 text-muted-foreground">
+                {missing.map((m) => <li key={m}>{m}</li>)}
+              </ul>
+            </div>
+          );
+        })()}
 
         {adminNotes && status === "rejected" && (
           <div className="mb-6 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-foreground">

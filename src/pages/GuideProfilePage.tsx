@@ -27,6 +27,7 @@ export default function GuideProfilePage() {
   const { id } = useParams();
   const [pro, setPro] = useState<Pro | null>(null);
   const [name, setName] = useState<string>("");
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,8 +42,9 @@ export default function GuideProfilePage() {
         .maybeSingle();
       if (data) {
         setPro(data as unknown as Pro);
-        const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", data.user_id).maybeSingle();
+        const { data: prof } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", data.user_id).maybeSingle();
         setName(prof?.full_name ?? "Profissional");
+        setAvatar(prof?.avatar_url ?? null);
       }
       setLoading(false);
     })();
@@ -96,9 +98,11 @@ export default function GuideProfilePage() {
       <main className="flex-1">
         <section className="border-b border-border bg-muted/20 py-10">
           <div className="container flex flex-col sm:flex-row gap-6 items-start">
-            <div className="w-28 h-28 rounded-2xl overflow-hidden bg-muted border border-border flex-shrink-0">
-              {pro.profile_photo_url && (
-                <img src={pro.profile_photo_url} alt={title} className="w-full h-full object-cover" width={224} height={224} />
+            <div className="w-28 h-28 rounded-2xl overflow-hidden bg-muted border border-border flex-shrink-0 flex items-center justify-center">
+              {(pro.profile_photo_url || avatar) ? (
+                <img src={(pro.profile_photo_url || avatar) as string} alt={title} className="w-full h-full object-cover" width={224} height={224} />
+              ) : (
+                <span className="font-display text-3xl text-muted-foreground">{(title ?? "?").charAt(0).toUpperCase()}</span>
               )}
             </div>
             <div>

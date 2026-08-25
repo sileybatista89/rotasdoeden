@@ -34,6 +34,7 @@ export default function ExperienceDetailPage() {
         .select("*")
         .eq("id", id)
         .eq("is_active", true)
+        .eq("moderation_status", "approved")
         .maybeSingle();
       setService(svc);
       if (svc) {

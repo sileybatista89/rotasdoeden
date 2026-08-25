@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   GUIDE_STATUSES, DOCUMENT_TYPES, guideStatusClass, guideStatusLabel,
+  documentStatusClass, documentStatusLabel,
   missingForPublication, type GuideStatus,
 } from "@/lib/guideStatus";
 
@@ -270,18 +271,16 @@ export function AdminGuideDetailDrawer({
               <div key={d.id} className="rounded-xl border border-border p-4 space-y-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <p className="font-medium text-foreground text-sm">{d.label}</p>
-                  <Badge variant="outline" className="text-xs">{
-                    d.status === "open" ? "Por enviar" :
-                    d.status === "submitted" ? "Por rever" :
-                    d.status === "approved" ? "Aprovado" : "Recusado"
-                  }</Badge>
+                  <Badge variant="outline" className={`text-xs ${documentStatusClass(d.status)}`}>
+                    {documentStatusLabel(d.status)}
+                  </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{d.note}</p>
                 {d.rejection_reason && <p className="text-xs text-destructive">Motivo da recusa: {d.rejection_reason}</p>}
                 {d.document_url && signed[d.document_url] && (
                   <a href={signed[d.document_url]} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Abrir documento</a>
                 )}
-                {d.status === "submitted" && (
+                {(d.status === "fulfilled" || d.status === "in_review") && (
                   <div className="flex gap-2 pt-1">
                     <Button size="sm" disabled={busy} onClick={() => run(
                       async () => await supabase.rpc("admin_review_document", { _request_id: d.id, _approve: true }),
@@ -292,6 +291,12 @@ export function AdminGuideDetailDrawer({
                       if (!reason) return toast.error("Indica o motivo da recusa");
                       void run(async () => await supabase.rpc("admin_review_document", { _request_id: d.id, _approve: false, _reason: reason }), "Documento recusado");
                     }}><X size={14} className="mr-1" /> Recusar</Button>
+                    {d.status === "fulfilled" && (
+                      <Button size="sm" variant="ghost" disabled={busy} onClick={() => run(
+                        async () => await supabase.rpc("admin_set_document_status", { _request_id: d.id, _status: "in_review" }),
+                        "Documento marcado como em análise",
+                      )}>Em análise</Button>
+                    )}
                   </div>
                 )}
               </div>

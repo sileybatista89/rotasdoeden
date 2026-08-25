@@ -923,6 +923,10 @@ export type Database = {
         Args: { _approve: boolean; _reason?: string; _request_id: string }
         Returns: undefined
       }
+      admin_set_document_status: {
+        Args: { _request_id: string; _status: string }
+        Returns: undefined
+      }
       admin_set_guide_status: {
         Args: {
           _note?: string

@@ -6,18 +6,17 @@ export function StatsSection() {
   const stats = [
     { value: t("stats.visitors.value"), label: t("stats.visitors.label"), sublabel: t("stats.visitors.sub") },
     { value: t("stats.pt.value"), label: t("stats.pt.label"), sublabel: t("stats.pt.sub") },
-    { value: t("stats.stay.value"), label: t("stats.stay.label"), sublabel: t("stats.stay.sub") },
   ];
 
   return (
     <section className="bg-card border-b border-border">
       <div className="container py-14 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2">
           {stats.map((stat, i) => (
             <Reveal
               key={i}
               delay={i * 110}
-              className={`py-8 md:py-0 md:px-10 first:md:pl-0 last:md:pr-0 border-b md:border-b-0 md:border-r border-border last:border-0 first:pt-0 last:pb-0`}
+              className="py-8 md:py-0 md:px-10 first:md:pl-0 last:md:pr-0 border-b md:border-b-0 md:border-r border-border last:border-0 first:pt-0 last:pb-0"
             >
               <p className="font-display text-5xl md:text-6xl font-light text-foreground leading-none tracking-tight">
                 {stat.value}
@@ -31,6 +30,7 @@ export function StatsSection() {
             </Reveal>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground mt-10">{t("stats.source")}</p>
       </div>
     </section>
   );
