@@ -136,7 +136,7 @@ export default function VerificationRequestPage() {
             <h2 id="missing-documents-title" className="font-display text-xl font-semibold text-foreground">Documentos pedidos pela equipa</h2>
             <p className="text-sm text-muted-foreground">Cada documento tem o seu estado. Os recusados aparecem com o motivo e podes voltar a enviá-los.</p>
           </div></div>
-          <div className="space-y-4">{requests.map((request) => <div key={request.id} className="bg-card border border-border rounded-lg p-4">
+          <div className="space-y-4">{requests.map((request) => <div key={request.id} id={`doc-${request.id}`} className={`bg-card border rounded-lg p-4 transition-colors ${focusedDoc === request.id ? "border-primary ring-2 ring-primary/30" : "border-border"}`}>
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <p className="font-medium text-foreground">{request.label}</p>
               <Badge variant="outline" className={`text-xs ${documentStatusClass(request.status)}`}>{documentStatusLabel(request.status)}</Badge>
