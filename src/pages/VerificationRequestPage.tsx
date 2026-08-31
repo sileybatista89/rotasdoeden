@@ -28,6 +28,14 @@ export default function VerificationRequestPage() {
   const [busy, setBusy] = useState(false);
   const [requests, setRequests] = useState<Array<{ id: string; label: string; note: string; status: string; rejection_reason: string | null }>>([]);
   const [requestFiles, setRequestFiles] = useState<Record<string, File | null>>({});
+  const [searchParams] = useSearchParams();
+  const focusedDoc = searchParams.get("doc");
+
+  useEffect(() => {
+    if (!focusedDoc || loading) return;
+    const node = document.getElementById(`doc-${focusedDoc}`);
+    node?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusedDoc, loading, requests.length]);
 
   useEffect(() => {
     if (!user) return;
