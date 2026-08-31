@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { VERIFICATION_LABELS, professionalTypeLabel, type ProfessionalType, type VerificationStatus } from "@/lib/professional";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { documentStatusClass, documentStatusLabel } from "@/lib/guideStatus";
 
 export default function VerificationRequestPage() {
