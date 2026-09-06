@@ -16,6 +16,14 @@
 - [x] Ações: aceitar / em análise / rejeitar (nota) / expirar (nota) + auditoria
 - [x] Testes, typecheck, verificação desktop/mobile; sem agentes ativos nem dados fictícios
 
+## Fase 5 — Content Agent v1 (concluída)
+- [x] Migrações: content_items, content_versions, content_sources, content_reviews, content_publications, content_cache
+- [x] RPCs: content_save_draft, content_cache_get/put, content_stats, admin_set_content_status, admin_restore_content_version
+- [x] Módulo puro content.ts: elegibilidade da oportunidade, parsing estruturado, SEO, controlo de qualidade anti-invenção
+- [x] Edge function ai-content: fontes internas reais, outline+draft com abstração de fornecedor, cache, custos
+- [x] Admin "Conteúdo IA": resumo, filtros, lista paginada, detalhe (texto/fontes/versões/histórico/execução), aprovar/rejeitar/arquivar/repor versão
+- [x] 84 testes a passar; sem cron, sem publicação automática, sem alterações ao site público
+
 ## Próximas fases (requerem autorização)
-- [ ] Content / Acquisition / Conversion agents
+- [ ] Acquisition / Conversion agents
 
