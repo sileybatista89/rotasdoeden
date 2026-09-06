@@ -633,39 +633,51 @@ export type Database = {
       }
       discovery_opportunity_history: {
         Row: {
+          changed_by: string | null
           confidence_score: number | null
           evidence_type: string | null
           id: string
           metrics: Json
+          note: string | null
           opportunity_id: string
           opportunity_score: number | null
+          previous_status: string | null
           recorded_at: string
           run_id: string | null
           source: string | null
+          status: string | null
           task_id: string | null
         }
         Insert: {
+          changed_by?: string | null
           confidence_score?: number | null
           evidence_type?: string | null
           id?: string
           metrics?: Json
+          note?: string | null
           opportunity_id: string
           opportunity_score?: number | null
+          previous_status?: string | null
           recorded_at?: string
           run_id?: string | null
           source?: string | null
+          status?: string | null
           task_id?: string | null
         }
         Update: {
+          changed_by?: string | null
           confidence_score?: number | null
           evidence_type?: string | null
           id?: string
           metrics?: Json
+          note?: string | null
           opportunity_id?: string
           opportunity_score?: number | null
+          previous_status?: string | null
           recorded_at?: string
           run_id?: string | null
           source?: string | null
+          status?: string | null
           task_id?: string | null
         }
         Relationships: [
@@ -1471,6 +1483,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_opportunity_status: {
+        Args: { _note?: string; _opportunity_id: string; _status: string }
+        Returns: undefined
+      }
       agent_claim_task: {
         Args: { _limit?: number }
         Returns: {
@@ -1561,6 +1577,24 @@ export type Database = {
         Returns: undefined
       }
       discovery_save_opportunity: { Args: { _payload: Json }; Returns: string }
+      discovery_stats: {
+        Args: never
+        Returns: {
+          aceites: number
+          avg_confidence: number
+          avg_cost: number
+          avg_score: number
+          distinct_countries: number
+          distinct_markets: number
+          em_analise: number
+          expiradas: number
+          last_run_at: string
+          novas: number
+          rejeitadas: number
+          total: number
+          total_cost: number
+        }[]
+      }
       fulfill_document_request: {
         Args: { _document_url: string; _request_id: string }
         Returns: undefined
