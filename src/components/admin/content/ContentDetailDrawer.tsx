@@ -224,7 +224,7 @@ export function ContentDetailDrawer({ contentId, onClose }: Props) {
                     Modelo: {(run.data?.run as { model?: string } | null)?.model ?? "—"}
                   </p>
                   <p className="text-muted-foreground">
-                    Custo: {(run.data?.costs ?? []).reduce((sum, c) => sum + Number((c as { cost: number }).cost ?? 0), 0).toFixed(4)} USD
+                    Custo: {(run.data?.costs ?? []).reduce((sum, c) => sum + Number(c.estimated_cost ?? 0), 0).toFixed(4)} USD
                   </p>
                   <p className="text-muted-foreground">Criado: {fmt(item.created_at)}</p>
                 </div>
