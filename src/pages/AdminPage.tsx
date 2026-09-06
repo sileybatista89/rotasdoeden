@@ -12,6 +12,7 @@ import { TerritoryManager } from "@/components/admin/TerritoryManager";
 import { FlaggedMessages } from "@/components/admin/FlaggedMessages";
 import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
+import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -207,6 +208,17 @@ export default function AdminPage() {
               description="Revê as experiências criadas pelos guias. Só serviços aprovados ficam visíveis publicamente."
             />
             <ServiceModeration />
+          </>
+        )}
+
+        {section === "discovery" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Agentes IA"
+              title="Discovery Control Center"
+              description="Oportunidades de procura detetadas pelo agente Discovery. As ações aqui apenas classificam oportunidades — não executam campanhas."
+            />
+            <DiscoveryPanel />
           </>
         )}
 
