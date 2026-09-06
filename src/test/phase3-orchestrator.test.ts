@@ -9,6 +9,13 @@ import {
 } from "../../supabase/functions/_shared/agents/core";
 import { registerTool, runTool, type ToolContext } from "../../supabase/functions/_shared/agents/tools";
 import type { PolicyRow } from "../../supabase/functions/_shared/agents/core";
+import type { ToolOutcome } from "../../supabase/functions/_shared/agents/tools";
+
+type ToolFailure = Extract<ToolOutcome, { ok: false }>;
+const asFailure = (outcome: ToolOutcome): ToolFailure => {
+  if (outcome.ok) throw new Error("expected the tool to fail");
+  return outcome;
+};
 
 const policies: PolicyRow[] = [
   { agent_type: "discovery", action_key: "t_free", level: "free" },
@@ -65,11 +72,8 @@ describe("1-3. task and agent validation", () => {
 describe("4-5. missing / unavailable provider", () => {
   it("surfaces a tool failure instead of inventing a result", async () => {
     const outcome = await runTool("test_boom", {}, ctx());
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) {
-      expect(outcome.reason).toBe("failed");
-      expect(outcome.error).toContain("provider unavailable");
-    }
+    expect(asFailure(outcome).reason).toBe("failed");
+    expect(asFailure(outcome).error).toContain("provider unavailable");
   });
   it("denies unknown tools by default", async () => {
     const outcome = await runTool("does_not_exist", {}, ctx());
@@ -131,18 +135,15 @@ describe("10-11. budget limits", () => {
 describe("18. unauthorized access", () => {
   it("refuses a forbidden action", async () => {
     const outcome = await runTool("test_forbidden", {}, ctx());
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) expect(outcome.reason).toBe("forbidden");
+    expect(asFailure(outcome).reason).toBe("forbidden");
   });
   it("refuses an action that needs approval", async () => {
     const outcome = await runTool("test_approval", {}, ctx());
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) expect(outcome.reason).toBe("needs_approval");
+    expect(asFailure(outcome).reason).toBe("needs_approval");
   });
   it("validates arguments before running anything", async () => {
     const outcome = await runTool("test_ok", "not-an-object", ctx());
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) expect(outcome.reason).toBe("invalid_args");
+    expect(asFailure(outcome).reason).toBe("invalid_args");
   });
   it("runs an allowed, valid tool", async () => {
     const outcome = await runTool("test_ok", {}, ctx());
