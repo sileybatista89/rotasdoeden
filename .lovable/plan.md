@@ -1,89 +1,49 @@
-# Fase 1 — Auditoria Técnica e Arquitetura dos Agentes IA
+# Fase 2A — Fundação do sistema de agentes IA
 
-Auditoria feita sobre o código e a base de dados reais. Nenhum ficheiro do projeto foi alterado.
+Só infraestrutura. Nenhum agente comercial, nenhuma campanha, nenhuma alteração ao site público, ao design, ao admin visual, aos pagamentos ou a qualquer fluxo existente.
 
-## 1. ESTADO ATUAL DO PROJETO
-Plataforma funcional em produção (rotasdoeden.com). Dados reais atuais: 6 perfis de utilizador, 5 perfis profissionais (2 verificados), 7 distritos, 29 localidades, 6 notificações, 1 administrador, **0 serviços** e **0 reservas**. Não existe qualquer estrutura de IA, pacotes, leads ou campanhas.
+## Resumo da Fase 1 (confirmado na auditoria)
+Base de dados única no Lovable Cloud, 19 tabelas, RLS ativa, `admin_audit_log` e `notifications` já existentes, 4 funções servidor (Stripe, emails, filtro de mensagens), sem `pg_cron`/`pg_net`, sem qualquer estrutura de IA.
 
-## 2. STACK ATUAL
-React 18 + Vite 5 + TypeScript + Tailwind + shadcn/ui; React Router (rotas em `src/App.tsx`), React Query, react-helmet-async (SEO), i18n próprio em `src/i18n`. STATUS: existe e funciona.
+## O que vai ser criado
 
-## 3. BACKEND
-Lovable Cloud (Supabase). 4 funções servidor: `create-checkout` e `payments-webhook` (Stripe, funcionam), `auth-email-hook` (emails de autenticação com domínio verificado, funciona), `filter-message` (existe mas não é usada — a filtragem acontece por trigger na base de dados). Não há Railway/AWS nem servidor paralelo. STATUS: reutilizável para os agentes.
+### 1. Seis tabelas novas (só administradores acedem)
+- `agent_tasks` — fila de tarefas: agente, tipo, prioridade, estado (pendente, em fila, a correr, à espera de aprovação, concluída, falhada, cancelada), dados de entrada e resultado, contagem e limite de tentativas, agendamento, chave de idempotência única.
+- `agent_runs` — cada execução: tarefa, agente, fornecedor e modelo, resumo de entrada/saída (só resumos, sem dados pessoais completos), número de ferramentas usadas, tokens, custo estimado, duração, código e mensagem de erro.
+- `agent_costs` — custo por execução, por agente, fornecedor, modelo e dia, com índices para totais diários e mensais.
+- `agent_approvals` — fila de aprovação humana: ação, descrição, dados, estado (pendente, aprovada, rejeitada, expirada, cancelada), quem reviu e motivo da rejeição.
+- `agent_policies` — permissão por agente e por ação com três níveis: livre, exige aprovação, proibida. Inicializada com as regras indicadas para Content, Discovery, Acquisition e Conversion. Isto é configuração do sistema, não dados fictícios.
+- `agent_settings` — limites de custo: diário e mensal globais e por agente, e interruptor geral de pausa.
 
-## 4. BANCO DE DADOS
-19 tabelas: perfis, papéis, guias profissionais, pedidos de verificação, pedidos de documentos, serviços (com moderação), reservas, conversas/mensagens, suporte, notificações, distritos/localidades, KYC, mensagens sinalizadas, registo de auditoria admin. ~25 funções de base de dados e ~20 triggers já cobrem lógica de negócio. Não existem tabelas de conteúdo, SEO, leads, campanhas, pacotes, custos ou execuções de agentes.
-Extensões instaladas: `pgcrypto`, `uuid-ossp`, `pg_stat_statements`, `supabase_vault`. **Não existe `pg_cron` nem `pg_net`** — este é o facto mais determinante para o agendamento.
+Todas com RLS: leitura e escrita apenas por administrador; as funções servidor escrevem com a chave de serviço. Nenhum acesso para turistas, guias ou visitantes.
 
-## 5. AUTENTICAÇÃO E SEGURANÇA
-Autenticação por email/palavra-passe; papéis em tabela separada (`user_roles`) com funções `has_role`/`is_admin`; rotas protegidas por papel; RLS ativa com políticas por dono e por administrador; triggers que impedem escalada de privilégios (banimento, estado de verificação, moderação). Documentos ficam em bucket privado. STATUS: sólido; nada a alterar nesta fase.
+### 2. Orquestrador (`ai-orchestrator`)
+Função servidor genérica, sem lógica comercial: valida o agente e o tipo de tarefa, consulta a política, verifica os limites de custo, marca a tarefa como a corrar de forma atómica (impede execução dupla), chama a função do agente, grava a execução, o custo e o erro, aplica as tentativas (máximo 3, com espera crescente) e marca falha permanente ao esgotar. Cria aprovação pendente quando a política exige, em vez de agir.
 
-## 6. APIs E INTEGRAÇÕES EXISTENTES
-Stripe (checkout + webhook), email transacional Lovable (chave `LOVABLE_API_KEY` já presente), Google Search Console (conector já ligado), Supabase Storage (3 buckets), Realtime (notificações e chat). Não existe OpenAI, Gemini nem Google Ads.
+### 3. Camada de fornecedores de IA
+Módulo partilhado com uma interface única e duas implementações — OpenAI e Google/Gemini — escolhidas por configuração, para que os agentes futuros não fiquem presos a um fornecedor. Inclui tempo-limite, contagem de tokens, estimativa de custo e tratamento de erros. Nesta fase só é testada a conectividade, sem processamento pesado.
 
-## 7. FUNCIONALIDADES REUTILIZÁVEIS PELOS AGENTES
-- Papéis/RLS → política de permissões dos agentes.
-- `admin_audit_log` → padrão já existente para registo de execuções.
-- `notifications` + Realtime → avisos e pedidos de aprovação ao administrador.
-- Consola de administração modular (`AdminSidebar` + `AdminPage`) → o AI Control Center entra como mais uma secção, sem redesenho.
-- Padrão de moderação de serviços (rascunho → aprovação) → reutilizável tal e qual para conteúdo gerado por IA.
-- Funções servidor com segredos → local seguro para as chaves de IA.
+### 4. Camada de ferramentas
+Apenas o esqueleto: registo de ferramentas, validação de argumentos, verificação de permissão pela política e registo da execução. Nenhuma ferramenta de negócio é implementada agora.
 
-## 8. COMPONENTES QUE FALTAM
-Registo de execuções e custos de IA; fila de tarefas; agendador; tabelas de conteúdo/SEO/leads/campanhas/pacotes; política de permissões por agente; fila de aprovações; chaves OpenAI/Gemini/Google Ads; interface do AI Control Center.
+### 5. Funções dos agentes
+Quatro esboços controlados (`ai-content`, `ai-discovery`, `ai-acquisition`, `ai-conversion`) que apenas confirmam o fluxo do orquestrador e devolvem "não implementado". Sem comportamento comercial.
 
-## 9. RISCOS TÉCNICOS
-1. Sem `pg_cron`/`pg_net`, não há agendamento nativo — exige agendador do Cron do Supabase Edge ou um serviço externo mínimo de disparo.
-2. Custo descontrolado de chamadas de IA sem limites por dia/agente.
-3. Risco de conteúdo inventado — mitigado por obrigar fonte em cada facto e por moderação humana.
-4. Base de dados quase vazia: os agentes não têm ainda oferta real para vender ou indexar.
-5. Gasto financeiro real em campanhas — exige aprovação humana obrigatória.
-6. Avisos antigos do analisador de segurança sobre funções `SECURITY DEFINER` continuam por resolver.
+### 6. Execução assíncrona e agendamento
+As tarefas ficam na tabela `agent_tasks` (fila em base de dados, sem serviço externo). O disparo periódico do orquestrador exige as extensões `pg_cron` e `pg_net`, que hoje não estão instaladas — proponho ativá-las e registar um agendamento único e conservador. Nesta fase o agendamento fica criado mas desligado: nada corre em ciclo automático até autorização.
 
-## 10. ARQUITETURA RECOMENDADA
-Tudo dentro da infraestrutura atual: base de dados única, funções servidor do Cloud, consola de administração existente. Um cérebro (função `ai-orchestrator`) + uma função por agente + tabelas de tarefas/execuções/custos/aprovações. Sem segunda aplicação, sem segunda base de dados, sem infraestrutura externa.
+### 7. Notificações e auditoria
+Reutilizam `notifications` (erro crítico, aprovação pendente, limite de custo atingido, falha permanente) e `admin_audit_log` (aprovações, rejeições, alterações de limites). Nenhum sistema paralelo.
 
-## 11. ARQUITETURA DOS 4 AGENTES
-Cada agente é uma função servidor sem estado que recebe uma tarefa, usa apenas ferramentas declaradas e devolve um resultado gravado na base de dados: Conteúdo (rascunhos, sempre por aprovar), Discovery/SEO (procura internacional por mercado), Aquisição (canais, custo por aquisição, campanhas por aprovar), Conversão (assistente no site, identifica-se sempre como IA, gera leads).
+### 8. Testes
+Testes automáticos da fundação: criação e validação de tarefa, agente inválido, aplicação da política (livre / com aprovação / proibida), criação e fecho de execução, tentativas e limite de tentativas, idempotência, aprovação e rejeição, bloqueio por limite de custo, acesso de administrador permitido e de utilizador normal negado, falha de API, tempo-limite e erro permanente. Além disso, verificação de que autenticação, admin, pagamentos e tempo real continuam intactos.
 
-## 12. PAPEL DO ORQUESTRADOR
-Componente técnico, não comercial: cria e prioriza tarefas, aplica permissões, impede repetições e ciclos infinitos, controla tentativas e erros, encaminha aprovações, regista custo e duração de cada execução.
+## O que NÃO é tocado
+Site público, autenticação, perfis, verificação, documentos, serviços, moderação, reservas, mensagens, suporte, Stripe, Storage, tempo real, SEO, traduções, layout e navegação. Nenhuma tabela existente é alterada. Nenhum dado é inserido além da configuração de políticas e limites.
 
-## 13. OPENAI VS GOOGLE/GEMINI
-OpenAI: raciocínio, planeamento, redação, conversa e uso de ferramentas. Google/Gemini: pesquisa com fundamentação em resultados reais, tendências, análise de procura e ligação a serviços Google (Search Console já ligado; Ads mais tarde). Sem duplicação: a Google traz factos, a OpenAI decide e escreve.
+## Decisões que preciso de confirmar antes de implementar
+1. **Chaves de IA**: o projeto já tem acesso à IA da Lovable sem chaves nem contas extra. Posso usá-la como fornecedor inicial (com a camada preparada para OpenAI e Gemini diretos), ou prefere fornecer já `OPENAI_API_KEY` e `GEMINI_API_KEY`? Sem chaves próprias, o teste de conectividade direto a OpenAI/Google não pode correr.
+2. **Extensões de agendamento**: confirma a ativação de `pg_cron` e `pg_net` na base de dados para permitir execução sem o navegador aberto?
 
-## 14. SISTEMA DE PACOTES
-Não existe nada no projeto que suporte pacotes. Proposta futura: componentes (voo, alojamento, transporte, guia, experiências, alimentação, seguro) com custo por fornecedor e datas, margem definida por política comercial, preço calculado por origem/data/pessoas, versões e estado de aprovação. Nada é apresentado sem fonte real.
-
-## 15. AI CONTROL CENTER
-Entra como nova secção no menu da consola já existente, ao lado de "Moderar serviços", com separadores para agentes, tarefas, execuções, aprovações, leads, pacotes, custos e definições. Sem alterar o design atual.
-
-## 16. SCHEDULER / JOBS / BACKGROUND
-Hoje: inexistente (confirmado — sem `pg_cron`, sem filas, sem jobs). Recomendação: fila de tarefas em tabela + agendador de Edge Functions do Supabase a chamar o orquestrador de X em X minutos. Funciona sem navegador aberto e sem servidor externo.
-
-## 17. PERMISSÕES DOS AGENTES
-Tabela de política por agente com três níveis: livre (pesquisar, analisar, rascunhar, calcular, guardar), com aprovação (publicar, campanhas, preços, gastos), proibido (apagar dados críticos, mexer em credenciais ou políticas, dar privilégios, pagar). Aplicado no servidor, nunca no navegador.
-
-## 18. CONTROLE DE CUSTOS
-Registo por execução: agente, modelo, tokens, custo estimado, duração. Limites por dia/mês e por agente, reutilização de resultados em cache e paragem automática ao atingir o limite.
-
-## 19. SEGURANÇA E CONFORMIDADE
-Chaves OpenAI/Gemini/Google Ads guardadas apenas como segredos do backend, usadas só dentro das funções servidor; nunca no frontend nem em variáveis `VITE_`. O assistente identifica-se sempre como IA. Dados de turistas nunca entram em prompts sem necessidade. Registo de auditoria de todas as ações automáticas.
-
-## 20. PLANO DE IMPLEMENTAÇÃO FASEADA
-Fase 1 auditoria (esta) → 2 infraestrutura mínima → 3 orquestrador → 4 Discovery → 5 Conteúdo → 6 Aquisição → 7 Conversão → 8 pacotes → 9 Control Center → 10 observabilidade e custos → 11 testes ponta a ponta → 12 autonomia gradual.
-
-## 21. ESTIMATIVA DE COMPLEXIDADE
-Baixa: infraestrutura mínima, Control Center (leitura), custos. Média: orquestrador, Discovery, Conteúdo, Conversão. Alta: Aquisição com gasto real e motor de pacotes com preço dinâmico.
-
-## 22. O QUE PODE SER FEITO SEM INFRAESTRUTURA EXTERNA
-Praticamente tudo: tabelas, orquestrador, os quatro agentes, chamadas a OpenAI/Gemini, Control Center, custos, aprovações e agendamento por Edge Functions.
-
-## 23. O QUE EVENTUALMENTE EXIGIRÁ SERVIÇOS EXTERNOS
-Contas e chaves OpenAI, Gemini, Google Ads/Keyword Planner; eventuais fornecedores de voos/hotéis para preços reais; tarefas muito longas (acima do limite de execução de uma função) que exijam divisão em passos ou um disparador externo.
-
-## 24. RECOMENDAÇÃO FINAL
-Não é preciso nova infraestrutura. Avançar para a Fase 2 apenas com as tabelas base e uma função de orquestração, mantendo tudo em modo rascunho com aprovação humana. Antes disso, faz sentido garantir oferta real na plataforma (serviços de parceiros), porque os agentes de Conteúdo, Aquisição e Conversão precisam de algo real para promover.
-
-## Próximo passo
-Esta fase termina aqui, sem alterações ao projeto. A Fase 2 só arranca com autorização explícita.
+## Relatório final
+No fim entrego o relatório com as secções A a R pedidas (criado, alterado, reutilizado, tabelas, funções, segredos, fila, agendador, tentativas, custos, autorização, idempotência, testes, falhas, problemas, riscos, não implementado, próxima fase). Depois disso paro e aguardo autorização para a Fase 3.
