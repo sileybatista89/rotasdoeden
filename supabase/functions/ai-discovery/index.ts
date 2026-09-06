@@ -473,7 +473,7 @@ async function runDiscovery(body: Record<string, unknown>) {
     model: runtime.classifyModel,
     input_tokens: runtime.usage.inputTokens,
     output_tokens: runtime.usage.outputTokens,
-    estimated_cost: round2(runtime.usage.estimatedCost),
+    estimated_cost: Math.round(runtime.usage.estimatedCost * 1e6) / 1e6,
     tool_calls_count: toolLog.length,
     result: {
       source: sourceResult.source,
