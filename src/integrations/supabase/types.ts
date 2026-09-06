@@ -44,6 +44,331 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_approvals: {
+        Row: {
+          action_type: string
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at: string
+          description: string
+          id: string
+          payload: Json
+          rejection_reason: string | null
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["agent_approval_status"]
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          description: string
+          id?: string
+          payload?: Json
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["agent_approval_status"]
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          agent_type?: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          description?: string
+          id?: string
+          payload?: Json
+          rejection_reason?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["agent_approval_status"]
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_approvals_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_costs: {
+        Row: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at: string
+          currency: string
+          estimated_cost: number
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          provider: string
+          run_id: string | null
+          task_id: string | null
+          usage_date: string
+        }
+        Insert: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          currency?: string
+          estimated_cost?: number
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          provider: string
+          run_id?: string | null
+          task_id?: string | null
+          usage_date?: string
+        }
+        Update: {
+          agent_type?: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          currency?: string
+          estimated_cost?: number
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          provider?: string
+          run_id?: string | null
+          task_id?: string | null
+          usage_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_costs_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_costs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_policies: {
+        Row: {
+          action_key: string
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at: string
+          description: string | null
+          id: string
+          level: Database["public"]["Enums"]["agent_permission_level"]
+          updated_at: string
+        }
+        Insert: {
+          action_key: string
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          level: Database["public"]["Enums"]["agent_permission_level"]
+          updated_at?: string
+        }
+        Update: {
+          action_key?: string
+          agent_type?: Database["public"]["Enums"]["agent_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          level?: Database["public"]["Enums"]["agent_permission_level"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_runs: {
+        Row: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          attempt: number
+          completed_at: string | null
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          error_message: string | null
+          estimated_cost: number
+          id: string
+          input_summary: string | null
+          input_tokens: number
+          model_name: string | null
+          model_provider: string | null
+          output_summary: string | null
+          output_tokens: number
+          started_at: string
+          status: string
+          task_id: string | null
+          tool_calls_count: number
+        }
+        Insert: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          attempt?: number
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          estimated_cost?: number
+          id?: string
+          input_summary?: string | null
+          input_tokens?: number
+          model_name?: string | null
+          model_provider?: string | null
+          output_summary?: string | null
+          output_tokens?: number
+          started_at?: string
+          status?: string
+          task_id?: string | null
+          tool_calls_count?: number
+        }
+        Update: {
+          agent_type?: Database["public"]["Enums"]["agent_type"]
+          attempt?: number
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          estimated_cost?: number
+          id?: string
+          input_summary?: string | null
+          input_tokens?: number
+          model_name?: string | null
+          model_provider?: string | null
+          output_summary?: string | null
+          output_tokens?: number
+          started_at?: string
+          status?: string
+          task_id?: string | null
+          tool_calls_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_settings: {
+        Row: {
+          agent_type: Database["public"]["Enums"]["agent_type"] | null
+          created_at: string
+          currency: string
+          daily_limit: number
+          id: string
+          monthly_limit: number
+          notes: string | null
+          paused: boolean
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          agent_type?: Database["public"]["Enums"]["agent_type"] | null
+          created_at?: string
+          currency?: string
+          daily_limit?: number
+          id?: string
+          monthly_limit?: number
+          notes?: string | null
+          paused?: boolean
+          scope: string
+          updated_at?: string
+        }
+        Update: {
+          agent_type?: Database["public"]["Enums"]["agent_type"] | null
+          created_at?: string
+          currency?: string
+          daily_limit?: number
+          id?: string
+          monthly_limit?: number
+          notes?: string | null
+          paused?: boolean
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_tasks: {
+        Row: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          locked_at: string | null
+          max_retries: number
+          payload: Json
+          priority: number
+          result: Json | null
+          retry_count: number
+          scheduled_for: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["agent_task_status"]
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_retries?: number
+          payload?: Json
+          priority?: number
+          result?: Json | null
+          retry_count?: number
+          scheduled_for?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["agent_task_status"]
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          agent_type?: Database["public"]["Enums"]["agent_type"]
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_retries?: number
+          payload?: Json
+          priority?: number
+          result?: Json | null
+          retry_count?: number
+          scheduled_for?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["agent_task_status"]
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           commission_amount: number | null
@@ -935,6 +1260,43 @@ export type Database = {
         }
         Returns: undefined
       }
+      agent_claim_task: {
+        Args: { _limit?: number }
+        Returns: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          locked_at: string | null
+          max_retries: number
+          payload: Json
+          priority: number
+          result: Json | null
+          retry_count: number
+          scheduled_for: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["agent_task_status"]
+          task_type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "agent_tasks"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      agent_cost_totals: {
+        Args: { _agent?: Database["public"]["Enums"]["agent_type"] }
+        Returns: {
+          daily_total: number
+          monthly_total: number
+        }[]
+      }
       approve_professional_verification: {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
@@ -975,6 +1337,28 @@ export type Database = {
       }
     }
     Enums: {
+      agent_approval_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "expired"
+        | "cancelled"
+      agent_permission_level: "free" | "approval_required" | "forbidden"
+      agent_task_status:
+        | "pending"
+        | "queued"
+        | "running"
+        | "waiting_approval"
+        | "completed"
+        | "failed"
+        | "permanently_failed"
+        | "cancelled"
+      agent_type:
+        | "content"
+        | "discovery"
+        | "acquisition"
+        | "conversion"
+        | "orchestrator"
       app_role: "admin" | "guide" | "tourist"
       booking_status:
         | "pending_payment"
@@ -1145,6 +1529,31 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_approval_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "cancelled",
+      ],
+      agent_permission_level: ["free", "approval_required", "forbidden"],
+      agent_task_status: [
+        "pending",
+        "queued",
+        "running",
+        "waiting_approval",
+        "completed",
+        "failed",
+        "permanently_failed",
+        "cancelled",
+      ],
+      agent_type: [
+        "content",
+        "discovery",
+        "acquisition",
+        "conversion",
+        "orchestrator",
+      ],
       app_role: ["admin", "guide", "tourist"],
       booking_status: [
         "pending_payment",
