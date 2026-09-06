@@ -303,13 +303,17 @@ async function loadConfig(client: SupabaseClient) {
   };
 }
 
+/**
+ * An explicitly requested provider is never silently swapped: if it is not
+ * configured the run fails in a controlled way instead of faking a result.
+ * Without an explicit request we prefer OpenAI, then the Lovable gateway, then Gemini.
+ */
 function pickProvider(requested?: string): ProviderName | null {
-  const order: ProviderName[] = requested
-    ? ([requested as ProviderName, "openai", "lovable", "google"].filter(
-        (v, i, arr) => arr.indexOf(v) === i,
-      ) as ProviderName[])
-    : ["openai", "lovable", "google"];
-  for (const name of order) {
+  if (requested) {
+    const name = requested as ProviderName;
+    return getProvider(name).isConfigured() ? name : null;
+  }
+  for (const name of ["openai", "lovable", "google"] as ProviderName[]) {
     if (getProvider(name).isConfigured()) return name;
   }
   return null;
