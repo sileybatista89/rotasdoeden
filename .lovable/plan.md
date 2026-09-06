@@ -1,100 +1,143 @@
-# Fase 4 — Discovery Control Center (plano)
+# Fase 5 — Content Agent V1 (plano técnico)
 
-Painel administrativo para consultar e validar oportunidades descobertas. Sem executar agentes, sem scheduler, sem custos de IA, sem alterações no site público.
+Plano apenas. Nada é implementado nesta interação. Nenhuma tabela, função, migração, cron ou alteração do site público.
 
-## A. Arquitetura atual verificada
+## Estado atual verificado (consultas de leitura feitas agora)
 
-- Consola admin: `src/pages/AdminPage.tsx` + `src/components/admin/AdminSidebar.tsx` (secções por estado local, não por rota). Rota `/admin` protegida por `ProtectedRoute requireRole="admin"`.
-- Tabelas confirmadas: `discovery_opportunities` (0 linhas), `discovery_opportunity_history` (0), `agent_runs` (0), `agent_costs` (0), `agent_tasks` (0), `agent_config` (3 chaves), `agent_approvals`, `agent_policies`, `agent_settings`.
-- RLS confirmada: leitura de oportunidades, histórico, runs, custos, config e tasks apenas para `is_admin(auth.uid())`; `discovery_cache` nega anon/authenticated; `discovery_opportunities` tem policy de UPDATE para admins.
-- Estados válidos por CHECK: `nova`, `em_analise`, `aceite`, `rejeitada`, `expirada`. `evidence_type`: `observed`, `interpreted`, `hypothesis`, `recommendation`.
-- Índices existentes: único em `lower(country), lower(language), lower(query)`; `(opportunity_score DESC, discovered_at DESC)`; `status`.
-- Pesos reais em `agent_config.discovery_score_weights`: travel_intent 30, stp_relevance 20, volume 15, potential_value 15, competition 10, seasonality 10 — a UI lê estes valores, nunca os fixa em código.
+- Tabelas de agentes existentes: `agent_tasks`, `agent_runs`, `agent_costs`, `agent_approvals`, `agent_policies`, `agent_settings`, `agent_config`.
+- Tabelas de Discovery existentes: `discovery_opportunities` (com `market`, `country`, `language`, `query`, `intent`, `category`, `season`, `source`, `source_reference`, `evidence_type`, `opportunity_score`, `confidence_score`, `rationale`, `status`, `task_id`, `run_id`, `expires_at`), `discovery_opportunity_history`, `discovery_cache`.
+- **Não existe** nenhuma tabela de conteúdo: nem `content`, nem `content_versions`, `content_sources`, `content_reviews`, `content_publications`, `content_translations`.
+- Políticas do agente `content` já existem e serão respeitadas tal como estão: `research` livre, `create_draft` livre, `update_draft` livre, `publish` exige aprovação, `delete_content` proibido.
+- Dados reais disponíveis como fonte interna: `professional_profiles`, `services`, `districts`, `localities`, `profiles_public`, `bookings`.
+- `supabase/functions/ai-content/index.ts` continua um esboço que devolve "não implementado". Módulos partilhados reutilizáveis: `core.ts`, `providers.ts`, `tools.ts`, `discovery.ts`, `sources.ts`.
 
-## B. Rota administrativa
+## 1. Arquitetura
 
-Nova secção `discovery` no `AdminSidebar` (label "Discovery IA", ícone `Radar`/`Sparkles`), renderizada dentro de `AdminPage` como as restantes. Sem nova rota global, sem novo layout, sem nova autenticação. Detalhe abre em `Sheet`/`Dialog` (padrão já usado no drawer de guias), preservando a secção activa.
+O Content Agent segue exatamente o modelo do Discovery: nenhuma lógica nova de orquestração, fila, custos ou segurança.
 
-## C. Componentes existentes reutilizados
+```text
+ai-orchestrator (existente)
+   ├─ valida agente/tarefa, política, orçamento, lease, retries, chaining
+   └─ chama ai-content
+        ├─ _shared/agents/content.ts   (lógica pura: validação, dedup, qualidade, SEO)
+        ├─ _shared/agents/tools.ts     (registo de tools, já existente)
+        └─ _shared/agents/providers.ts (Lovable / OpenAI / Google, já existente)
+```
 
-`AdminSectionHeader`, `StatsCards` (+ `defaultStats` como referência de forma), `Badge`, `Button`, `Input`, `Select`, `Table`, `Sheet`/`Dialog`, `Tabs`, `Skeleton`, `sonner` toasts, `supabase` client, `Tables<>` types.
+Toda a lógica determinística (validação de fontes, deteção de duplicados, verificações de qualidade, estrutura SEO, escolha de idioma) fica em `content.ts` puro, testável em Vitest sem chamar IA. A função edge só faz I/O.
 
-## D. Novos componentes
+## 2. Relação com Discovery
 
-- `src/components/admin/discovery/DiscoveryPanel.tsx` — orquestra overview + filtros + lista.
-- `DiscoveryOverview.tsx` — cartões de agregados e qualidade.
-- `DiscoveryFilters.tsx` — filtros e pesquisa.
-- `DiscoveryTable.tsx` — lista paginada e ordenável.
-- `DiscoveryDetailDrawer.tsx` — identificação, fonte, evidência, score, rationale, histórico, execução, acções.
-- `EvidenceBlock.tsx` e `ScoreBreakdown.tsx` — blocos reutilizáveis.
-- `src/hooks/useDiscovery.ts` — hooks React Query (`useDiscoveryStats`, `useOpportunities`, `useOpportunityDetail`, `useOpportunityHistory`, `useOpportunityRun`, `useDiscoveryWeights`).
+- Só oportunidades com `status = 'aceite'` e `expires_at` no futuro (ou nulo) são elegíveis.
+- `nova`, `em_analise`, `rejeitada`, `expirada` → tarefa termina com motivo explícito, sem gerar nada.
+- Cada conteúdo guarda `discovery_opportunity_id`; o contexto (`country`, `language`, `market`, `intent`, `season`, `category`) é copiado da oportunidade, nunca inventado nem hardcoded.
 
-## E. Queries
+## 3. Fluxo de criação
 
-1. Lista: `discovery_opportunities` com `select(..., { count: "exact" })`, filtros server-side (`eq/ilike/gte/lte/in`), `order` configurável, `range()` para paginação (25/página).
-2. Agregados: contagens por `status` (head+count por estado) e médias de score/confidence via RPC de leitura `discovery_stats()` (SECURITY DEFINER, admin-only) para evitar carregar todas as linhas.
-3. Detalhe: uma linha por `id`.
-4. Histórico: `discovery_opportunity_history` por `opportunity_id`, `order recorded_at desc`.
-5. Execução: `agent_runs` por `run_id` + `agent_costs` por `run_id` + `agent_tasks` por `task_id`.
-6. Pesos: `agent_config` chave `discovery_score_weights`.
-7. Custos: somatórios de `agent_costs` filtrados a `agent_type = 'discovery'`.
+```text
+oportunidade aceite → validação → tarefa de conteúdo → recolha de dados internos/fontes
+→ outline → rascunho → quality check → rascunho gravado (draft) → revisão humana
+```
 
-## F. Mutations
+Se o quality check falhar de forma bloqueante, o rascunho é gravado com `status = 'draft'` e a lista de problemas; nunca é promovido.
 
-Uma única RPC nova, `admin_set_opportunity_status(_opportunity_id uuid, _status text, _note text default null)`, SECURITY DEFINER, que: valida `is_admin(auth.uid())`, valida o estado contra a lista permitida, actualiza `status`/`updated_at`, escreve uma linha em `discovery_opportunity_history` (snapshot de métricas/scores) e um registo em `admin_audit_log` com admin, timestamp e nota. Aceitar apenas marca validação — não inicia agentes, campanhas nem despesas. Nenhum outro write a partir do frontend.
+## 4. Fluxo de aprovação
 
-## G/H. Permissões e RLS
+Criação e publicação são separadas. O agente pode criar e alterar rascunhos livremente. A publicação cria um registo em `agent_approvals` (`publish` = approval_required) e só um administrador a resolve. Nesta versão a publicação apenas marca o estado no sistema — não escreve no site público.
 
-Sem alterações às políticas existentes: leitura já é admin-only, logo guias/turistas/anónimos recebem zero linhas e a acção falha server-side. A UI esconde a secção a não-admins, mas a segurança fica na RLS + verificação dentro da RPC. Nunca usar service role no frontend.
+## 5. Estados de conteúdo
 
-## I. Fluxo de aprovação
+`draft → in_review → approved → published`, com `rejected` e `archived` como saídas. Transições permitidas validadas em código e por CHECK; publicação automática impossível.
 
-`nova → em_analise → aceite | rejeitada`; `expirada` apenas manual quando a oportunidade deixou de ser relevante. Rejeitar e expirar exigem nota obrigatória. Cada transição gera histórico + auditoria.
+## 6. Estrutura de dados proposta (a criar só no BUILD)
 
-## J. Histórico
+- `content_items` — item lógico: tipo (`destination_page`, `seo_article`, `landing_page`, `faq`, `social_post`, `experience_content`, `market_content`), `discovery_opportunity_id`, país/idioma/mercado/intenção/época/audiência, `slug`, `status`, `generated_by` (`ai_content` ou `human`), `translation_group_id`, `current_version_id`, `task_id`, `run_id`, timestamps.
+- `content_versions` — corpo completo por versão: número, título, meta description, outline, blocos, SEO (keyword principal, secundárias, headings, links internos, sugestões de schema/canonical), autor/agente, motivo da alteração, resultado do quality check. Nunca sobrescrever: nova versão sempre.
+- `content_sources` — fonte por versão: tipo interno/externo, tabela/registo interno ou URL externo, data de consulta, excerto de evidência, classificação `observed | interpreted | hypothesis | recommendation`.
+- `content_reviews` — revisão humana: revisor, decisão, nota, timestamp.
+- `content_publications` — pedido e histórico de publicação, com ligação à aprovação e ao administrador.
+- Traduções através de `translation_group_id` + `language` (unicidade por grupo/idioma), não por tabela separada.
 
-Somente leitura, ordem cronológica inversa, com métricas, scores, evidência, fonte, task e run associados. Nunca apagado.
+Todas as tabelas: GRANT explícito (`authenticated` para admin, `service_role` para as funções), RLS ativa, leitura/escrita apenas para administradores, escrita do agente pela chave de serviço.
 
-## K. Custos
+## 7. Versionamento
 
-Área simples: custo total de discovery, custo médio por oportunidade (total ÷ nº de oportunidades, "—" quando zero), custo por execução no detalhe. Sem gráficos nesta fase.
+Cada alteração cria uma nova linha em `content_versions` e atualiza `current_version_id`. Guarda versão, timestamp, autor/agente, motivo, fontes, oportunidade e estado. Reposição de versão anterior = criação de nova versão com o conteúdo antigo, mantendo o histórico intacto.
 
-## L–P. Estrutura de ecrãs
+## 8. Modelo de fontes
 
-- Overview: cartões com total, novas, em análise, aceites, rejeitadas, expiradas, score médio, confidence média, países/mercados distintos, custo de discovery, última execução (`agent_runs` mais recente do tipo discovery). Sem dados → `0` ou `—`.
-- Lista: mercado, país, idioma, query, intenção, categoria, estação, fonte, score, confidence, status, discovered_at; ordenação por score/confidence/data; paginação.
-- Detalhe: identificação → fonte e `source_reference` (ou "Fonte não disponível") → evidência separada por tipo → scores lado a lado com decomposição pelos pesos da execução → rationale registado → recomendação → histórico → execução.
-- Filtros: país, mercado, idioma, intenção, categoria, status, fonte, score mínimo, confidence mínima, intervalo de datas; opções de listas derivadas dos dados existentes (sem opções vazias).
-- Métricas de qualidade: totais, aceites, taxa de rejeição, médias, duplicados actualizados (oportunidades com mais de uma linha de histórico), custo total e médio.
+Nenhum facto, número, preço ou nome de parceiro entra no conteúdo sem uma linha correspondente em `content_sources`. Dados internos referenciam tabela e id reais. URLs externos só entram se tiverem sido efetivamente consultados por uma tool; nunca produzidos pelo modelo. Lacunas ficam marcadas como desconhecidas ou interrompem aquele conteúdo.
 
-## Q. Loading / vazio / erro
+## 9. Multilingue
 
-Skeletons nas tabelas e cartões; estado vazio no padrão já usado ("Ainda não existem oportunidades descobertas."); erros mostrados com mensagem explícita e botão "Tentar novamente"; erro de autorização mostra acesso negado. Nunca falhar em silêncio.
+Idioma vem da oportunidade. Versões linguísticas são itens independentes ligados por `translation_group_id`. Não há tradução automática do site nem alteração do i18n global. Validação automática de que o texto gerado está no idioma pedido.
 
-## R. Responsividade
+## 10. Arquitetura SEO
 
-Desktop primeiro: tabela completa. Tablet/mobile: cartões empilhados com campos essenciais e detalhe em sheet full-screen, seguindo os padrões actuais.
+Campos estruturados por versão: title, meta description, slug, H1/H2/H3, FAQ, links internos apenas para rotas existentes, keyword principal e secundárias, intenção de pesquisa, sugestões de schema e canonical. Regras anti-spam: um item por (oportunidade, tipo, idioma, mercado); rejeição de densidade excessiva de keyword; rejeição de similaridade alta com conteúdo existente; sem geração em massa de páginas quase iguais.
 
-## S/T. Performance e índices
+## 11. Tipos de conteúdo
 
-Paginação server-side, filtros no servidor, agregados por RPC. Índices actuais cobrem status e score/data. Só se a pesquisa textual ficar lenta com volume real se avaliará um índice trigram em `query`/`rationale` — não criado agora.
+Registo extensível em `agent_config` (`content_types`) com, por tipo: comprimento mínimo/máximo, secções obrigatórias, campos SEO exigidos, se admite imagens, limites por lote. Adicionar um tipo novo é configuração, não código.
 
-## U. Riscos
+## 12. Ferramentas (a implementar no BUILD, todas registadas em `tools.ts`)
 
-Zero dados hoje (só estados vazios são verificáveis); `source_reference` pode vir vazio; nova RPC precisa de aprovação de migração; risco de o painel dar impressão de automação — mitigado com aviso explícito de que aceitar não executa nada.
+`get_discovery_opportunity`, `get_destination_data`, `get_partner_data`, `get_experience_data`, `search_sources`, `validate_source`, `generate_outline`, `generate_draft`, `seo_analyze`, `quality_check`, `save_draft`. Cada uma valida input, verifica a política do agente, regista uso na execução e devolve estrutura tipada. Nenhuma acede a secrets diretamente. Ferramentas com custo externo (`search_sources`) ficam `approval_required` por omissão.
 
-## V. Testes
+## 13. Providers
 
-Unitários para derivação de agregados, decomposição de score com pesos vindos da config, mapeamento de estados e formatação de custo; verificação de que não-admin não lê nem escreve; verificação em browser das telas com dados vazios em desktop e mobile; typecheck e Vitest.
+Usa `providers.ts` sem alterações: Lovable Gateway por omissão, OpenAI e Google configuráveis. Modelo por operação, configurável em `agent_config`: modelo barato para outline, classificação e quality check; modelo mais capaz apenas para o rascunho final. Erros 429/5xx com backoff; 402/403 param a cadeia e notificam o administrador.
 
-## W. Sequência
+## 14. Custos
 
-1. RPC de estado + RPC de estatísticas (única migração). 2. Hooks. 3. Overview. 4. Lista + filtros. 5. Detalhe com evidência/score/rationale. 6. Histórico + execução + custos. 7. Acções administrativas. 8. Estados vazios/erro, testes e verificação em browser.
+Respeita integralmente o que já existe: pausa global, limites diário/mensal, limite por agente e por execução, registo em `agent_costs`. Acrescenta um limite de lote configurável (proposta: máximo 3 conteúdos por execução, 1 rascunho longo por tarefa). Limites do Content Agent ficam a zero/pausado até autorização explícita.
 
-## X/Y. Complexidade e impacto
+## 15. Cache
 
-Média (frontend extenso, backend mínimo: uma migração com duas funções). Sem consumo de IA, sem alterações a limites, sem cron, sem dados fictícios, sem impacto no site público.
+Reutiliza o padrão de `discovery_cache`: cache de dados internos e de resultados de pesquisa de fontes, com TTL configurável, apenas do lado do servidor, sem acesso de clientes.
 
-## Z. Checklist pré-build
+## 16. Deduplicação
 
-Sem mudanças no site público; sem activação de agentes ou scheduler; limites continuam pausados/zero; RLS intacta; nenhum secret exposto; nenhum dado de demonstração; apenas a secção admin nova.
+Antes de gerar: chave lógica (oportunidade, tipo, idioma, mercado, intenção) com índice único; verificação de slug existente; verificação de similaridade do outline com conteúdos ativos. Se existir, a tarefa devolve "já existe" e liga ao conteúdo atual, sem gastar tokens.
+
+## 17-18. Segurança e permissões
+
+RLS em todas as tabelas novas, leitura e escrita só para administradores; nada exposto a turistas ou guias; escrita do agente pela chave de serviço; validação no servidor; secrets só no servidor; funções admin com `SECURITY DEFINER`, `search_path` fixo, verificação `is_admin` e execução revogada a `anon`. Frontend nunca escreve diretamente — só através de RPCs.
+
+## 19-20. Auditoria e observabilidade
+
+Ações administrativas (aprovar, rejeitar, publicar, repor versão) em `admin_audit_log`. Cada execução regista em `agent_runs`/`agent_costs`: tarefa, provider, modelo, tokens, custo, duração, tools usadas, oportunidade, conteúdos criados, fontes, resultado e erro. Notificações ao administrador em falha permanente, limite atingido e aprovação pendente.
+
+## 21. Integração futura com Acquisition
+
+O output fica estruturado (item + versão aprovada + SEO + mercado/idioma) para o Acquisition Agent poder consumi-lo mais tarde através do encadeamento já existente no orquestrador. Nada de Acquisition é implementado.
+
+## 22. Impacto no site
+
+Zero. Sem alterações a rotas públicas, layout, navegação, SEO global ou i18n. Só uma nova secção "Conteúdo IA" dentro do `/admin` existente, ao lado do Discovery Control Center, reutilizando `AdminSidebar` e `AdminPage` (sem novo sistema de autenticação e sem novo painel global).
+
+## 23. Dependências
+
+Orquestrador, políticas do agente `content` (já existentes), providers, oportunidades aceites no Discovery (atualmente zero em produção — os testes usam dados controlados que são apagados no fim).
+
+## 24. Complexidade
+
+Média-alta. Maior peso: modelo de dados com versões e fontes, quality check e a secção administrativa. A orquestração, custos e segurança já estão feitos.
+
+## 25. Testes
+
+Oportunidade aceite / rejeitada / expirada / inexistente; fonte ausente e fonte inválida; conteúdo duplicado; idioma incorreto; provider indisponível; limite de custo; retry; timeout; permissão negada; rascunho criado; publicação bloqueada sem aprovação; versionamento e reposição; rastreabilidade até à oportunidade; ausência de factos sem fonte. Mais typecheck, suíte existente intacta e verificação do admin em desktop e mobile.
+
+## 26. Sequência de implementação (no BUILD)
+
+1. Migração das tabelas de conteúdo com GRANTs, RLS, índices de deduplicação e RPCs administrativas.
+2. `_shared/agents/content.ts` puro + testes unitários.
+3. Tools registadas e validadas.
+4. `ai-content` completo ligado ao orquestrador.
+5. Testes de execução controlada com dados apagados no fim.
+6. Secção administrativa "Conteúdo IA" (lista, detalhe, versões, fontes, revisão, aprovação de publicação).
+7. Relatório final; limites mantidos a zero, sem cron e sem autonomia.
+
+## Ponto a confirmar antes do build
+
+A publicação aprovada nesta V1 fica apenas registada no sistema (sem qualquer página pública nova). A criação das páginas públicas seria uma fase separada.
