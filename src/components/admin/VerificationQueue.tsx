@@ -22,11 +22,12 @@ interface Req {
   full_name?: string;
 }
 
+// keys must match the document_requests.document_type CHECK constraint
 const REQUIRED_DOCS = [
-  { key: "id_document", label: "Documento de identificação" },
+  { key: "identity", label: "Documento de identificação" },
   { key: "tourism_license", label: "Licença / credencial de turismo" },
-  { key: "training_certificate", label: "Certificado de formação" },
-  { key: "commercial_registration", label: "Registo comercial da empresa" },
+  { key: "certificacao", label: "Certificado de formação" },
+  { key: "business_registration", label: "Registo comercial da empresa" },
 ] as const;
 
 interface DocReq {
