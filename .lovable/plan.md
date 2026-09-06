@@ -1,98 +1,100 @@
-# Fase 3 — Orquestrador completo + Discovery Agent v1 (plano)
+# Fase 4 — Discovery Control Center (plano)
 
-## 1. Estado atual verificado (consultado agora)
-- Tabelas existentes: agent_tasks, agent_runs, agent_costs, agent_approvals, agent_policies, agent_settings. 0 tarefas, 18 políticas.
-- agent_settings: global e 4 agentes, todos `paused = true`, limites diário/mensal = 0 (nada pode executar nem gastar).
-- Extensões ativas: plpgsql, pg_stat_statements, uuid-ossp, pgcrypto, supabase_vault, **pg_cron**, **pg_net**. Tabela `cron.job` está **vazia** — não há nenhum agendamento ativo.
-- Funções de servidor: ai-orchestrator (fila, política, orçamento, retry, aprovações, notificações, auditoria) + 4 esboços (ai-content, ai-discovery, ai-acquisition, ai-conversion) que só respondem "não implementado".
-- Camadas partilhadas: core.ts (idempotência, retry, orçamento, sanitização), providers.ts (lovable/openai/google, leitura de segredos só no servidor), tools.ts (registo de ferramentas, sem ferramentas reais).
-- Segredos presentes: LOVABLE_API_KEY, GOOGLE_SEARCH_CONSOLE_API_KEY (gerido por conector), chaves Stripe. **Não existe OPENAI_API_KEY nem credenciais de Google Ads.**
+Painel administrativo para consultar e validar oportunidades descobertas. Sem executar agentes, sem scheduler, sem custos de IA, sem alterações no site público.
 
-## 2. Orquestrador (Fase 3A) — o que passa a fazer
-Mantém-se camada de coordenação, sem lógica de negócio. Acrescenta-se:
-- Recuperação de tarefas presas: tarefas em `running` há mais de N minutos voltam a `pending` (lease/heartbeat) para não bloquearem a fila.
-- Fluxo de aprovação fechado: aprovar uma ação passa a colocar a tarefa em execução; recusar cancela e regista motivo; tudo com auditoria.
-- Encadeamento controlado: um agente pode pedir a criação de tarefas seguintes, com profundidade máxima, contador de descendentes e cadeia registada — protege contra ciclos infinitos.
-- Limite por execução e por tarefa, além dos limites diário/mensal já existentes.
-- Timeout por execução e cancelamento durante execução.
-- Endpoint interno para o agendador, protegido por segredo próprio, separado do acesso de administrador.
+## A. Arquitetura atual verificada
 
-## 3. Discovery Agent v1 (Fase 3B) — arquitetura
-Execução assíncrona: tarefa na fila → orquestrador → função `ai-discovery` → ferramentas controladas → oportunidades gravadas → notificação ao administrador. Nunca depende de browser aberto.
+- Consola admin: `src/pages/AdminPage.tsx` + `src/components/admin/AdminSidebar.tsx` (secções por estado local, não por rota). Rota `/admin` protegida por `ProtectedRoute requireRole="admin"`.
+- Tabelas confirmadas: `discovery_opportunities` (0 linhas), `discovery_opportunity_history` (0), `agent_runs` (0), `agent_costs` (0), `agent_tasks` (0), `agent_config` (3 chaves), `agent_approvals`, `agent_policies`, `agent_settings`.
+- RLS confirmada: leitura de oportunidades, histórico, runs, custos, config e tasks apenas para `is_admin(auth.uid())`; `discovery_cache` nega anon/authenticated; `discovery_opportunities` tem policy de UPDATE para admins.
+- Estados válidos por CHECK: `nova`, `em_analise`, `aceite`, `rejeitada`, `expirada`. `evidence_type`: `observed`, `interpreted`, `hypothesis`, `recommendation`.
+- Índices existentes: único em `lower(country), lower(language), lower(query)`; `(opportunity_score DESC, discovered_at DESC)`; `status`.
+- Pesos reais em `agent_config.discovery_score_weights`: travel_intent 30, stp_relevance 20, volume 15, potential_value 15, competition 10, seasonality 10 — a UI lê estes valores, nunca os fixa em código.
 
-Ciclo de uma execução:
-1. Recolha de sinais (dados reais, com fonte).
-2. Normalização e deduplicação.
-3. Interpretação e classificação de intenção (modelo de linguagem, saída estruturada).
-4. Cálculo de pontuação de oportunidade e de confiança.
-5. Gravação com fonte, estado `nova`, sem qualquer ação externa.
+## B. Rota administrativa
 
-Mercados: sem limitação artificial — país, língua e sazonalidade são campos de dados, definidos na tarefa.
+Nova secção `discovery` no `AdminSidebar` (label "Discovery IA", ícone `Radar`/`Sparkles`), renderizada dentro de `AdminPage` como as restantes. Sem nova rota global, sem novo layout, sem nova autenticação. Detalhe abre em `Sheet`/`Dialog` (padrão já usado no drawer de guias), preservando a secção activa.
 
-## 4. Divisão Google / OpenAI
-- **Google fornece factos**: dados do Search Console (consultas reais que já trazem tráfego ao site), e, quando autorizado, volumes e previsões de palavras-chave.
-- **OpenAI interpreta**: classifica intenção (informativa, comparação, intenção de reserva), avalia relevância para São Tomé e Príncipe, sintetiza e recomenda ação.
-- Regra dura: o modelo nunca inventa métricas. Um número sem fonte é hipótese, nunca dado observado. Cada oportunidade guarda o tipo de evidência: observado, interpretado, hipótese, recomendação.
+## C. Componentes existentes reutilizados
 
-## 5. Google — o que existe e o que falta
-- **Search Console**: já ligado por conector. Dá consultas, impressões, cliques, posição e país. Suficiente e sem custo para a v1.
-- **Google Ads API / Keyword Planner**: exige conta Google Ads, token de programador aprovado, projeto Google Cloud e OAuth de servidor. Não está disponível hoje. Fica opcional, ativável mais tarde.
-- **Pesquisa web genérica**: possível via pesquisa do próprio ambiente ou API paga; na v1 é opcional e limitada.
-- Recomendação v1: Search Console + OpenAI. Sem gastos com Google.
+`AdminSectionHeader`, `StatsCards` (+ `defaultStats` como referência de forma), `Badge`, `Button`, `Input`, `Select`, `Table`, `Sheet`/`Dialog`, `Tabs`, `Skeleton`, `sonner` toasts, `supabase` client, `Tables<>` types.
 
-## 6. Ferramentas do agente (todas registadas na camada existente)
-| Ferramenta | Entrada | Saída | Permissão | Risco/custo |
-|---|---|---|---|---|
-| search_console_data | intervalo, país, filtro | consultas com métricas reais | livre | sem custo |
-| google_keyword_research | termos, país, língua | volumes/previsões | exige aprovação | custo/credenciais |
-| search_web | consulta | resumos com ligação | exige aprovação | custo externo |
-| classify_intent | consultas | intenção + justificação | livre | custo de modelo |
-| analyze_market | conjunto de sinais | leitura de mercado | livre | custo de modelo |
-| score_opportunity | sinais + intenção | pontuações | livre | determinístico |
-| save_opportunity | oportunidade validada | registo criado | livre (só nesta tabela) | sem gasto |
+## D. Novos componentes
 
-Nenhuma ferramenta lê segredos; a leitura fica na camada de fornecedores. Escrita apenas na tabela de oportunidades.
+- `src/components/admin/discovery/DiscoveryPanel.tsx` — orquestra overview + filtros + lista.
+- `DiscoveryOverview.tsx` — cartões de agregados e qualidade.
+- `DiscoveryFilters.tsx` — filtros e pesquisa.
+- `DiscoveryTable.tsx` — lista paginada e ordenável.
+- `DiscoveryDetailDrawer.tsx` — identificação, fonte, evidência, score, rationale, histórico, execução, acções.
+- `EvidenceBlock.tsx` e `ScoreBreakdown.tsx` — blocos reutilizáveis.
+- `src/hooks/useDiscovery.ts` — hooks React Query (`useDiscoveryStats`, `useOpportunities`, `useOpportunityDetail`, `useOpportunityHistory`, `useOpportunityRun`, `useDiscoveryWeights`).
 
-## 7. Modelo de dados proposto (a criar só no build)
-`discovery_opportunities`: id, market, country, language, query, intent, intent_confidence, category, season, source, source_reference, metrics (JSON), evidence_type, opportunity_score, confidence_score, rationale, recommended_action, status (nova / em análise / aceite / rejeitada / expirada), task_id, run_id, discovered_at, expires_at, unicidade por (country, language, query) com atualização em vez de duplicado.
-`discovery_cache`: chave da consulta, resposta, fonte, validade (24h a 7 dias), para nunca repetir a mesma pesquisa dentro do prazo.
-Acesso restrito a administradores; funções de servidor escrevem com papel de serviço.
+## E. Queries
 
-## 8. Pontuações
-**Oportunidade** (0–100), média ponderada explícita e revisível: intenção de viagem 30, relevância para São Tomé 20, volume 15, valor potencial 15, concorrência 10, sazonalidade 10. Pesos guardados em configuração, não fixos no código, e justificados no registo.
-**Confiança** (0–100): qualidade dos dados — fonte real e recente sobe; extrapolação, amostra pequena ou ausência de métricas desce. Uma oportunidade com confiança baixa nunca é apresentada como facto nem gera ação.
+1. Lista: `discovery_opportunities` com `select(..., { count: "exact" })`, filtros server-side (`eq/ilike/gte/lte/in`), `order` configurável, `range()` para paginação (25/página).
+2. Agregados: contagens por `status` (head+count por estado) e médias de score/confidence via RPC de leitura `discovery_stats()` (SECURITY DEFINER, admin-only) para evitar carregar todas as linhas.
+3. Detalhe: uma linha por `id`.
+4. Histórico: `discovery_opportunity_history` por `opportunity_id`, `order recorded_at desc`.
+5. Execução: `agent_runs` por `run_id` + `agent_costs` por `run_id` + `agent_tasks` por `task_id`.
+6. Pesos: `agent_config` chave `discovery_score_weights`.
+7. Custos: somatórios de `agent_costs` filtrados a `agent_type = 'discovery'`.
 
-## 9. Custos e cache
-- Verificação de orçamento antes de qualquer chamada (já existe) mais limite por execução.
-- Cache obrigatória antes de qualquer chamada externa; execução repetida do mesmo período não gasta nada.
-- Lote reduzido por execução (por exemplo, até 50 consultas), modelo económico para classificação em massa e modelo mais forte só para síntese final.
-- Continua tudo em pausa e com limite zero: para funcionar, o administrador terá de definir limites explicitamente.
+## F. Mutations
 
-## 10. Segurança
-Sem segredos no frontend; sem acesso direto a tabelas fora das permitidas; RLS mantida; ações fora da lista de políticas são recusadas por omissão; ações que gastam dinheiro exigem aprovação humana; auditoria de todas as decisões administrativas.
+Uma única RPC nova, `admin_set_opportunity_status(_opportunity_id uuid, _status text, _note text default null)`, SECURITY DEFINER, que: valida `is_admin(auth.uid())`, valida o estado contra a lista permitida, actualiza `status`/`updated_at`, escreve uma linha em `discovery_opportunity_history` (snapshot de métricas/scores) e um registo em `admin_audit_log` com admin, timestamp e nota. Aceitar apenas marca validação — não inicia agentes, campanhas nem despesas. Nenhum outro write a partir do frontend.
 
-## 11. Agendamento
-pg_cron e pg_net estão ativos mas sem tarefas. Na Fase 3 fica **preparado, não ativado**: definição pronta de uma chamada periódica ao orquestrador, protegida por segredo, para ser ligada por decisão explícita. Limites conhecidos: janela de execução da função, número de tarefas por ciclo, e necessidade de idempotência (já garantida).
+## G/H. Permissões e RLS
 
-## 12. Observabilidade
-Cada execução regista: tarefa, tentativa, fornecedor, modelo, ferramentas usadas, duração, tokens, custo estimado, resumo de entrada/saída, erros, decisão de retry, oportunidades criadas/atualizadas, confiança média e fontes.
+Sem alterações às políticas existentes: leitura já é admin-only, logo guias/turistas/anónimos recebem zero linhas e a acção falha server-side. A UI esconde a secção a não-admins, mas a segurança fica na RLS + verificação dentro da RPC. Nunca usar service role no frontend.
 
-## 13. Testes
-Unitários: pontuações, deduplicação, cache, classificação de evidência, profundidade de encadeamento, recuperação de tarefas presas, limites por execução.
-Fim a fim (com fornecedores simulados): tarefa válida, tarefa inválida, agente inválido, fornecedor indisponível, timeout, erro de API, retry e falha definitiva, bloqueio por orçamento, idempotência, oportunidade duplicada, oportunidade sem fonte (recusada), pontuação inválida, acesso não autorizado (guia e turista não conseguem executar nem ler).
+## I. Fluxo de aprovação
 
-## 14. Reutilizar vs criar
-Reutiliza: fila, tarefas, execuções, custos, aprovações, políticas, retry, idempotência, notificações, auditoria, camada de fornecedores, camada de ferramentas, testes existentes.
-Cria: recuperação de tarefas presas, encadeamento com limite, limite por execução, fluxo de aprovação fechado, tabelas de oportunidades e cache, ferramentas de descoberta, agente de descoberta real, novos testes.
+`nova → em_analise → aceite | rejeitada`; `expirada` apenas manual quando a oportunidade deixou de ser relevante. Rejeitar e expirar exigem nota obrigatória. Cada transição gera histórico + auditoria.
 
-## 15. Sequência, complexidade e impacto
-1) Orquestrador completo + testes. 2) Tabelas de oportunidade e cache. 3) Ferramentas (Search Console primeiro). 4) Agente de descoberta com saída estruturada. 5) Testes fim a fim com simulação. 6) Execução manual controlada com limite mínimo.
-Complexidade: média-alta (3A média, 3B alta). Impacto no site público: nenhum — nada muda no design, nas páginas, na autenticação, nas reservas ou nos pagamentos.
+## J. Histórico
 
-## 16. Pré-requisitos antes do build
-- Decidir o fornecedor de inteligência: usar o já disponível (sem chave nova) ou configurar uma chave OpenAI própria.
-- Confirmar que o Search Console será a fonte de dados da v1 (Google Ads fica para depois).
-- Definir limites de custo diário/mensal a ativar para testes.
-- Confirmar que o agendamento fica preparado mas desligado.
+Somente leitura, ordem cronológica inversa, com métricas, scores, evidência, fonte, task e run associados. Nunca apagado.
 
-Nada será implementado, ligado ou gasto sem a sua autorização explícita.
+## K. Custos
+
+Área simples: custo total de discovery, custo médio por oportunidade (total ÷ nº de oportunidades, "—" quando zero), custo por execução no detalhe. Sem gráficos nesta fase.
+
+## L–P. Estrutura de ecrãs
+
+- Overview: cartões com total, novas, em análise, aceites, rejeitadas, expiradas, score médio, confidence média, países/mercados distintos, custo de discovery, última execução (`agent_runs` mais recente do tipo discovery). Sem dados → `0` ou `—`.
+- Lista: mercado, país, idioma, query, intenção, categoria, estação, fonte, score, confidence, status, discovered_at; ordenação por score/confidence/data; paginação.
+- Detalhe: identificação → fonte e `source_reference` (ou "Fonte não disponível") → evidência separada por tipo → scores lado a lado com decomposição pelos pesos da execução → rationale registado → recomendação → histórico → execução.
+- Filtros: país, mercado, idioma, intenção, categoria, status, fonte, score mínimo, confidence mínima, intervalo de datas; opções de listas derivadas dos dados existentes (sem opções vazias).
+- Métricas de qualidade: totais, aceites, taxa de rejeição, médias, duplicados actualizados (oportunidades com mais de uma linha de histórico), custo total e médio.
+
+## Q. Loading / vazio / erro
+
+Skeletons nas tabelas e cartões; estado vazio no padrão já usado ("Ainda não existem oportunidades descobertas."); erros mostrados com mensagem explícita e botão "Tentar novamente"; erro de autorização mostra acesso negado. Nunca falhar em silêncio.
+
+## R. Responsividade
+
+Desktop primeiro: tabela completa. Tablet/mobile: cartões empilhados com campos essenciais e detalhe em sheet full-screen, seguindo os padrões actuais.
+
+## S/T. Performance e índices
+
+Paginação server-side, filtros no servidor, agregados por RPC. Índices actuais cobrem status e score/data. Só se a pesquisa textual ficar lenta com volume real se avaliará um índice trigram em `query`/`rationale` — não criado agora.
+
+## U. Riscos
+
+Zero dados hoje (só estados vazios são verificáveis); `source_reference` pode vir vazio; nova RPC precisa de aprovação de migração; risco de o painel dar impressão de automação — mitigado com aviso explícito de que aceitar não executa nada.
+
+## V. Testes
+
+Unitários para derivação de agregados, decomposição de score com pesos vindos da config, mapeamento de estados e formatação de custo; verificação de que não-admin não lê nem escreve; verificação em browser das telas com dados vazios em desktop e mobile; typecheck e Vitest.
+
+## W. Sequência
+
+1. RPC de estado + RPC de estatísticas (única migração). 2. Hooks. 3. Overview. 4. Lista + filtros. 5. Detalhe com evidência/score/rationale. 6. Histórico + execução + custos. 7. Acções administrativas. 8. Estados vazios/erro, testes e verificação em browser.
+
+## X/Y. Complexidade e impacto
+
+Média (frontend extenso, backend mínimo: uma migração com duas funções). Sem consumo de IA, sem alterações a limites, sem cron, sem dados fictícios, sem impacto no site público.
+
+## Z. Checklist pré-build
+
+Sem mudanças no site público; sem activação de agentes ou scheduler; limites continuam pausados/zero; RLS intacta; nenhum secret exposto; nenhum dado de demonstração; apenas a secção admin nova.
