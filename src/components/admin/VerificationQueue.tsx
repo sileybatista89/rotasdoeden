@@ -102,7 +102,7 @@ export function VerificationQueue() {
     if (!selected.length) return toast.error("Seleciona pelo menos um documento em falta");
     if (!message) return toast.error("Escreve uma mensagem para o profissional");
     setBusy(r.id);
-    const items = selected.map((key) => ({ document_type: key, label: REQUIRED_DOCS.find((doc) => doc.key === key)?.label ?? key }));
+    const items = selected.map((key) => ({ type: key, label: REQUIRED_DOCS.find((doc) => doc.key === key)?.label ?? key }));
     const { error } = await supabase.rpc("request_verification_documents", {
       _verification_request_id: r.id, _items: items, _message: message,
     });
