@@ -1852,9 +1852,17 @@ export type Database = {
         }
         Returns: string
       }
+      admin_restore_content_version: {
+        Args: { _content_id: string; _note?: string; _version_id: string }
+        Returns: Json
+      }
       admin_review_document: {
         Args: { _approve: boolean; _reason?: string; _request_id: string }
         Returns: undefined
+      }
+      admin_set_content_status: {
+        Args: { _content_id: string; _note?: string; _status: string }
+        Returns: Json
       }
       admin_set_document_status: {
         Args: { _request_id: string; _status: string }
@@ -1930,6 +1938,7 @@ export type Database = {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
       }
+      content_stats: { Args: never; Returns: Json }
       create_notification: {
         Args: {
           _body: string
