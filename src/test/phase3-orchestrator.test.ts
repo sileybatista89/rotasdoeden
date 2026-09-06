@@ -14,7 +14,7 @@ import type { ToolOutcome } from "../../supabase/functions/_shared/agents/tools"
 type ToolFailure = Extract<ToolOutcome, { ok: false }>;
 const asFailure = (outcome: ToolOutcome): ToolFailure => {
   if (outcome.ok) throw new Error("expected the tool to fail");
-  return outcome;
+  return outcome as ToolFailure;
 };
 
 const policies: PolicyRow[] = [
