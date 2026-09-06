@@ -401,7 +401,9 @@ export function qualityCheck(
 
   // Internal links must point at real routes
   for (const link of draft.seo.internal_links) {
-    const ok = config.allowedInternalPrefixes.some((p) => link === p || link.startsWith(p));
+    const ok = config.allowedInternalPrefixes.some(
+      (p) => link === p || (p !== "/" && link.startsWith(`${p}/`)),
+    );
     if (!ok) issues.push({ code: "invalid_internal_link", severity: "blocking", detail: `Rota inexistente: ${link}` });
   }
 
