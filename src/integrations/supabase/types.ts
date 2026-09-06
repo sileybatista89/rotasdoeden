@@ -473,6 +473,391 @@ export type Database = {
         }
         Relationships: []
       }
+      content_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          payload: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
+      content_items: {
+        Row: {
+          audience: string | null
+          content_type: string
+          country: string | null
+          created_at: string
+          current_version_id: string | null
+          discovery_opportunity_id: string | null
+          generated_by: string
+          id: string
+          intent: string | null
+          language: string
+          market: string | null
+          quality_issues: Json
+          quality_passed: boolean
+          run_id: string | null
+          season: string | null
+          slug: string | null
+          status: string
+          task_id: string | null
+          title: string | null
+          translation_group_id: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string | null
+          content_type: string
+          country?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          discovery_opportunity_id?: string | null
+          generated_by?: string
+          id?: string
+          intent?: string | null
+          language: string
+          market?: string | null
+          quality_issues?: Json
+          quality_passed?: boolean
+          run_id?: string | null
+          season?: string | null
+          slug?: string | null
+          status?: string
+          task_id?: string | null
+          title?: string | null
+          translation_group_id?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string | null
+          content_type?: string
+          country?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          discovery_opportunity_id?: string | null
+          generated_by?: string
+          id?: string
+          intent?: string | null
+          language?: string
+          market?: string | null
+          quality_issues?: Json
+          quality_passed?: boolean
+          run_id?: string | null
+          season?: string | null
+          slug?: string | null
+          status?: string
+          task_id?: string | null
+          title?: string | null
+          translation_group_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_items_current_version_fkey"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "content_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_items_discovery_opportunity_id_fkey"
+            columns: ["discovery_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_items_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_publications: {
+        Row: {
+          approval_id: string | null
+          content_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          requested_by: string
+          status: string
+          updated_at: string
+          version_id: string | null
+        }
+        Insert: {
+          approval_id?: string | null
+          content_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          version_id?: string | null
+        }
+        Update: {
+          approval_id?: string | null
+          content_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_publications_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "agent_approvals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_publications_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_publications_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "content_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reviews: {
+        Row: {
+          content_id: string
+          created_at: string
+          decision: string
+          id: string
+          note: string | null
+          previous_status: string | null
+          reviewer_id: string | null
+          version_id: string | null
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          note?: string | null
+          previous_status?: string | null
+          reviewer_id?: string | null
+          version_id?: string | null
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          note?: string | null
+          previous_status?: string | null
+          reviewer_id?: string | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reviews_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_reviews_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "content_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_sources: {
+        Row: {
+          consulted_at: string
+          content_id: string
+          created_at: string
+          evidence_type: string
+          excerpt: string | null
+          id: string
+          source_record_id: string | null
+          source_scope: string
+          source_table: string | null
+          title: string | null
+          url: string | null
+          version_id: string | null
+        }
+        Insert: {
+          consulted_at?: string
+          content_id: string
+          created_at?: string
+          evidence_type: string
+          excerpt?: string | null
+          id?: string
+          source_record_id?: string | null
+          source_scope: string
+          source_table?: string | null
+          title?: string | null
+          url?: string | null
+          version_id?: string | null
+        }
+        Update: {
+          consulted_at?: string
+          content_id?: string
+          created_at?: string
+          evidence_type?: string
+          excerpt?: string | null
+          id?: string
+          source_record_id?: string | null
+          source_scope?: string
+          source_table?: string | null
+          title?: string | null
+          url?: string | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_sources_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_sources_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "content_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_versions: {
+        Row: {
+          agent_type: string | null
+          author_id: string | null
+          author_type: string
+          blocks: Json
+          change_reason: string | null
+          content_id: string
+          created_at: string
+          id: string
+          language: string
+          meta_description: string | null
+          outline: Json
+          quality_result: Json
+          run_id: string | null
+          seo: Json
+          slug: string | null
+          task_id: string | null
+          title: string | null
+          version_number: number
+          word_count: number
+        }
+        Insert: {
+          agent_type?: string | null
+          author_id?: string | null
+          author_type?: string
+          blocks?: Json
+          change_reason?: string | null
+          content_id: string
+          created_at?: string
+          id?: string
+          language: string
+          meta_description?: string | null
+          outline?: Json
+          quality_result?: Json
+          run_id?: string | null
+          seo?: Json
+          slug?: string | null
+          task_id?: string | null
+          title?: string | null
+          version_number: number
+          word_count?: number
+        }
+        Update: {
+          agent_type?: string | null
+          author_id?: string | null
+          author_type?: string
+          blocks?: Json
+          change_reason?: string | null
+          content_id?: string
+          created_at?: string
+          id?: string
+          language?: string
+          meta_description?: string | null
+          outline?: Json
+          quality_result?: Json
+          run_id?: string | null
+          seo?: Json
+          slug?: string | null
+          task_id?: string | null
+          title?: string | null
+          version_number?: number
+          word_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_versions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_versions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_versions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           booking_id: string | null
@@ -1467,9 +1852,17 @@ export type Database = {
         }
         Returns: string
       }
+      admin_restore_content_version: {
+        Args: { _content_id: string; _note?: string; _version_id: string }
+        Returns: Json
+      }
       admin_review_document: {
         Args: { _approve: boolean; _reason?: string; _request_id: string }
         Returns: undefined
+      }
+      admin_set_content_status: {
+        Args: { _content_id: string; _note?: string; _status: string }
+        Returns: Json
       }
       admin_set_document_status: {
         Args: { _request_id: string; _status: string }
@@ -1545,6 +1938,19 @@ export type Database = {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
       }
+      content_cache_get: {
+        Args: { _key: string }
+        Returns: {
+          created_at: string
+          payload: Json
+        }[]
+      }
+      content_cache_put: {
+        Args: { _key: string; _payload: Json; _ttl_hours?: number }
+        Returns: undefined
+      }
+      content_save_draft: { Args: { _payload: Json }; Returns: Json }
+      content_stats: { Args: never; Returns: Json }
       create_notification: {
         Args: {
           _body: string

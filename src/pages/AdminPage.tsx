@@ -13,6 +13,7 @@ import { FlaggedMessages } from "@/components/admin/FlaggedMessages";
 import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
+import { ContentPanel } from "@/components/admin/content/ContentPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -219,6 +220,17 @@ export default function AdminPage() {
               description="Oportunidades de procura detetadas pelo agente Discovery. As ações aqui apenas classificam oportunidades — não executam campanhas."
             />
             <DiscoveryPanel />
+          </>
+        )}
+
+        {section === "conteudo" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Agentes IA"
+              title="Conteúdo IA"
+              description="Rascunhos criados a partir de oportunidades aceites, com as fontes usadas e o controlo de qualidade. Nada é publicado sem a tua decisão."
+            />
+            <ContentPanel />
           </>
         )}
 
