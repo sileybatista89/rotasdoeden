@@ -100,6 +100,30 @@ export type Database = {
           },
         ]
       }
+      agent_config: {
+        Row: {
+          created_at: string
+          description: string | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       agent_costs: {
         Row: {
           agent_type: Database["public"]["Enums"]["agent_type"]
@@ -309,12 +333,15 @@ export type Database = {
           completed_at: string | null
           created_at: string
           created_by: string | null
+          depth: number
           failed_at: string | null
           id: string
           idempotency_key: string
           last_error: string | null
           locked_at: string | null
+          max_cost_per_run: number
           max_retries: number
+          parent_task_id: string | null
           payload: Json
           priority: number
           result: Json | null
@@ -330,12 +357,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
+          depth?: number
           failed_at?: string | null
           id?: string
           idempotency_key: string
           last_error?: string | null
           locked_at?: string | null
+          max_cost_per_run?: number
           max_retries?: number
+          parent_task_id?: string | null
           payload?: Json
           priority?: number
           result?: Json | null
@@ -351,12 +381,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
+          depth?: number
           failed_at?: string | null
           id?: string
           idempotency_key?: string
           last_error?: string | null
           locked_at?: string | null
+          max_cost_per_run?: number
           max_retries?: number
+          parent_task_id?: string | null
           payload?: Json
           priority?: number
           result?: Json | null
@@ -367,7 +400,15 @@ export type Database = {
           task_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bookings: {
         Row: {
@@ -463,6 +504,176 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          request: Json
+          response: Json
+          source: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          request?: Json
+          response: Json
+          source: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          request?: Json
+          response?: Json
+          source?: string
+        }
+        Relationships: []
+      }
+      discovery_opportunities: {
+        Row: {
+          category: string | null
+          confidence_score: number
+          country: string
+          created_at: string
+          discovered_at: string
+          evidence_type: string
+          expires_at: string | null
+          id: string
+          intent: string | null
+          intent_confidence: number | null
+          language: string
+          market: string | null
+          metrics: Json
+          opportunity_score: number
+          query: string
+          rationale: string | null
+          recommended_action: string | null
+          run_id: string | null
+          season: string | null
+          source: string
+          source_reference: Json
+          status: string
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          confidence_score?: number
+          country: string
+          created_at?: string
+          discovered_at?: string
+          evidence_type?: string
+          expires_at?: string | null
+          id?: string
+          intent?: string | null
+          intent_confidence?: number | null
+          language: string
+          market?: string | null
+          metrics?: Json
+          opportunity_score?: number
+          query: string
+          rationale?: string | null
+          recommended_action?: string | null
+          run_id?: string | null
+          season?: string | null
+          source: string
+          source_reference?: Json
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          confidence_score?: number
+          country?: string
+          created_at?: string
+          discovered_at?: string
+          evidence_type?: string
+          expires_at?: string | null
+          id?: string
+          intent?: string | null
+          intent_confidence?: number | null
+          language?: string
+          market?: string | null
+          metrics?: Json
+          opportunity_score?: number
+          query?: string
+          rationale?: string | null
+          recommended_action?: string | null
+          run_id?: string | null
+          season?: string | null
+          source?: string
+          source_reference?: Json
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_opportunities_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_opportunities_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_opportunity_history: {
+        Row: {
+          confidence_score: number | null
+          evidence_type: string | null
+          id: string
+          metrics: Json
+          opportunity_id: string
+          opportunity_score: number | null
+          recorded_at: string
+          run_id: string | null
+          source: string | null
+          task_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          evidence_type?: string | null
+          id?: string
+          metrics?: Json
+          opportunity_id: string
+          opportunity_score?: number | null
+          recorded_at?: string
+          run_id?: string | null
+          source?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          evidence_type?: string | null
+          id?: string
+          metrics?: Json
+          opportunity_id?: string
+          opportunity_score?: number | null
+          recorded_at?: string
+          run_id?: string | null
+          source?: string | null
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_opportunity_history_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_opportunities"
             referencedColumns: ["id"]
           },
         ]
@@ -1267,12 +1478,15 @@ export type Database = {
           completed_at: string | null
           created_at: string
           created_by: string | null
+          depth: number
           failed_at: string | null
           id: string
           idempotency_key: string
           last_error: string | null
           locked_at: string | null
+          max_cost_per_run: number
           max_retries: number
+          parent_task_id: string | null
           payload: Json
           priority: number
           result: Json | null
@@ -1297,6 +1511,20 @@ export type Database = {
           monthly_total: number
         }[]
       }
+      agent_recover_stuck_tasks: {
+        Args: { _timeout_minutes?: number }
+        Returns: {
+          agent_type: Database["public"]["Enums"]["agent_type"]
+          released_status: Database["public"]["Enums"]["agent_task_status"]
+          retry_count: number
+          task_id: string
+        }[]
+      }
+      agent_review_approval: {
+        Args: { _approval_id: string; _approve: boolean; _reason?: string }
+        Returns: undefined
+      }
+      agent_task_heartbeat: { Args: { _task_id: string }; Returns: undefined }
       approve_professional_verification: {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
@@ -1314,6 +1542,25 @@ export type Database = {
         }
         Returns: string
       }
+      discovery_cache_get: {
+        Args: { _key: string }
+        Returns: {
+          created_at: string
+          expired: boolean
+          response: Json
+        }[]
+      }
+      discovery_cache_put: {
+        Args: {
+          _key: string
+          _request: Json
+          _response: Json
+          _source: string
+          _ttl_hours?: number
+        }
+        Returns: undefined
+      }
+      discovery_save_opportunity: { Args: { _payload: Json }; Returns: string }
       fulfill_document_request: {
         Args: { _document_url: string; _request_id: string }
         Returns: undefined

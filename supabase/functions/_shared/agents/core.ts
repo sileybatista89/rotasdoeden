@@ -136,3 +136,29 @@ export function summarize(value: unknown, max = 500): string {
   const text = typeof value === "string" ? value : JSON.stringify(sanitizePayload(value) ?? null);
   return (text ?? "").slice(0, max);
 }
+
+/** Chaining guard: bounded depth, bounded fan-out, no cycles, no self-replication. */
+export interface ChainLimits {
+  maxDepth: number;
+  maxChildren: number;
+}
+
+export type ChainVerdict =
+  | { allowed: true }
+  | { allowed: false; reason: "max_depth" | "max_children" | "cycle" | "self_replication" };
+
+export function canChain(
+  parent: { id: string; depth: number; agent_type: string; task_type: string; ancestry?: string[] },
+  child: { agent_type: string; task_type: string },
+  existingChildren: number,
+  limits: ChainLimits,
+): ChainVerdict {
+  if (parent.depth + 1 > limits.maxDepth) return { allowed: false, reason: "max_depth" };
+  if (existingChildren >= limits.maxChildren) return { allowed: false, reason: "max_children" };
+  if (parent.agent_type === child.agent_type && parent.task_type === child.task_type) {
+    return { allowed: false, reason: "self_replication" };
+  }
+  const signature = `${child.agent_type}:${child.task_type}`;
+  if ((parent.ancestry ?? []).includes(signature)) return { allowed: false, reason: "cycle" };
+  return { allowed: true };
+}
