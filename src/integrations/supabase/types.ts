@@ -1938,6 +1938,18 @@ export type Database = {
         Args: { _note?: string; _verification_request_id: string }
         Returns: undefined
       }
+      content_cache_get: {
+        Args: { _key: string }
+        Returns: {
+          created_at: string
+          payload: Json
+        }[]
+      }
+      content_cache_put: {
+        Args: { _key: string; _payload: Json; _ttl_hours?: number }
+        Returns: undefined
+      }
+      content_save_draft: { Args: { _payload: Json }; Returns: Json }
       content_stats: { Args: never; Returns: Json }
       create_notification: {
         Args: {
