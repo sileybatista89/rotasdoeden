@@ -212,3 +212,79 @@ describe("atribuição", () => {
     expect(result["direto"]).toBe(1);
   });
 });
+
+// --- Fase 5B: canais, capacidade e parsing -----------------------------------
+import {
+  CHANNELS,
+  getChannel,
+  canExecuteChannel,
+  assessCapacity,
+  deriveFactors,
+  parseAnalysis,
+} from "../../supabase/functions/_shared/agents/acquisition.ts";
+
+describe("acquisition channels", () => {
+  it("nunca permite execução de canais", () => {
+    expect(canExecuteChannel()).toBe(false);
+    for (const c of CHANNELS) expect(["disponivel", "nao_ligado", "hipotetico"]).toContain(c.availability);
+  });
+  it("canais pagos não pedem conteúdo e não estão ligados", () => {
+    for (const key of ["google_ads", "meta_ads"]) {
+      const ch = getChannel(key);
+      expect(ch?.kind).toBe("pago");
+      expect(ch?.availability).toBe("nao_ligado");
+      expect(ch?.canRequestContent).toBe(false);
+    }
+  });
+  it("devolve null para canais desconhecidos", () => {
+    expect(getChannel("tiktok_ads")).toBeNull();
+  });
+});
+
+describe("assessCapacity", () => {
+  const base = { publishedGuides: 0, approvedServices: 0, districts: 0, languages: [], pastBookings: 0, targetLanguage: "pt" };
+  it("é insuficiente sem guias nem serviços", () => {
+    const r = assessCapacity(base);
+    expect(r.sufficient).toBe(false);
+    expect(r.ratio).toBeLessThan(0.4);
+    expect(r.reasons.length).toBeGreaterThan(0);
+  });
+  it("exige idioma declarado", () => {
+    const r = assessCapacity({ ...base, publishedGuides: 3, approvedServices: 4, languages: ["en"], targetLanguage: "de" });
+    expect(r.languageCovered).toBe(false);
+    expect(r.sufficient).toBe(false);
+  });
+  it("é suficiente com dados reais coerentes", () => {
+    const r = assessCapacity({ ...base, publishedGuides: 5, approvedServices: 10, languages: ["pt", "en"], targetLanguage: "pt" });
+    expect(r.sufficient).toBe(true);
+    expect(r.ratio).toBe(1);
+  });
+});
+
+describe("deriveFactors", () => {
+  it("não inventa dimensão de mercado nem margem", () => {
+    const capacity = assessCapacity({ publishedGuides: 0, approvedServices: 0, districts: 0, languages: [], pastBookings: 0, targetLanguage: null });
+    const f = deriveFactors({
+      opportunityScore: 0, intent: null, country: null, observedSignals: 0, observedClicks: 0,
+      bookingsFromMarket: 0, capacity, seasonMatch: null, averageServicePrice: null,
+    });
+    expect(f.market_size).toBe(0);
+    expect(f.margin).toBe(0);
+    expect(f.stp_relevance).toBe(0);
+  });
+});
+
+describe("parseAnalysis", () => {
+  it("ignora tipos de ativo desconhecidos e texto inválido", () => {
+    const out = parseAnalysis('lixo {"hypothesis":"h","assets":[{"asset_type":"seo_article"},{"asset_type":"tv_ad"}]} fim');
+    expect(out.hypothesis).toBe("h");
+    expect(out.assets).toHaveLength(1);
+    expect(out.assets[0].asset_type).toBe("seo_article");
+  });
+  it("devolve estrutura segura para lixo total", () => {
+    const out = parseAnalysis("sem json");
+    expect(out.hypothesis).toBe("");
+    expect(out.assets).toEqual([]);
+    expect(out.risks).toEqual([]);
+  });
+});
