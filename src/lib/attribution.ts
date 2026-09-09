@@ -43,6 +43,23 @@ function readJson<T>(key: string): T | null {
   }
 }
 
+/**
+ * The origin is read once, when the app loads, and kept in memory only.
+ * Nothing is written to the device before the visitor accepts optional cookies,
+ * but the campaign that brought them is not lost while the banner is open.
+ */
+let initialAttribution: Attribution | null = null;
+
+export function captureInitialAttribution(): Attribution {
+  if (initialAttribution) return initialAttribution;
+  initialAttribution = parseAttributionFromLocation(
+    window.location.search,
+    document.referrer,
+    navigator.language,
+  );
+  return initialAttribution;
+}
+
 export function getVisitorId(): string | null {
   if (!hasAnalyticsConsent()) return null;
   try {
@@ -122,13 +139,13 @@ export async function trackEvent(
   const visitorId = getVisitorId();
   if (!visitorId) return;
 
-  const attribution = rememberAttribution(
-    parseAttributionFromLocation(
-      window.location.search,
-      document.referrer,
-      navigator.language,
-    ),
+  const current = parseAttributionFromLocation(
+    window.location.search,
+    document.referrer,
+    navigator.language,
   );
+  const hasSignal = Boolean(current.utm_source || current.utm_campaign || current.utm_medium);
+  const attribution = rememberAttribution(hasSignal ? current : captureInitialAttribution());
 
   try {
     await supabase.rpc("record_traffic_event", {
