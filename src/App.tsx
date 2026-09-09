@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AttributionTracker } from "@/components/AttributionTracker";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import CheckoutReturnPage from "./pages/CheckoutReturnPage.tsx";
 import Index from "./pages/Index.tsx";
@@ -54,6 +55,7 @@ const App = () => (
         <AuthProvider>
           <PaymentTestModeBanner />
           <ScrollToTop />
+          <AttributionTracker />
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
           <Routes>
             <Route path="/" element={<Index />} />

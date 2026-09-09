@@ -8,6 +8,20 @@ const corsHeaders = {
 
 const PLATFORM_COMMISSION = 0.15; // 15%
 
+const ATTRIBUTION_KEYS = [
+  "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "referrer_host", "language",
+] as const;
+
+function sanitizeAttribution(input: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!input || typeof input !== "object") return out;
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = (input as Record<string, unknown>)[key];
+    if (typeof value === "string" && value.trim()) out[key] = value.trim().slice(0, 150);
+  }
+  return out;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") {
@@ -34,7 +48,7 @@ Deno.serve(async (req) => {
     const userEmail = claimsData.claims.email as string | undefined;
 
     const body = await req.json();
-    const { serviceId, date, numPeople, specialRequests, returnUrl } = body ?? {};
+    const { serviceId, date, numPeople, specialRequests, returnUrl, visitorId, attribution } = body ?? {};
     if (!serviceId || !date || !numPeople || !returnUrl) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -104,6 +118,9 @@ Deno.serve(async (req) => {
         special_requests: specialRequests || null,
         status: "pending_payment",
         payment_status: "unpaid",
+        // First-party attribution only. Unknown keys are dropped, values are capped.
+        visitor_id: typeof visitorId === "string" && /^[0-9a-f-]{36}$/i.test(visitorId) ? visitorId : null,
+        attribution: sanitizeAttribution(attribution),
       })
       .select()
       .single();

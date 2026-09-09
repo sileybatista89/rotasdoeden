@@ -19,7 +19,8 @@ async function handleCheckoutCompleted(session: any) {
     return;
   }
   const paid = session.payment_status === "paid";
-  await getSupabase()
+  const supabase = getSupabase();
+  const { data: booking } = await supabase
     .from("bookings")
     .update({
       payment_status: paid ? "paid" : "unpaid",
@@ -27,7 +28,32 @@ async function handleCheckoutCompleted(session: any) {
       paid_at: paid ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", bookingId);
+    .eq("id", bookingId)
+    .select("id, visitor_id, attribution, total_price, currency")
+    .maybeSingle();
+
+  // First-party measurement: a paid booking is the only conversion we record.
+  // Measurement must never break a payment, so it is best-effort.
+  if (paid && booking?.visitor_id) {
+    const attribution = (booking.attribution ?? {}) as Record<string, string>;
+    const { error: eventError } = await supabase.from("traffic_events").insert({
+      visitor_id: booking.visitor_id,
+      event_type: "booking_paid",
+      entity_type: "booking",
+      entity_id: booking.id,
+      utm_source: attribution.utm_source ?? null,
+      utm_medium: attribution.utm_medium ?? null,
+      utm_campaign: attribution.utm_campaign ?? null,
+      utm_content: attribution.utm_content ?? null,
+      utm_term: attribution.utm_term ?? null,
+      referrer_host: attribution.referrer_host ?? null,
+      language: attribution.language ?? null,
+      value: booking.total_price,
+      currency: booking.currency,
+    });
+    if (eventError) console.error("traffic_events insert failed:", eventError.message);
+  }
+
 }
 
 async function handleCheckoutExpired(session: any) {

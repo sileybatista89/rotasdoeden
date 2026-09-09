@@ -14,6 +14,387 @@ export type Database = {
   }
   public: {
     Tables: {
+      acquisition_assets: {
+        Row: {
+          asset_type: string
+          content_id: string | null
+          created_at: string
+          id: string
+          language: string | null
+          note: string | null
+          plan_id: string
+          purpose: string | null
+          requested_task_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_type: string
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          note?: string | null
+          plan_id: string
+          purpose?: string | null
+          requested_task_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_type?: string
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          language?: string | null
+          note?: string | null
+          plan_id?: string
+          purpose?: string | null
+          requested_task_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_assets_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_assets_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_assets_requested_task_id_fkey"
+            columns: ["requested_task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_campaigns: {
+        Row: {
+          approval_id: string | null
+          budget_cap: number
+          channel: string
+          created_at: string
+          currency: string
+          external_reference: string | null
+          id: string
+          name: string
+          period_end: string | null
+          period_start: string | null
+          plan_id: string
+          requested_budget: number
+          status: string
+          stop_conditions: Json
+          updated_at: string
+          utm_campaign: string | null
+        }
+        Insert: {
+          approval_id?: string | null
+          budget_cap?: number
+          channel: string
+          created_at?: string
+          currency?: string
+          external_reference?: string | null
+          id?: string
+          name: string
+          period_end?: string | null
+          period_start?: string | null
+          plan_id: string
+          requested_budget?: number
+          status?: string
+          stop_conditions?: Json
+          updated_at?: string
+          utm_campaign?: string | null
+        }
+        Update: {
+          approval_id?: string | null
+          budget_cap?: number
+          channel?: string
+          created_at?: string
+          currency?: string
+          external_reference?: string | null
+          id?: string
+          name?: string
+          period_end?: string | null
+          period_start?: string | null
+          plan_id?: string
+          requested_budget?: number
+          status?: string
+          stop_conditions?: Json
+          updated_at?: string
+          utm_campaign?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_campaigns_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "agent_approvals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_campaigns_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_learning: {
+        Row: {
+          channel: string | null
+          conclusion: string
+          confidence: number
+          created_at: string
+          evidence: Json
+          id: string
+          language: string | null
+          market: string | null
+          plan_id: string | null
+          run_id: string | null
+          scope: string
+          task_id: string | null
+        }
+        Insert: {
+          channel?: string | null
+          conclusion: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          id?: string
+          language?: string | null
+          market?: string | null
+          plan_id?: string | null
+          run_id?: string | null
+          scope: string
+          task_id?: string | null
+        }
+        Update: {
+          channel?: string | null
+          conclusion?: string
+          confidence?: number
+          created_at?: string
+          evidence?: Json
+          id?: string
+          language?: string | null
+          market?: string | null
+          plan_id?: string | null
+          run_id?: string | null
+          scope?: string
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_learning_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_learning_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_learning_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_plans: {
+        Row: {
+          acquisition_score: number
+          audience: Json
+          channel: string
+          confidence_score: number
+          country: string | null
+          created_at: string
+          decision: string
+          discovery_opportunity_id: string | null
+          estimated_cost: number
+          evidence: Json
+          hypothesis: string
+          id: string
+          language: string
+          market: string
+          market_state: string
+          message: Json
+          objective: string | null
+          offer: Json
+          rationale: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          run_id: string | null
+          score_breakdown: Json
+          status: string
+          target_metric: Json
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          acquisition_score?: number
+          audience?: Json
+          channel: string
+          confidence_score?: number
+          country?: string | null
+          created_at?: string
+          decision?: string
+          discovery_opportunity_id?: string | null
+          estimated_cost?: number
+          evidence?: Json
+          hypothesis: string
+          id?: string
+          language: string
+          market: string
+          market_state?: string
+          message?: Json
+          objective?: string | null
+          offer?: Json
+          rationale?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          run_id?: string | null
+          score_breakdown?: Json
+          status?: string
+          target_metric?: Json
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acquisition_score?: number
+          audience?: Json
+          channel?: string
+          confidence_score?: number
+          country?: string | null
+          created_at?: string
+          decision?: string
+          discovery_opportunity_id?: string | null
+          estimated_cost?: number
+          evidence?: Json
+          hypothesis?: string
+          id?: string
+          language?: string
+          market?: string
+          market_state?: string
+          message?: Json
+          objective?: string | null
+          offer?: Json
+          rationale?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          run_id?: string | null
+          score_breakdown?: Json
+          status?: string
+          target_metric?: Json
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_plans_discovery_opportunity_id_fkey"
+            columns: ["discovery_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_plans_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_plans_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_results: {
+        Row: {
+          bookings: number
+          campaign_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          leads: number
+          measured_from: string
+          period_end: string
+          period_start: string
+          plan_id: string | null
+          revenue: number
+          spend: number
+          visits: number
+        }
+        Insert: {
+          bookings?: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          leads?: number
+          measured_from?: string
+          period_end: string
+          period_start: string
+          plan_id?: string | null
+          revenue?: number
+          spend?: number
+          visits?: number
+        }
+        Update: {
+          bookings?: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          leads?: number
+          measured_from?: string
+          period_end?: string
+          period_start?: string
+          plan_id?: string | null
+          revenue?: number
+          spend?: number
+          visits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_results_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acquisition_results_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -412,6 +793,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          attribution: Json
           commission_amount: number | null
           created_at: string
           currency: string
@@ -430,8 +812,10 @@ export type Database = {
           total_price: number
           tourist_id: string
           updated_at: string
+          visitor_id: string | null
         }
         Insert: {
+          attribution?: Json
           commission_amount?: number | null
           created_at?: string
           currency?: string
@@ -450,8 +834,10 @@ export type Database = {
           total_price: number
           tourist_id: string
           updated_at?: string
+          visitor_id?: string | null
         }
         Update: {
+          attribution?: Json
           commission_amount?: number | null
           created_at?: string
           currency?: string
@@ -470,6 +856,7 @@ export type Database = {
           total_price?: number
           tourist_id?: string
           updated_at?: string
+          visitor_id?: string | null
         }
         Relationships: []
       }
@@ -1712,6 +2099,116 @@ export type Database = {
           },
         ]
       }
+      traffic_events: {
+        Row: {
+          created_at: string
+          currency: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          language: string | null
+          path: string | null
+          referrer_host: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          value: number | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          language?: string | null
+          path?: string | null
+          referrer_host?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          value?: number | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          language?: string | null
+          path?: string | null
+          referrer_host?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          value?: number | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traffic_events_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_visitors"
+            referencedColumns: ["visitor_id"]
+          },
+        ]
+      }
+      traffic_visitors: {
+        Row: {
+          created_at: string
+          first_landing_path: string | null
+          first_language: string | null
+          first_referrer_host: string | null
+          first_utm_campaign: string | null
+          first_utm_content: string | null
+          first_utm_medium: string | null
+          first_utm_source: string | null
+          first_utm_term: string | null
+          updated_at: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_landing_path?: string | null
+          first_language?: string | null
+          first_referrer_host?: string | null
+          first_utm_campaign?: string | null
+          first_utm_content?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          first_utm_term?: string | null
+          updated_at?: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          first_landing_path?: string | null
+          first_language?: string | null
+          first_referrer_host?: string | null
+          first_utm_campaign?: string | null
+          first_utm_content?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          first_utm_term?: string | null
+          updated_at?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2014,6 +2511,17 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      record_traffic_event: {
+        Args: {
+          _attribution?: Json
+          _entity_id?: string
+          _entity_type?: string
+          _event_type: string
+          _path?: string
+          _visitor_id: string
+        }
+        Returns: undefined
+      }
       request_verification_documents: {
         Args: {
           _items: Json

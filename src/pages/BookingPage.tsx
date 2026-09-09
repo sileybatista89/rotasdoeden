@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { getStoredAttribution, getVisitorId, trackEvent } from "@/lib/attribution";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Service = Tables<"services">;
@@ -58,9 +59,12 @@ export default function BookingPage() {
     }
     setSubmitting(true);
     try {
+      void trackEvent("booking_started", { entityType: "service", entityId: service.id });
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           serviceId: service.id,
+          visitorId: getVisitorId() ?? undefined,
+          attribution: getStoredAttribution(),
           date,
           numPeople,
           specialRequests: specialRequests || undefined,
