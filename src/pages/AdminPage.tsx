@@ -18,6 +18,7 @@ import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPane
 import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
 import { SuppliersPanel } from "@/components/admin/suppliers/SuppliersPanel";
 import { PricingPanel } from "@/components/admin/pricing/PricingPanel";
+import { FlightsPanel } from "@/components/admin/flights/FlightsPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -283,6 +284,17 @@ export default function AdminPage() {
         )}
 
 
+
+        {section === "voos" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Fornecimento"
+              title="Voos (modo de teste)"
+              description="Pesquisa de ofertas aéreas reais no ambiente de teste da Duffel. Os valores são custo de fornecedor: a margem, a proteção e o arredondamento continuam a ser aplicados em Preços. Não há reservas, pagamentos nem emissão de bilhetes."
+            />
+            <FlightsPanel />
+          </>
+        )}
 
         {section === "territorio" && (
           <>
