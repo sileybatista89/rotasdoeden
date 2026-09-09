@@ -318,3 +318,251 @@ export function attributeBookings(
   }
   return perCampaign;
 }
+
+// ---------------------------------------------------------------------------
+// Channels
+// ---------------------------------------------------------------------------
+
+export type ChannelKind = "organico" | "pago";
+/** availability: what the platform can really do today. */
+export type ChannelAvailability = "disponivel" | "nao_ligado" | "hipotetico";
+
+export interface ChannelInfo {
+  key: string;
+  label: string;
+  kind: ChannelKind;
+  availability: ChannelAvailability;
+  /** Only channels we can actually produce work for may request content assets. */
+  canRequestContent: boolean;
+  note: string;
+}
+
+export const CHANNELS: ChannelInfo[] = [
+  {
+    key: "seo",
+    label: "SEO / conteúdo orgânico",
+    kind: "organico",
+    availability: "disponivel",
+    canRequestContent: true,
+    note: "Pode ser trabalhado hoje através do Agente de Conteúdo.",
+  },
+  {
+    key: "landing_page",
+    label: "Landing page própria",
+    kind: "organico",
+    availability: "disponivel",
+    canRequestContent: true,
+    note: "Página no próprio site; requer aprovação humana para publicação.",
+  },
+  {
+    key: "instagram_organico",
+    label: "Instagram orgânico",
+    kind: "organico",
+    availability: "nao_ligado",
+    canRequestContent: true,
+    note: "Sem integração de publicação: o conteúdo fica em rascunho.",
+  },
+  {
+    key: "email",
+    label: "Email",
+    kind: "organico",
+    availability: "nao_ligado",
+    canRequestContent: true,
+    note: "Sem envio externo nesta fase; apenas rascunho.",
+  },
+  {
+    key: "google_ads",
+    label: "Google Ads",
+    kind: "pago",
+    availability: "nao_ligado",
+    canRequestContent: false,
+    note: "Canal futuro. Sem integração, sem orçamento e sem execução.",
+  },
+  {
+    key: "meta_ads",
+    label: "Meta Ads",
+    kind: "pago",
+    availability: "nao_ligado",
+    canRequestContent: false,
+    note: "Canal futuro. Sem integração, sem orçamento e sem execução.",
+  },
+];
+
+export function getChannel(key: string): ChannelInfo | null {
+  return CHANNELS.find((c) => c.key === key) ?? null;
+}
+
+/** A channel may never be executed in this phase, whatever it is. */
+export function canExecuteChannel(): false {
+  return false;
+}
+
+// ---------------------------------------------------------------------------
+// Real capacity
+// ---------------------------------------------------------------------------
+
+export interface CapacityInput {
+  publishedGuides: number;
+  approvedServices: number;
+  districts: number;
+  /** Languages really declared by published guides/services. */
+  languages: string[];
+  pastBookings: number;
+  /** Language the opportunity targets. */
+  targetLanguage: string | null;
+}
+
+export interface CapacityResult {
+  sufficient: boolean;
+  ratio: number;
+  languageCovered: boolean;
+  reasons: string[];
+  snapshot: Omit<CapacityInput, "targetLanguage">;
+}
+
+/** Never promise availability that does not exist in the database. */
+export function assessCapacity(input: CapacityInput): CapacityResult {
+  const reasons: string[] = [];
+  const languages = input.languages.map((l) => l.trim().toLowerCase()).filter(Boolean);
+  const target = (input.targetLanguage ?? "").trim().toLowerCase();
+  const languageCovered = target ? languages.includes(target) : languages.length > 0;
+
+  if (input.publishedGuides <= 0) reasons.push("Sem guias publicados para atender procura.");
+  if (input.approvedServices <= 0) reasons.push("Sem serviços aprovados disponíveis.");
+  if (!languageCovered) {
+    reasons.push(
+      target
+        ? `Nenhum guia/serviço declara o idioma "${target}".`
+        : "Nenhum idioma declarado pelos guias ou serviços.",
+    );
+  }
+
+  const guideRatio = Math.min(1, input.publishedGuides / 5);
+  const serviceRatio = Math.min(1, input.approvedServices / 10);
+  const languageRatio = languageCovered ? 1 : 0;
+  const ratio = +(((guideRatio + serviceRatio + languageRatio) / 3)).toFixed(3);
+
+  return {
+    sufficient: reasons.length === 0,
+    ratio,
+    languageCovered,
+    reasons,
+    snapshot: {
+      publishedGuides: input.publishedGuides,
+      approvedServices: input.approvedServices,
+      districts: input.districts,
+      languages,
+      pastBookings: input.pastBookings,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Deterministic factors — every value comes from observed data
+// ---------------------------------------------------------------------------
+
+export interface FactorInput {
+  opportunityScore?: number | null;
+  intent?: string | null;
+  country?: string | null;
+  observedSignals: number;
+  observedClicks: number;
+  bookingsFromMarket: number;
+  capacity: CapacityResult;
+  seasonMatch: boolean | null;
+  averageServicePrice: number | null;
+}
+
+const TRAVEL_INTENTS = ["transactional", "booking", "commercial", "comercial", "transacional"];
+
+export function deriveFactors(input: FactorInput): ScoreFactors {
+  const intent = (input.intent ?? "").toLowerCase();
+  const travelIntent = TRAVEL_INTENTS.some((i) => intent.includes(i))
+    ? 1
+    : intent.includes("informational") || intent.includes("informacional")
+      ? 0.4
+      : 0.2;
+
+  return {
+    travel_intent: travelIntent,
+    // Relevance is only what Discovery actually measured.
+    stp_relevance: Math.min(1, Number(input.opportunityScore ?? 0) / 100),
+    conversion_potential: input.bookingsFromMarket > 0 ? 1 : input.observedClicks > 0 ? 0.5 : 0.1,
+    service_capacity: input.capacity.ratio,
+    // Without CPC data we cannot estimate cost; organic-only work stays neutral-low.
+    acquisition_cost: 0.5,
+    // No Keyword Planner: bounded by observed impressions only.
+    market_size: Math.min(1, input.observedSignals / 1000),
+    seasonality: input.seasonMatch === null ? 0.5 : input.seasonMatch ? 1 : 0.2,
+    margin: input.averageServicePrice && input.averageServicePrice > 0
+      ? Math.min(1, input.averageServicePrice / 200)
+      : 0,
+  };
+}
+
+export const ACQUISITION_SYSTEM_PROMPT = `És um analista de aquisição da Rotas do Éden, marketplace de turismo em São Tomé e Príncipe.
+Recebes dados REAIS da plataforma e uma oportunidade de procura observada.
+Responde APENAS com JSON válido:
+{"hypothesis":"","audience":{"description":"","segments":[]},"message":{"angle":"","key_points":[]},"offer":{"description":"","requires":[]},"objective":"","target_metric":{"primary":"","secondary":[]},"assets":[{"asset_type":"","purpose":"","language":""}],"risks":[]}
+Regras:
+- Nunca inventes números, volumes de pesquisa, CPC, parceiros, preços ou disponibilidade.
+- Só podes referir capacidade que exista nos dados fornecidos.
+- Escreve em português de Portugal.
+- Não propõe execução de anúncios nem contacto externo.`;
+
+export interface AnalysisDraft {
+  hypothesis: string;
+  audience: Record<string, unknown>;
+  message: Record<string, unknown>;
+  offer: Record<string, unknown>;
+  objective: string;
+  target_metric: Record<string, unknown>;
+  assets: { asset_type: string; purpose?: string; language?: string }[];
+  risks: string[];
+}
+
+export const ASSET_TYPES = [
+  "landing_page",
+  "seo_article",
+  "social_post",
+  "email_draft",
+  "ad_copy_draft",
+  "video_concept",
+] as const;
+
+export function parseAnalysis(raw: string, fallbackLanguage = "pt"): AnalysisDraft {
+  let parsed: Record<string, unknown> = {};
+  const text = (raw ?? "").trim();
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    try {
+      parsed = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
+    } catch {
+      parsed = {};
+    }
+  }
+  const obj = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+
+  const assets = Array.isArray(parsed.assets)
+    ? (parsed.assets as Record<string, unknown>[])
+        .map((a) => ({
+          asset_type: String(a.asset_type ?? ""),
+          purpose: a.purpose ? String(a.purpose) : undefined,
+          language: a.language ? String(a.language) : fallbackLanguage,
+        }))
+        .filter((a) => (ASSET_TYPES as readonly string[]).includes(a.asset_type))
+    : [];
+
+  return {
+    hypothesis: String(parsed.hypothesis ?? "").slice(0, 2000),
+    audience: obj(parsed.audience),
+    message: obj(parsed.message),
+    offer: obj(parsed.offer),
+    objective: String(parsed.objective ?? "").slice(0, 500),
+    target_metric: obj(parsed.target_metric),
+    assets: assets.slice(0, 4),
+    risks: Array.isArray(parsed.risks) ? (parsed.risks as unknown[]).map(String).slice(0, 10) : [],
+  };
+}
