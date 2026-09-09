@@ -1919,6 +1919,176 @@ export type Database = {
           },
         ]
       }
+      flight_offers: {
+        Row: {
+          base_amount: number | null
+          created_at: string
+          expires_at: string | null
+          fare_conditions: Json
+          hold_capable: boolean
+          id: string
+          last_reprice: Json | null
+          owner_carrier: string | null
+          owner_name: string | null
+          payment_required_by: string | null
+          payment_requirements: Json
+          price_guarantee_expires_at: string | null
+          provider: string
+          provider_created_at: string | null
+          provider_offer_id: string
+          provider_offer_request_id: string | null
+          refreshed_at: string | null
+          requires_instant_payment: boolean
+          search_id: string | null
+          services: Json
+          slices: Json
+          status: string
+          tax_amount: number | null
+          total_amount: number
+          total_currency: string
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number | null
+          created_at?: string
+          expires_at?: string | null
+          fare_conditions?: Json
+          hold_capable?: boolean
+          id?: string
+          last_reprice?: Json | null
+          owner_carrier?: string | null
+          owner_name?: string | null
+          payment_required_by?: string | null
+          payment_requirements?: Json
+          price_guarantee_expires_at?: string | null
+          provider?: string
+          provider_created_at?: string | null
+          provider_offer_id: string
+          provider_offer_request_id?: string | null
+          refreshed_at?: string | null
+          requires_instant_payment?: boolean
+          search_id?: string | null
+          services?: Json
+          slices?: Json
+          status?: string
+          tax_amount?: number | null
+          total_amount: number
+          total_currency: string
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number | null
+          created_at?: string
+          expires_at?: string | null
+          fare_conditions?: Json
+          hold_capable?: boolean
+          id?: string
+          last_reprice?: Json | null
+          owner_carrier?: string | null
+          owner_name?: string | null
+          payment_required_by?: string | null
+          payment_requirements?: Json
+          price_guarantee_expires_at?: string | null
+          provider?: string
+          provider_created_at?: string | null
+          provider_offer_id?: string
+          provider_offer_request_id?: string | null
+          refreshed_at?: string | null
+          requires_instant_payment?: boolean
+          search_id?: string | null
+          services?: Json
+          slices?: Json
+          status?: string
+          tax_amount?: number | null
+          total_amount?: number
+          total_currency?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flight_offers_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "flight_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flight_searches: {
+        Row: {
+          adults: number
+          cabin: string
+          cache_key: string
+          children: number
+          created_at: string
+          created_by: string | null
+          departure_date: string
+          destination: string
+          duration_ms: number | null
+          error_code: string | null
+          expires_at: string | null
+          id: string
+          infants: number
+          max_connections: number | null
+          offers_count: number
+          origin: string
+          provider: string
+          provider_mode: string
+          provider_offer_request_id: string | null
+          provider_request_id: string | null
+          return_date: string | null
+          status: string
+        }
+        Insert: {
+          adults: number
+          cabin: string
+          cache_key: string
+          children?: number
+          created_at?: string
+          created_by?: string | null
+          departure_date: string
+          destination: string
+          duration_ms?: number | null
+          error_code?: string | null
+          expires_at?: string | null
+          id?: string
+          infants?: number
+          max_connections?: number | null
+          offers_count?: number
+          origin: string
+          provider?: string
+          provider_mode?: string
+          provider_offer_request_id?: string | null
+          provider_request_id?: string | null
+          return_date?: string | null
+          status?: string
+        }
+        Update: {
+          adults?: number
+          cabin?: string
+          cache_key?: string
+          children?: number
+          created_at?: string
+          created_by?: string | null
+          departure_date?: string
+          destination?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          expires_at?: string | null
+          id?: string
+          infants?: number
+          max_connections?: number | null
+          offers_count?: number
+          origin?: string
+          provider?: string
+          provider_mode?: string
+          provider_offer_request_id?: string | null
+          provider_request_id?: string | null
+          return_date?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       kyc_submissions: {
         Row: {
           document_back_url: string | null
@@ -3355,6 +3525,7 @@ export type Database = {
           total_cost: number
         }[]
       }
+      flight_stats: { Args: never; Returns: Json }
       fulfill_document_request: {
         Args: { _document_url: string; _request_id: string }
         Returns: undefined
