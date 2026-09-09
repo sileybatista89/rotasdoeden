@@ -15,6 +15,7 @@ import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
 import { ContentPanel } from "@/components/admin/content/ContentPanel";
 import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPanel";
+import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
