@@ -14,6 +14,7 @@ import { AdminGuideTable } from "@/components/admin/AdminGuideTable";
 import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
 import { ContentPanel } from "@/components/admin/content/ContentPanel";
+import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -231,6 +232,17 @@ export default function AdminPage() {
               description="Rascunhos criados a partir de oportunidades aceites, com as fontes usadas e o controlo de qualidade. Nada é publicado sem a tua decisão."
             />
             <ContentPanel />
+          </>
+        )}
+
+        {section === "aquisicao" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Agentes IA"
+              title="Aquisição IA"
+              description="Planos de aquisição em rascunho criados a partir de oportunidades aceites e da capacidade real da plataforma. Nada é publicado, contactado ou pago a partir daqui."
+            />
+            <AcquisitionPanel />
           </>
         )}
 
