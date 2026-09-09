@@ -37,8 +37,16 @@
 - [x] RPCs de aquisição + histórico de planos + auditoria de administração
 - [x] Secção admin "Aquisição IA" (visão geral, filtros, lista, detalhe, decisões)
 
+## Fase 7B — Produtos e versões de pacotes (em curso)
+- [ ] Tabelas travel_products + travel_product_versions (RLS admin, versão publicada imutável)
+- [ ] RPCs de criação/edição/estado/versão com auditoria
+- [ ] Os 4 produtos oficiais (Essencial, Explorar, Imersão, À Medida) sem preços nem componentes
+- [ ] Secção admin "Pacotes" (lista + detalhe + ações)
+- [ ] Testes de duração, versionamento, imutabilidade, permissões
+
 ## Próximas fases (requerem autorização)
+- [ ] Fase 7A restante: fornecedores/custos, pricing engine, voos/Duffel, cotações
 - [ ] Resultados/aprendizagem e, só com autorização, canal externo (etapas 9-10)
-- [ ] Conversion agent
+- [ ] Conversion agent (plano da Fase 6 por aprovar)
 
 
