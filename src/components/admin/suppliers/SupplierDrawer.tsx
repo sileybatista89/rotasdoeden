@@ -41,8 +41,8 @@ export function SupplierDrawer({ supplier, onClose }: Props) {
       toast({ title: "Transição não permitida", variant: "destructive" });
       return;
     }
-    const note = status === "archived" ? window.prompt("Motivo do arquivo:") ?? "" : undefined;
-    if (status === "archived" && !note.trim()) {
+    const note = status === "archived" ? (window.prompt("Motivo do arquivo:") ?? "") : undefined;
+    if (status === "archived" && !note?.trim()) {
       toast({ title: "É preciso indicar um motivo", variant: "destructive" });
       return;
     }
