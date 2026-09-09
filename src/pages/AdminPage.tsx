@@ -16,6 +16,7 @@ import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
 import { ContentPanel } from "@/components/admin/content/ContentPanel";
 import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPanel";
 import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
+import { SuppliersPanel } from "@/components/admin/suppliers/SuppliersPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -255,6 +256,17 @@ export default function AdminPage() {
               description="Os produtos de viagem e as suas versões. Nesta fase não existem preços, custos, fornecedores nem voos, e nada aparece no site público."
             />
             <PackagesPanel />
+          </>
+        )}
+
+        {section === "fornecedores" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Fornecimento"
+              title="Fornecedores"
+              description="Fornecedores reais, alojamentos, quartos, componentes e tarifas. Cada valor exige fonte e data, o preço público observado nunca se confunde com o custo da Rotas do Éden, e nada fica visível no site."
+            />
+            <SuppliersPanel />
           </>
         )}
 
