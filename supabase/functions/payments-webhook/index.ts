@@ -33,9 +33,10 @@ async function handleCheckoutCompleted(session: any) {
     .maybeSingle();
 
   // First-party measurement: a paid booking is the only conversion we record.
+  // Measurement must never break a payment, so it is best-effort.
   if (paid && booking?.visitor_id) {
     const attribution = (booking.attribution ?? {}) as Record<string, string>;
-    await supabase.from("traffic_events").insert({
+    const { error: eventError } = await supabase.from("traffic_events").insert({
       visitor_id: booking.visitor_id,
       event_type: "booking_paid",
       entity_type: "booking",
@@ -50,7 +51,9 @@ async function handleCheckoutCompleted(session: any) {
       value: booking.total_price,
       currency: booking.currency,
     });
+    if (eventError) console.error("traffic_events insert failed:", eventError.message);
   }
+
 }
 
 async function handleCheckoutExpired(session: any) {
