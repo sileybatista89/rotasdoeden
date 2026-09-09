@@ -213,7 +213,7 @@ describe("Fase 7E — segurança de preço e integração com o Pricing Engine",
   it("a margem e a proteção continuam a ser calculadas pelo Pricing Engine", () => {
     const cost = toPricingFlightCost(offer);
     expect(applyMarkup(cost.amount, 10)).toBeCloseTo(929.83, 2);
-    expect(applyFlightProtection(cost.amount, { method: "percentage", value: 5 })).toBeCloseTo(42.27, 2);
+    expect(applyFlightProtection(cost.amount, { method: "percentage", value: 5 })).toBeCloseTo(42.265, 3);
   });
 
   it("o modelo normalizado não contém margem, markup nem preço final", () => {
