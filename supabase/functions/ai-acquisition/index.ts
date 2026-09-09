@@ -63,6 +63,24 @@ interface AcqContext extends ToolContext {
   runtime: AcquisitionRuntime;
 }
 
+/** Evidence is only what Discovery really observed — never invented. */
+function buildEvidence(row: Record<string, unknown>): Record<string, unknown>[] {
+  const evidence: Record<string, unknown>[] = [];
+  const metrics = (row.metrics ?? {}) as Record<string, unknown>;
+  if (Object.keys(metrics).length > 0) {
+    evidence.push({
+      type: String(row.evidence_type ?? "observed"),
+      source: String(row.source ?? "desconhecida"),
+      metrics,
+    });
+  }
+  const reference = (row.source_reference ?? {}) as Record<string, unknown>;
+  if (Object.keys(reference).length > 0) {
+    evidence.push({ type: "source_reference", source: String(row.source ?? ""), reference });
+  }
+  return evidence;
+}
+
 // ---------------------------------------------------------------- tools -----
 
 registerTool({
@@ -84,11 +102,12 @@ registerTool({
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) return { opportunity: null, eligibility: { eligible: false, reason: "Oportunidade inexistente." } };
-    const evidence = Array.isArray((data as { evidence?: unknown[] }).evidence)
-      ? ((data as { evidence: unknown[] }).evidence)
-      : [];
+    // Discovery stores evidence as metrics + source_reference + evidence_type.
+    const row = data as Record<string, unknown>;
+    const metrics = (row.metrics ?? {}) as Record<string, unknown>;
+    const evidence = buildEvidence(row);
     let eligibility = checkOpportunityEligibility(data as never, new Date(), c.runtime.minConfidence);
-    if (eligibility.eligible && evidence.length === 0) {
+    if (eligibility.eligible && (evidence.length === 0 || Object.keys(metrics).length === 0)) {
       eligibility = { eligible: false, reason: "Oportunidade sem evidência." };
     }
     return { opportunity: data, evidence, eligibility };
@@ -107,7 +126,7 @@ registerTool({
       c.client.from("professional_profiles").select("id, languages").eq("status", "published").limit(500),
       c.client
         .from("services")
-        .select("id, price, languages")
+        .select("id, price_per_person, languages")
         .eq("moderation_status", "approved")
         .limit(500),
       c.client.from("districts").select("id").limit(100),
@@ -122,7 +141,7 @@ registerTool({
       for (const lang of ((row as { languages?: string[] | null }).languages ?? [])) languages.add(String(lang));
     }
     const prices = (services ?? [])
-      .map((s) => Number((s as { price?: number | null }).price ?? 0))
+      .map((s) => Number((s as { price_per_person?: number | null }).price_per_person ?? 0))
       .filter((p) => p > 0);
 
     const capacity = assessCapacity({
@@ -497,7 +516,7 @@ async function runAcquisition(body: Record<string, unknown>) {
 
     // 4. Deterministic score. Confidence multiplies the total.
     const factors = deriveFactors({
-      opportunityScore: Number(opportunity?.score ?? 0),
+      opportunityScore: Number(opportunity?.opportunity_score ?? 0),
       intent: (opportunity?.intent as string) ?? null,
       country: (opportunity?.country as string) ?? null,
       observedSignals,
@@ -569,7 +588,7 @@ async function runAcquisition(body: Record<string, unknown>) {
         language,
         channel,
         market_state: marketState,
-        hypothesis: analysis?.hypothesis ?? null,
+        hypothesis: analysis?.hypothesis || rationaleParts.join(" "),
         audience: analysis?.audience ?? {},
         message: analysis?.message ?? {},
         offer: analysis?.offer ?? {},
