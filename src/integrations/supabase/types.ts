@@ -217,6 +217,50 @@ export type Database = {
           },
         ]
       }
+      acquisition_plan_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_kind: string
+          created_at: string
+          id: string
+          new_status: string | null
+          note: string | null
+          plan_id: string
+          previous_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_kind?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          plan_id: string
+          previous_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_kind?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          note?: string | null
+          plan_id?: string
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_plan_history_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_plans: {
         Row: {
           acquisition_score: number
@@ -226,6 +270,7 @@ export type Database = {
           country: string | null
           created_at: string
           decision: string
+          dedupe_key: string | null
           discovery_opportunity_id: string | null
           estimated_cost: number
           evidence: Json
@@ -256,6 +301,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           decision?: string
+          dedupe_key?: string | null
           discovery_opportunity_id?: string | null
           estimated_cost?: number
           evidence?: Json
@@ -286,6 +332,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           decision?: string
+          dedupe_key?: string | null
           discovery_opportunity_id?: string | null
           estimated_cost?: number
           evidence?: Json
@@ -2321,6 +2368,14 @@ export type Database = {
       }
     }
     Functions: {
+      acquisition_markets: { Args: never; Returns: Json }
+      acquisition_request_asset: { Args: { _payload: Json }; Returns: Json }
+      acquisition_save_campaign_draft: {
+        Args: { _payload: Json }
+        Returns: Json
+      }
+      acquisition_save_plan: { Args: { _payload: Json }; Returns: Json }
+      acquisition_stats: { Args: never; Returns: Json }
       admin_list_flagged_messages: {
         Args: { _limit?: number }
         Returns: {
@@ -2376,6 +2431,10 @@ export type Database = {
       admin_set_opportunity_status: {
         Args: { _note?: string; _opportunity_id: string; _status: string }
         Returns: undefined
+      }
+      admin_set_plan_status: {
+        Args: { _note?: string; _plan_id: string; _status: string }
+        Returns: Json
       }
       agent_claim_task: {
         Args: { _limit?: number }
