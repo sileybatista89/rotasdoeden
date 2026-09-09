@@ -247,6 +247,19 @@ export default function AdminPage() {
           </>
         )}
 
+        {section === "pacotes" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Produtos"
+              title="Pacotes"
+              description="Os produtos de viagem e as suas versões. Nesta fase não existem preços, custos, fornecedores nem voos, e nada aparece no site público."
+            />
+            <PackagesPanel />
+          </>
+        )}
+
+
+
         {section === "territorio" && (
           <>
             <AdminSectionHeader
