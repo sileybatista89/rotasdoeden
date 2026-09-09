@@ -24,6 +24,16 @@
 - [x] Admin "Conteúdo IA": resumo, filtros, lista paginada, detalhe (texto/fontes/versões/histórico/execução), aprovar/rejeitar/arquivar/repor versão
 - [x] 84 testes a passar; sem cron, sem publicação automática, sem alterações ao site público
 
+## Fase 6 — Aquisição: medição própria + fundação (etapas 1-3 concluídas)
+- [x] Medição primeira-parte: traffic_visitors, traffic_events, record_traffic_event (consentimento obrigatório)
+- [x] Atribuição na reserva (visitor_id + origem) no checkout e evento de reserva paga no webhook
+- [x] Tabelas de aquisição: plans, assets, campaigns, results, learning (RLS admin-only)
+- [x] Políticas e configuração de aquisição; orçamento de campanha a zero
+- [x] Módulo puro acquisition.ts (elegibilidade, estados de mercado, scoring, orçamento, paragens) + 31 testes
+
 ## Próximas fases (requerem autorização)
-- [ ] Acquisition / Conversion agents
+- [ ] Ferramentas de leitura/análise + agente ai-acquisition a criar planos em rascunho (etapas 4-7)
+- [ ] Secção admin "Aquisição IA" (etapa 8)
+- [ ] Resultados/aprendizagem e, só com autorização, canal externo (etapas 9-10)
+- [ ] Conversion agent
 
