@@ -2181,6 +2181,231 @@ export type Database = {
           },
         ]
       }
+      pricing_calculations: {
+        Row: {
+          calculation_kind: string
+          cost_total: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          final_price: number
+          gross_margin_pct: number | null
+          id: string
+          input: Json
+          markup_total: number
+          policy_id: string | null
+          policy_version_id: string | null
+          policy_version_number: number | null
+          product_id: string | null
+          product_version_id: string | null
+          result: Json
+          status: string
+          subtotal: number
+          validation_errors: Json
+          warnings: Json
+        }
+        Insert: {
+          calculation_kind?: string
+          cost_total?: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          final_price?: number
+          gross_margin_pct?: number | null
+          id?: string
+          input?: Json
+          markup_total?: number
+          policy_id?: string | null
+          policy_version_id?: string | null
+          policy_version_number?: number | null
+          product_id?: string | null
+          product_version_id?: string | null
+          result?: Json
+          status: string
+          subtotal?: number
+          validation_errors?: Json
+          warnings?: Json
+        }
+        Update: {
+          calculation_kind?: string
+          cost_total?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          final_price?: number
+          gross_margin_pct?: number | null
+          id?: string
+          input?: Json
+          markup_total?: number
+          policy_id?: string | null
+          policy_version_id?: string | null
+          policy_version_number?: number | null
+          product_id?: string | null
+          product_version_id?: string | null
+          result?: Json
+          status?: string
+          subtotal?: number
+          validation_errors?: Json
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_calculations_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_calculations_policy_version_id_fkey"
+            columns: ["policy_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policy_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_calculations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_calculations_product_version_id_fkey"
+            columns: ["product_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_product_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_policies: {
+        Row: {
+          base_currency: string
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          description: string | null
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          base_currency?: string
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          base_currency?: string
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_policies_current_version_fk"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policy_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_policy_versions: {
+        Row: {
+          activated_at: string | null
+          base_currency: string
+          change_reason: string | null
+          component_rules: Json
+          created_at: string
+          created_by: string | null
+          fees: Json
+          flight_protection: Json
+          id: string
+          margin_mode: string
+          min_margin_pct: number
+          operational_costs: Json
+          policy_id: string
+          rounding_mode: string
+          status: string
+          supplements: Json
+          target_margin_pct: number
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+          version_number: number
+        }
+        Insert: {
+          activated_at?: string | null
+          base_currency?: string
+          change_reason?: string | null
+          component_rules?: Json
+          created_at?: string
+          created_by?: string | null
+          fees?: Json
+          flight_protection?: Json
+          id?: string
+          margin_mode?: string
+          min_margin_pct?: number
+          operational_costs?: Json
+          policy_id: string
+          rounding_mode?: string
+          status?: string
+          supplements?: Json
+          target_margin_pct?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          version_number: number
+        }
+        Update: {
+          activated_at?: string | null
+          base_currency?: string
+          change_reason?: string | null
+          component_rules?: Json
+          created_at?: string
+          created_by?: string | null
+          fees?: Json
+          flight_protection?: Json
+          id?: string
+          margin_mode?: string
+          min_margin_pct?: number
+          operational_costs?: Json
+          policy_id?: string
+          rounding_mode?: string
+          status?: string
+          supplements?: Json
+          target_margin_pct?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_policy_versions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_profiles: {
         Row: {
           admin_notes: string | null
@@ -2935,6 +3160,10 @@ export type Database = {
         Args: { _note?: string; _version_id: string }
         Returns: Json
       }
+      admin_record_pricing_calculation: {
+        Args: { _payload: Json }
+        Returns: Json
+      }
       admin_request_document: {
         Args: {
           _document_type: string
@@ -2954,6 +3183,8 @@ export type Database = {
       }
       admin_save_accommodation: { Args: { _payload: Json }; Returns: Json }
       admin_save_component: { Args: { _payload: Json }; Returns: Json }
+      admin_save_policy_version: { Args: { _payload: Json }; Returns: Json }
+      admin_save_pricing_policy: { Args: { _payload: Json }; Returns: Json }
       admin_save_rate: { Args: { _payload: Json }; Returns: Json }
       admin_save_room: { Args: { _payload: Json }; Returns: Json }
       admin_save_supplier: { Args: { _payload: Json }; Returns: Json }
@@ -2980,6 +3211,10 @@ export type Database = {
       }
       admin_set_plan_status: {
         Args: { _note?: string; _plan_id: string; _status: string }
+        Returns: Json
+      }
+      admin_set_policy_version_status: {
+        Args: { _note?: string; _status: string; _version_id: string }
         Returns: Json
       }
       admin_set_rate_status: {
@@ -3133,6 +3368,7 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      pricing_stats: { Args: never; Returns: Json }
       record_traffic_event: {
         Args: {
           _attribution?: Json

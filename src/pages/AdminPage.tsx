@@ -17,6 +17,7 @@ import { ContentPanel } from "@/components/admin/content/ContentPanel";
 import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPanel";
 import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
 import { SuppliersPanel } from "@/components/admin/suppliers/SuppliersPanel";
+import { PricingPanel } from "@/components/admin/pricing/PricingPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -267,6 +268,17 @@ export default function AdminPage() {
               description="Fornecedores reais, alojamentos, quartos, componentes e tarifas. Cada valor exige fonte e data, o preço público observado nunca se confunde com o custo da Rotas do Éden, e nada fica visível no site."
             />
             <SuppliersPanel />
+          </>
+        )}
+
+        {section === "precos" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Fornecimento"
+              title="Preços"
+              description="Políticas de preço versionadas: markup e margem bruta separados, margem mínima, regras por componente, taxas, suplementos, proteção futura de tarifa aérea e arredondamento. O preço é sempre calculado no servidor a partir de custos válidos."
+            />
+            <PricingPanel />
           </>
         )}
 
