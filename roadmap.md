@@ -31,9 +31,14 @@
 - [x] Políticas e configuração de aquisição; orçamento de campanha a zero
 - [x] Módulo puro acquisition.ts (elegibilidade, estados de mercado, scoring, orçamento, paragens) + 31 testes
 
+## Fase 5B — Acquisition Agent v1 (concluída)
+- [x] Registo de canais (nenhum executável), capacidade real, factores determinísticos, parser seguro
+- [x] ai-acquisition: planos só em rascunho, dedup, pedidos de ativos ao Conteúdo IA, campanhas a orçamento zero
+- [x] RPCs de aquisição + histórico de planos + auditoria de administração
+- [x] Secção admin "Aquisição IA" (visão geral, filtros, lista, detalhe, decisões)
+
 ## Próximas fases (requerem autorização)
-- [ ] Ferramentas de leitura/análise + agente ai-acquisition a criar planos em rascunho (etapas 4-7)
-- [ ] Secção admin "Aquisição IA" (etapa 8)
 - [ ] Resultados/aprendizagem e, só com autorização, canal externo (etapas 9-10)
 - [ ] Conversion agent
+
 

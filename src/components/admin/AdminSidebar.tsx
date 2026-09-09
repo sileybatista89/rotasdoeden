@@ -1,9 +1,9 @@
-import { BadgeCheck, MapPin, LayoutDashboard, Users, Calendar, Star, Settings, ArrowLeft, ShieldCheck, MessageSquare, UserCog, Radar, FileText } from "lucide-react";
+import { BadgeCheck, MapPin, LayoutDashboard, Users, Calendar, Star, Settings, ArrowLeft, ShieldCheck, MessageSquare, UserCog, Radar, FileText, Megaphone } from "lucide-react";
 import { LogoMark } from "@/components/brand/Logo";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "servicos" | "discovery" | "conteudo" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
+export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "servicos" | "discovery" | "conteudo" | "aquisicao" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
 
 interface Props {
   active: AdminSection;
@@ -19,6 +19,7 @@ const items: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "servicos", label: "Moderar serviços", icon: BadgeCheck },
   { id: "discovery", label: "Discovery IA", icon: Radar },
   { id: "conteudo", label: "Conteúdo IA", icon: FileText },
+  { id: "aquisicao", label: "Aquisição IA", icon: Megaphone },
   { id: "territorio", label: "Distritos e localidades", icon: MapPin },
   { id: "reservas", label: "Reservas", icon: Calendar },
   { id: "chats", label: "Moderação Chat", icon: MessageSquare },

@@ -63,11 +63,29 @@ interface AcqContext extends ToolContext {
   runtime: AcquisitionRuntime;
 }
 
+/** Evidence is only what Discovery really observed — never invented. */
+function buildEvidence(row: Record<string, unknown>): Record<string, unknown>[] {
+  const evidence: Record<string, unknown>[] = [];
+  const metrics = (row.metrics ?? {}) as Record<string, unknown>;
+  if (Object.keys(metrics).length > 0) {
+    evidence.push({
+      type: String(row.evidence_type ?? "observed"),
+      source: String(row.source ?? "desconhecida"),
+      metrics,
+    });
+  }
+  const reference = (row.source_reference ?? {}) as Record<string, unknown>;
+  if (Object.keys(reference).length > 0) {
+    evidence.push({ type: "source_reference", source: String(row.source ?? ""), reference });
+  }
+  return evidence;
+}
+
 // ---------------------------------------------------------------- tools -----
 
 registerTool({
   name: "acq_get_opportunity",
-  actionKey: "read_data",
+  actionKey: "read_internal_data",
   description: "Lê uma oportunidade de Discovery e valida a elegibilidade para aquisição.",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
@@ -84,11 +102,12 @@ registerTool({
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) return { opportunity: null, eligibility: { eligible: false, reason: "Oportunidade inexistente." } };
-    const evidence = Array.isArray((data as { evidence?: unknown[] }).evidence)
-      ? ((data as { evidence: unknown[] }).evidence)
-      : [];
+    // Discovery stores evidence as metrics + source_reference + evidence_type.
+    const row = data as Record<string, unknown>;
+    const metrics = (row.metrics ?? {}) as Record<string, unknown>;
+    const evidence = buildEvidence(row);
     let eligibility = checkOpportunityEligibility(data as never, new Date(), c.runtime.minConfidence);
-    if (eligibility.eligible && evidence.length === 0) {
+    if (eligibility.eligible && (evidence.length === 0 || Object.keys(metrics).length === 0)) {
       eligibility = { eligible: false, reason: "Oportunidade sem evidência." };
     }
     return { opportunity: data, evidence, eligibility };
@@ -97,7 +116,7 @@ registerTool({
 
 registerTool({
   name: "acq_get_capacity",
-  actionKey: "read_data",
+  actionKey: "read_internal_data",
   description: "Lê a capacidade real: guias publicados, serviços aprovados, territórios, idiomas e reservas.",
   validate: () => null,
   execute: async (args, ctx) => {
@@ -107,7 +126,7 @@ registerTool({
       c.client.from("professional_profiles").select("id, languages").eq("status", "published").limit(500),
       c.client
         .from("services")
-        .select("id, price, languages")
+        .select("id, price_per_person, languages")
         .eq("moderation_status", "approved")
         .limit(500),
       c.client.from("districts").select("id").limit(100),
@@ -122,7 +141,7 @@ registerTool({
       for (const lang of ((row as { languages?: string[] | null }).languages ?? [])) languages.add(String(lang));
     }
     const prices = (services ?? [])
-      .map((s) => Number((s as { price?: number | null }).price ?? 0))
+      .map((s) => Number((s as { price_per_person?: number | null }).price_per_person ?? 0))
       .filter((p) => p > 0);
 
     const capacity = assessCapacity({
@@ -164,7 +183,7 @@ registerTool({
 
 registerTool({
   name: "acq_analyze",
-  actionKey: "draft_plan",
+  actionKey: "draft_acquisition_plan",
   description: "Produz a hipótese, público, mensagem e oferta a partir de dados reais.",
   validate: (args) => ((args as Record<string, unknown>)?.brief ? null : "brief is required"),
   execute: async (args, ctx) => {
@@ -196,7 +215,7 @@ registerTool({
 
 registerTool({
   name: "acq_save_plan",
-  actionKey: "draft_plan",
+  actionKey: "draft_acquisition_plan",
   description: "Grava o plano de aquisição SEMPRE como rascunho, com deduplicação.",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
@@ -215,7 +234,7 @@ registerTool({
 
 registerTool({
   name: "acq_request_asset",
-  actionKey: "request_asset",
+  actionKey: "request_content_asset",
   description: "Pede um ativo ao Agente de Conteúdo criando uma tarefa filha (rascunho).",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
@@ -497,7 +516,7 @@ async function runAcquisition(body: Record<string, unknown>) {
 
     // 4. Deterministic score. Confidence multiplies the total.
     const factors = deriveFactors({
-      opportunityScore: Number(opportunity?.score ?? 0),
+      opportunityScore: Number(opportunity?.opportunity_score ?? 0),
       intent: (opportunity?.intent as string) ?? null,
       country: (opportunity?.country as string) ?? null,
       observedSignals,
@@ -569,7 +588,7 @@ async function runAcquisition(body: Record<string, unknown>) {
         language,
         channel,
         market_state: marketState,
-        hypothesis: analysis?.hypothesis ?? null,
+        hypothesis: analysis?.hypothesis || rationaleParts.join(" "),
         audience: analysis?.audience ?? {},
         message: analysis?.message ?? {},
         offer: analysis?.offer ?? {},
