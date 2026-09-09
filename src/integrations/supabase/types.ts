@@ -14,6 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
+      accommodation_rooms: {
+        Row: {
+          accommodation_id: string
+          amenities: Json
+          bed_configuration: string | null
+          capacity_source: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          images: Json
+          max_adults: number | null
+          max_children: number | null
+          max_guests: number | null
+          notes: string | null
+          room_name: string
+          room_type: string
+          size_sqm: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accommodation_id: string
+          amenities?: Json
+          bed_configuration?: string | null
+          capacity_source?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          images?: Json
+          max_adults?: number | null
+          max_children?: number | null
+          max_guests?: number | null
+          notes?: string | null
+          room_name: string
+          room_type?: string
+          size_sqm?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accommodation_id?: string
+          amenities?: Json
+          bed_configuration?: string | null
+          capacity_source?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          images?: Json
+          max_adults?: number | null
+          max_children?: number | null
+          max_guests?: number | null
+          notes?: string | null
+          room_name?: string
+          room_type?: string
+          size_sqm?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodation_rooms_accommodation_id_fkey"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accommodations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accommodations: {
+        Row: {
+          accommodation_type: string
+          address: string | null
+          amenities: Json
+          contact_email: string | null
+          contact_phone: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          district_id: string | null
+          id: string
+          images: Json
+          locality_id: string | null
+          locality_name: string | null
+          name: string
+          notes: string | null
+          rating_source: string | null
+          star_rating: number | null
+          status: string
+          supplier_id: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          accommodation_type?: string
+          address?: string | null
+          amenities?: Json
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          id?: string
+          images?: Json
+          locality_id?: string | null
+          locality_name?: string | null
+          name: string
+          notes?: string | null
+          rating_source?: string | null
+          star_rating?: number | null
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          accommodation_type?: string
+          address?: string | null
+          amenities?: Json
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          district_id?: string | null
+          id?: string
+          images?: Json
+          locality_id?: string | null
+          locality_name?: string | null
+          name?: string
+          notes?: string | null
+          rating_source?: string | null
+          star_rating?: number | null
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodations_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accommodations_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accommodations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_assets: {
         Row: {
           asset_type: string
@@ -906,6 +1071,108 @@ export type Database = {
           visitor_id?: string | null
         }
         Relationships: []
+      }
+      component_rates: {
+        Row: {
+          cancellation_summary: string | null
+          cancellation_type: string
+          component_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          meal_plan: string
+          notes: string | null
+          observed_at: string
+          occupancy_adults: number | null
+          occupancy_children: number | null
+          occupancy_total: number | null
+          price: number
+          quantity: number
+          rate_kind: string
+          source_document_url: string | null
+          source_reference: string | null
+          source_type: string
+          status: string
+          supplier_id: string | null
+          unit: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+          validity_unknown: boolean
+        }
+        Insert: {
+          cancellation_summary?: string | null
+          cancellation_type?: string
+          component_id: string
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          id?: string
+          meal_plan?: string
+          notes?: string | null
+          observed_at: string
+          occupancy_adults?: number | null
+          occupancy_children?: number | null
+          occupancy_total?: number | null
+          price: number
+          quantity?: number
+          rate_kind: string
+          source_document_url?: string | null
+          source_reference?: string | null
+          source_type: string
+          status?: string
+          supplier_id?: string | null
+          unit: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          validity_unknown?: boolean
+        }
+        Update: {
+          cancellation_summary?: string | null
+          cancellation_type?: string
+          component_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          meal_plan?: string
+          notes?: string | null
+          observed_at?: string
+          occupancy_adults?: number | null
+          occupancy_children?: number | null
+          occupancy_total?: number | null
+          price?: number
+          quantity?: number
+          rate_kind?: string
+          source_document_url?: string | null
+          source_reference?: string | null
+          source_type?: string
+          status?: string
+          supplier_id?: string | null
+          unit?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          validity_unknown?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_rates_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "package_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "component_rates_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_cache: {
         Row: {
@@ -1821,6 +2088,99 @@ export type Database = {
         }
         Relationships: []
       }
+      package_components: {
+        Row: {
+          accommodation_id: string | null
+          component_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          flight_reference: Json
+          guide_profile_id: string | null
+          id: string
+          metadata: Json
+          name: string
+          notes: string | null
+          room_id: string | null
+          service_id: string | null
+          status: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          accommodation_id?: string | null
+          component_type: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          flight_reference?: Json
+          guide_profile_id?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          notes?: string | null
+          room_id?: string | null
+          service_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accommodation_id?: string | null
+          component_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          flight_reference?: Json
+          guide_profile_id?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          notes?: string | null
+          room_id?: string | null
+          service_id?: string | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_components_accommodation_id_fkey"
+            columns: ["accommodation_id"]
+            isOneToOne: false
+            referencedRelation: "accommodations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_components_guide_profile_id_fkey"
+            columns: ["guide_profile_id"]
+            isOneToOne: false
+            referencedRelation: "professional_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_components_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "accommodation_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_components_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_components_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_profiles: {
         Row: {
           admin_notes: string | null
@@ -2066,6 +2426,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suppliers: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          legal_name: string
+          locality: string | null
+          notes: string | null
+          relationship_stage: string
+          status: string
+          supplier_type: string
+          trading_name: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_name: string
+          locality?: string | null
+          notes?: string | null
+          relationship_stage?: string
+          status?: string
+          supplier_type: string
+          trading_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_name?: string
+          locality?: string | null
+          notes?: string | null
+          relationship_stage?: string
+          status?: string
+          supplier_type?: string
+          trading_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
       }
       support_conversations: {
         Row: {
@@ -2538,6 +2952,11 @@ export type Database = {
         Args: { _approve: boolean; _reason?: string; _request_id: string }
         Returns: undefined
       }
+      admin_save_accommodation: { Args: { _payload: Json }; Returns: Json }
+      admin_save_component: { Args: { _payload: Json }; Returns: Json }
+      admin_save_rate: { Args: { _payload: Json }; Returns: Json }
+      admin_save_room: { Args: { _payload: Json }; Returns: Json }
+      admin_save_supplier: { Args: { _payload: Json }; Returns: Json }
       admin_save_travel_product: { Args: { _payload: Json }; Returns: Json }
       admin_set_content_status: {
         Args: { _content_id: string; _note?: string; _status: string }
@@ -2561,6 +2980,19 @@ export type Database = {
       }
       admin_set_plan_status: {
         Args: { _note?: string; _plan_id: string; _status: string }
+        Returns: Json
+      }
+      admin_set_rate_status: {
+        Args: { _note?: string; _rate_id: string; _status: string }
+        Returns: Json
+      }
+      admin_set_supply_status: {
+        Args: {
+          _entity: string
+          _entity_id: string
+          _note?: string
+          _status: string
+        }
         Returns: Json
       }
       admin_set_travel_product_status: {
@@ -2720,6 +3152,7 @@ export type Database = {
         }
         Returns: string
       }
+      supply_stats: { Args: never; Returns: Json }
       travel_product_stats: { Args: never; Returns: Json }
     }
     Enums: {
