@@ -272,18 +272,25 @@ Deno.serve(async (req) => {
         throw e;
       }
       const result = compareOffers(rowToOffer(row), current);
-      // A oferta histórica não é alterada: guarda-se a versão atual como novo registo.
+      // O valor histórico fica preservado em last_reprice; o estado passa a refletir a alteração.
       if (result.status !== "unchanged") {
         await admin.from("flight_offers").update({
-          status: result.status === "expired" ? "expired" : "superseded",
+          status: result.status === "expired"
+            ? "expired"
+            : result.status === "unavailable"
+            ? "unavailable"
+            : "price_changed",
+          total_amount: current.totalAmount,
+          total_currency: current.totalCurrency,
+          expires_at: current.expiresAt,
+          payment_requirements: current.paymentRequirements,
+          requires_instant_payment: current.paymentRequirements.requiresInstantPayment,
+          hold_capable: current.holdCapable,
           refreshed_at: new Date().toISOString(),
           last_reprice: result as unknown as Record<string, unknown>,
         }).eq("id", row.id);
-        await admin.from("flight_offers").upsert(
-          [{ ...offerRow(current, row.search_id), refreshed_at: new Date().toISOString() }],
-          { onConflict: "provider,provider_offer_id" },
-        );
       } else {
+
         await admin.from("flight_offers").update({
           refreshed_at: new Date().toISOString(),
           last_reprice: result as unknown as Record<string, unknown>,
