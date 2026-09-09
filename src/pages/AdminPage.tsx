@@ -15,6 +15,7 @@ import { AdminSectionHeader } from "@/components/admin/AdminSectionHeader";
 import { DiscoveryPanel } from "@/components/admin/discovery/DiscoveryPanel";
 import { ContentPanel } from "@/components/admin/content/ContentPanel";
 import { AcquisitionPanel } from "@/components/admin/acquisition/AcquisitionPanel";
+import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -245,6 +246,19 @@ export default function AdminPage() {
             <AcquisitionPanel />
           </>
         )}
+
+        {section === "pacotes" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Produtos"
+              title="Pacotes"
+              description="Os produtos de viagem e as suas versões. Nesta fase não existem preços, custos, fornecedores nem voos, e nada aparece no site público."
+            />
+            <PackagesPanel />
+          </>
+        )}
+
+
 
         {section === "territorio" && (
           <>

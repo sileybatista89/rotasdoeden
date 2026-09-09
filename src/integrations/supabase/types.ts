@@ -2256,6 +2256,127 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_product_versions: {
+        Row: {
+          change_reason: string | null
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          duration_days: number
+          id: string
+          included_components: Json
+          nights: number
+          product_id: string
+          published_at: string | null
+          status: string
+          terms: string | null
+          updated_at: string
+          version_number: number
+        }
+        Insert: {
+          change_reason?: string | null
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          duration_days: number
+          id?: string
+          included_components?: Json
+          nights: number
+          product_id: string
+          published_at?: string | null
+          status?: string
+          terms?: string | null
+          updated_at?: string
+          version_number: number
+        }
+        Update: {
+          change_reason?: string | null
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          duration_days?: number
+          id?: string
+          included_components?: Json
+          nights?: number
+          product_id?: string
+          published_at?: string | null
+          status?: string
+          terms?: string | null
+          updated_at?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_product_versions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_products: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          description: string | null
+          id: string
+          maximum_days: number | null
+          maximum_nights: number | null
+          minimum_days: number
+          minimum_nights: number
+          name: string
+          product_type: string
+          slug: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          id?: string
+          maximum_days?: number | null
+          maximum_nights?: number | null
+          minimum_days: number
+          minimum_nights: number
+          name: string
+          product_type?: string
+          slug: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          id?: string
+          maximum_days?: number | null
+          maximum_nights?: number | null
+          minimum_days?: number
+          minimum_nights?: number
+          name?: string
+          product_type?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_products_current_version_fkey"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_product_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2376,6 +2497,7 @@ export type Database = {
       }
       acquisition_save_plan: { Args: { _payload: Json }; Returns: Json }
       acquisition_stats: { Args: never; Returns: Json }
+      admin_create_product_version: { Args: { _payload: Json }; Returns: Json }
       admin_list_flagged_messages: {
         Args: { _limit?: number }
         Returns: {
@@ -2395,6 +2517,10 @@ export type Database = {
         Args: { _approve: boolean; _note?: string; _service_id: string }
         Returns: undefined
       }
+      admin_publish_product_version: {
+        Args: { _note?: string; _version_id: string }
+        Returns: Json
+      }
       admin_request_document: {
         Args: {
           _document_type: string
@@ -2412,6 +2538,7 @@ export type Database = {
         Args: { _approve: boolean; _reason?: string; _request_id: string }
         Returns: undefined
       }
+      admin_save_travel_product: { Args: { _payload: Json }; Returns: Json }
       admin_set_content_status: {
         Args: { _content_id: string; _note?: string; _status: string }
         Returns: Json
@@ -2434,6 +2561,10 @@ export type Database = {
       }
       admin_set_plan_status: {
         Args: { _note?: string; _plan_id: string; _status: string }
+        Returns: Json
+      }
+      admin_set_travel_product_status: {
+        Args: { _note?: string; _product_id: string; _status: string }
         Returns: Json
       }
       agent_claim_task: {
@@ -2589,6 +2720,7 @@ export type Database = {
         }
         Returns: string
       }
+      travel_product_stats: { Args: never; Returns: Json }
     }
     Enums: {
       agent_approval_status:
