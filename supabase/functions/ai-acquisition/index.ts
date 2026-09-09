@@ -85,7 +85,7 @@ function buildEvidence(row: Record<string, unknown>): Record<string, unknown>[] 
 
 registerTool({
   name: "acq_get_opportunity",
-  actionKey: "read_data",
+  actionKey: "read_internal_data",
   description: "Lê uma oportunidade de Discovery e valida a elegibilidade para aquisição.",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
@@ -116,7 +116,7 @@ registerTool({
 
 registerTool({
   name: "acq_get_capacity",
-  actionKey: "read_data",
+  actionKey: "read_internal_data",
   description: "Lê a capacidade real: guias publicados, serviços aprovados, territórios, idiomas e reservas.",
   validate: () => null,
   execute: async (args, ctx) => {
@@ -183,7 +183,7 @@ registerTool({
 
 registerTool({
   name: "acq_analyze",
-  actionKey: "draft_plan",
+  actionKey: "draft_acquisition_plan",
   description: "Produz a hipótese, público, mensagem e oferta a partir de dados reais.",
   validate: (args) => ((args as Record<string, unknown>)?.brief ? null : "brief is required"),
   execute: async (args, ctx) => {
@@ -215,7 +215,7 @@ registerTool({
 
 registerTool({
   name: "acq_save_plan",
-  actionKey: "draft_plan",
+  actionKey: "draft_acquisition_plan",
   description: "Grava o plano de aquisição SEMPRE como rascunho, com deduplicação.",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
@@ -234,7 +234,7 @@ registerTool({
 
 registerTool({
   name: "acq_request_asset",
-  actionKey: "request_asset",
+  actionKey: "request_content_asset",
   description: "Pede um ativo ao Agente de Conteúdo criando uma tarefa filha (rascunho).",
   validate: (args) => {
     const a = args as Record<string, unknown> | null;
