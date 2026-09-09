@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Cookie, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { persistAttributionOnConsent } from "@/lib/attribution";
 
 const STORAGE_KEY = "rde_cookie_consent";
 
@@ -21,6 +22,7 @@ export function CookieConsent() {
       STORAGE_KEY,
       JSON.stringify({ choice, at: new Date().toISOString() }),
     );
+    if (choice === "accepted") persistAttributionOnConsent();
     setVisible(false);
   };
 

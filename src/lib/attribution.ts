@@ -132,6 +132,16 @@ export function getStoredAttribution(): Attribution {
   return readJson<Attribution>(ATTRIBUTION_KEY) ?? {};
 }
 
+/**
+ * Called the moment the visitor accepts optional cookies: the campaign that
+ * brought them (captured in memory on load) is persisted and the visit counted.
+ */
+export function persistAttributionOnConsent(): void {
+  if (!hasAnalyticsConsent()) return;
+  rememberAttribution(captureInitialAttribution());
+  void trackEvent("visit");
+}
+
 export async function trackEvent(
   eventType: TrafficEventType,
   options: { path?: string; entityType?: string; entityId?: string } = {},
