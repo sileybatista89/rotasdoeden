@@ -317,8 +317,8 @@ describe("Fase 7E — DuffelFlightProvider", () => {
   it("o token nunca aparece no erro nem na mensagem", async () => {
     const { impl } = mockFetch(500, { errors: [{ code: "internal" }] });
     const p = new DuffelFlightProvider({ apiKey: "duffel_test_super_secreto", fetchImpl: impl, maxRetries: 0 });
-    const err = await p.getOffer("off_test_123").catch((e) => e as Error);
-    expect(JSON.stringify({ msg: err.message, err: String(err) })).not.toContain("duffel_test_super_secreto");
+    const err = await p.getOffer("off_test_123").then(() => null, (e: Error) => e);
+    expect(JSON.stringify({ msg: err?.message, err: String(err) })).not.toContain("duffel_test_super_secreto");
   });
 
   it("reconsulta a oferta e devolve o modelo normalizado", async () => {
