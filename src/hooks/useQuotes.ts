@@ -119,8 +119,28 @@ export function useQuotes(filters: QuoteFilters = {}, limit = 50) {
       if (filters.to) q = q.lte("created_at", filters.to);
       const { data, error } = await q;
       if (error) throw new Error(error.message);
-      return (data ?? []) as QuoteRow[];
+      const rows = (data ?? []) as QuoteRow[];
+      const versionIds = rows
+        .map((r) => (r as unknown as { current_version_id?: string | null }).current_version_id)
+        .filter((v): v is string => !!v);
+      if (versionIds.length === 0) return rows;
+      const { data: versions } = await anyDb
+        .from("travel_quote_versions")
+        .select("id,total_price,sale_currency")
+        .in("id", versionIds);
+      const priceById = new Map<string, { total_price: number; sale_currency: string }>(
+        ((versions ?? []) as { id: string; total_price: number; sale_currency: string }[]).map((v) => [
+          v.id,
+          { total_price: v.total_price, sale_currency: v.sale_currency },
+        ]),
+      );
+      return rows.map((r) => {
+        const vid = (r as unknown as { current_version_id?: string | null }).current_version_id;
+        const p = vid ? priceById.get(vid) : undefined;
+        return { ...r, total_price: p?.total_price ?? null, sale_currency: p?.sale_currency ?? r.sale_currency };
+      }) as QuoteRow[];
     },
+
   });
 }
 

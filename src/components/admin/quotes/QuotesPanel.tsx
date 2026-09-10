@@ -188,7 +188,10 @@ export function QuotesPanel() {
                   <tr key={q.id} className="border-t border-border">
                     <td className="px-4 py-3 font-mono text-xs">{q.quote_number}</td>
                     <td className="px-4 py-3">{q.product_id ? productName.get(q.product_id) ?? "—" : "—"}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{q.sale_currency}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {money((q as unknown as { total_price?: number | null }).total_price ?? undefined, q.sale_currency)}
+                    </td>
+
                     <td className="px-4 py-3"><StatusBadge status={q.status} /></td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.created_at)}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.expires_at)}</td>
