@@ -1,145 +1,111 @@
-# Fase 7A — Plano técnico: Motor de Pacotes, Preços e Voos
+# Fase 7F — Plano Técnico do Quote Engine (só desenho)
 
-Plano apenas. Nada é implementado, criado, ligado ou ativado nesta fase.
+Nada é construído nesta fase: sem tabelas, sem UI, sem código, sem reservas, sem pagamentos, sem orders Duffel, sem produção.
 
-## 1. Auditoria do modelo atual (verificado)
+## 1. Auditoria do que já existe
 
-- **Não existe nada de pacotes, fornecedores, custos, regras de preço, cotações ou voos.** Nenhuma tabela com esses conceitos existe hoje na base de dados.
-- O que existe é um catálogo de serviços avulsos: cada serviço tem preço por pessoa, duração em horas, mínimo/máximo de pessoas, categoria, distrito/localidade, idiomas, dias e horas indicativos, e precisa de aprovação para ficar visível.
-- A reserva é sempre de **um serviço, uma data, N pessoas**: cria-se a reserva a pagamento pendente, calcula-se `preço por pessoa × pessoas`, retira-se comissão fixa de 15% no servidor e abre-se o pagamento Stripe embebido; o webhook confirma. A origem da visita (UTM) é preservada na reserva.
-- Estados de reserva: pagamento pendente, confirmada, concluída, cancelada, reembolsada. Não há grupos de itens, nem itinerário, nem noites, nem validade de preço.
-- Não há alojamentos, quartos, voos, avaliações nem calendário de disponibilidade real.
-- Os agentes existentes (Descoberta, Conteúdo, Aquisição) já trazem infraestrutura reutilizável: tarefas, execuções, custos, aprovações, políticas, auditoria, notificações e abstração de fornecedor de IA.
+Verificado diretamente na base de dados e no código:
 
-## 2. O que se reaproveita e o que falta
+- **Produtos (7B)**: `travel_products`, `travel_product_versions`. Versão publicada é imutável; nova alteração exige nova versão. Reutilizável tal como está.
+- **Supply (7C)**: `suppliers`, `accommodations`, `accommodation_rooms`, `package_components`, `component_rates`. As tarifas já guardam `rate_kind` (observado / fornecedor / negociado / estimado), `source_type`, `source_reference`, `observed_at`, `valid_from`, `valid_until`, `validity_unknown`, ocupação, regime alimentar e política de cancelamento. Tudo o que a cotação precisa de fotografar já existe na origem.
+- **Preços (7D)**: `pricing_policies`, `pricing_policy_versions`, `pricing_calculations` e a função servidor `pricing-engine`, que só aceita admin, carrega a política ativa da base de dados e nunca aceita preço ou margem do cliente. `pricing_calculations` já guarda política, versão, custos, margem, subtotal, preço final, input e resultado completo — é o registo de cálculo que a cotação vai referenciar.
+- **Voos (7E)**: `flight_searches`, `flight_offers` com custo de fornecedor, validade, requisitos de pagamento, capacidade de reserva sem pagamento e reprice. Sem chave de teste configurada, o motor devolve "não configurado" e não inventa resultados.
+- **Reservas atuais**: `bookings` é de serviços individuais (`service_id`, `guide_id`, Stripe). Não é adequado a pacotes e **não será alterado**.
+- **Atribuição (5A)**: `traffic_visitors`, `traffic_events`, e `bookings` já guarda `visitor_id` + `attribution` jsonb. A cotação segue exatamente o mesmo padrão — nada de novo sistema de atribuição.
 
-Reaproveitável: utilizadores e perfis, guias aprovados, serviços aprovados (como componentes "experiência" e "guia"), distritos e localidades, reservas e Stripe, registo de auditoria, aprovações, medição de origem, área de administração e padrões de acesso.
+**Conclusão**: nada precisa de ser duplicado. O Quote Engine é uma camada de composição e fotografia por cima do que já existe.
 
-Em falta (a criar só no Build): produtos de pacote e versões, componentes, fornecedores e custos com fonte, regras e políticas de preço, cotações imutáveis, ofertas de voo e o vínculo entre cotação e reserva.
-
-## 3. Motor de Pacotes
-
-Produtos iniciais: **Rotas Essencial** (5–7 dias), **Rotas Explorar** (8–10 dias), **Rotas Imersão** (14–15 dias), **Rotas à Medida** (mínimo 5 dias, duração variável). Sem preços nem componentes inventados.
-
-Cada produto tem versões. Uma versão publicada é imutável: qualquer alteração cria uma nova versão. A versão define duração e noites, componentes incluídos e opcionais, capacidade, períodos de operação, condições e estado (rascunho, em revisão, publicado, arquivado). O que já foi vendido continua ligado à versão que foi vendida.
-
-## 4. Modelo de componentes
-
-Tipos: alojamento, quarto, transporte, transfer, experiência, guia, refeição, seguro, voo e futuros. Cada componente tem fornecedor, custo real, unidade (por pessoa, por noite, por grupo, por dia, fixo), quantidade, moeda, validade, condições, **fonte obrigatória** (contrato, tabela do fornecedor, orçamento escrito, serviço interno, resposta de fornecedor de voos) e estado. Custo sem fonte e sem validade nunca entra num cálculo comercial — o pacote fica marcado como "preço por confirmar".
-
-## 5. Motor de Custos
-
-`custo terrestre + custo de voo + outros custos = custo total real`, sempre separando:
-
-- **custo do fornecedor** — o que se paga a terceiros;
-- **custo operacional** — o que a operação acrescenta (coordenação, taxas, seguros próprios);
-- **custo estimado** — sem confirmação, marcado como tal;
-- **custo confirmado** — com fonte válida e dentro da validade.
-
-Estimativa e confirmado nunca se somam sem ficar visível qual é qual; um pacote com qualquer parte estimada nunca produz preço "confirmado".
-
-## 6. Motor de Preços
-
-Regras definidas pela empresa e guardadas em versões de política: markup por tipo de componente, margem mínima, margem alvo, custos operacionais, proteção de tarifa aérea, arredondamento, moeda, taxas e suplementos/extras. A IA nunca escolhe margem nem escreve preço: apenas lê o resultado do motor.
-
-Ordem de cálculo, para evitar dupla margem:
+## 2. Arquitetura
 
 ```text
-custo fornecedor (terrestre)      -> markup terrestre
-+ custo de voo                    -> proteção de tarifa (nunca markup duplo)
-+ custos operacionais             -> já incluídos, não voltam a ser marcados
-= subtotal
-+ taxas e suplementos             -> aplicados depois do markup
-= preço bruto -> arredondamento (uma única vez, no fim) = preço de venda
+critérios do cliente
+   -> produto + versão do produto        (7B)
+   -> componentes + tarifas válidas      (7C)
+   -> oferta de voo válida               (7E)
+   -> Pricing Engine (única fonte do preço)  (7D)
+   -> Quote Engine: fotografa tudo e emite a cotação
 ```
 
-Regra de segurança: se o preço final ficar abaixo da margem mínima, o pacote não é vendável e é assinalado para decisão humana.
+O Quote Engine **não tem matemática de preço**. Chama o motor de preços existente, recebe o resultado e guarda-o. Se o motor recusar, não há cotação.
 
-## 7. Motor de Voos e integração Duffel (desenho)
+Componentes a criar no Build (7G):
+- `supabase/functions/_shared/quote-engine.ts` — lógica pura: numeração, validade limitada pelo elemento mais curto, comparação entre versões, decisão de revalidação, estados. Sem I/O.
+- `supabase/functions/quote-engine/index.ts` — função servidor: valida entrada, carrega dados reais, chama o motor de preços, grava a cotação e as suas linhas.
+- `src/lib/quotes.ts` — reexporta os tipos e etiquetas para o admin, tal como `src/lib/pricing.ts`.
 
-Fluxo futuro: origem → destino → datas → passageiros → cabine → filtros → pedido de ofertas → ofertas → seleção → nova consulta de preço → cotação. Guarda-se sempre: fornecedor, identificador da oferta, validade da oferta, valor total, moeda, itinerário, companhia, bagagem/serviços e condições tarifárias quando existirem — nunca apenas o número mostrado no ecrã.
+## 3. Modelo de dados proposto (a criar só no Build)
 
-Duffel entra como **fornecedor**, atrás de uma interface `FlightProvider` (procurar ofertas, obter oferta, reconsultar preço, requisitos de passageiro, criar reserva). O negócio nunca depende de detalhes de Duffel; um segundo fornecedor ou alternativa de recurso pode entrar depois sem tocar no motor de preços. Sem chaves e sem ligação nesta fase.
+Nomes seguem as convenções já usadas (`travel_*`, `*_versions`, uuid, `created_at`/`updated_at`, `created_by`):
 
-Sobre reservar: a arquitetura prevê cliente escolhe → oferta reconfirmada → eventual reserva provisória → pagamento → emissão, mas o suporte real a reserva provisória, pagamento imediato e pagamento posterior tem de ser confirmado junto do fornecedor antes de qualquer construção, e o fluxo final tem de respeitar as obrigações legais de operador turístico.
+**`travel_quotes`** — identidade estável da cotação: número legível, produto e versão do produto, estado, moeda de venda, versão atual, criador, canal de criação (`admin`/`public`/`agent`), visitante e atribuição, contacto mínimo do cliente, validade.
 
-## 8. Proteção de tarifa aérea
+**`travel_quote_versions`** — a fotografia imutável. Cada versão guarda: número da versão, estado, critérios do cliente, versão da política de preços, referência ao `pricing_calculations` gerado, custo total, preço total, moeda de custo e de venda, câmbio usado e momento da conversão, referência à oferta de voo, validade da versão, motivo da nova versão, comparação com a versão anterior (preço antigo, novo, diferença), quem criou e quando foi substituída.
 
-Política configurável, com métodos avaliados: valor fixo, percentagem, percentagem com mínimo, percentagem com máximo e misto. Exemplo ilustrativo (não é regra definida): voo 800 € com 10% de proteção resulta em 880 €. Os valores reais são decisão da empresa e ficam guardados numa versão de política, com auditoria de quem os mudou.
+**`travel_quote_items`** — uma linha por componente da versão: componente e tarifa de origem, fornecedor, nome apresentado, quantidade, unidade, custo unitário e total no momento, regra de margem aplicada, preço resultante, moeda, tipo de tarifa, fonte, validade da tarifa e condições de cancelamento. As linhas guardam texto e valores, não apenas chaves: a cotação continua legível mesmo que o fornecedor mude o preço depois.
 
-## 9. Motor de Cotações e estados de preço
+Regras: sem eliminação (guardas de `delete` como em 7C/7D), acesso apenas a admin via RLS, `GRANT` explícito, alterações registadas em `admin_audit_log`, e uma RPC `quote_stats()` protegida por `is_admin`.
 
-Uma cotação guarda: identificador, produto e versão, componentes escolhidos, referência e validade da oferta de voo, custos do fornecedor, markup aplicado, preço final, moeda, data de criação e de expiração, critérios do cliente e versão da política de preços. **Depois de emitida é imutável**: qualquer alteração gera nova versão da cotação.
+## 4. Imutabilidade e versionamento
 
-Estados de preço, nunca misturados: **estimado**, **calculado**, **cotado**, **reconsultado**, **confirmado**, **expirado**, **cancelado**.
+- Assim que uma versão sai de `draft`, torna-se imutável por trigger: preço, itens, política, voo e validade não podem ser alterados.
+- Qualquer mudança cria **nova versão**; a anterior passa a `superseded` e permanece no histórico.
+- O cabeçalho (`travel_quotes`) só pode mudar de estado e apontar para a versão atual.
 
-## 10. Reconsulta antes de reservar
+## 5. Estados
 
-Antes da reserva final: verificar validade → reconsultar a oferta → detetar alteração → recalcular o pacote → aplicar a política de proteção → decidir se pode seguir ou se exige nova confirmação do cliente. Nunca se cobra com base numa oferta expirada; se a diferença ultrapassar o limite configurado, o cliente confirma outra vez.
+`draft` → `calculated` → `sent` → `awaiting_confirmation` → `accepted` → `superseded` / `expired` / `cancelled`.
 
-## 11. Origem do cliente, moeda e critérios
+Separação obrigatória, nunca colapsada: cotação válida ≠ cliente aceitou ≠ reserva criada ≠ pagamento iniciado ≠ pagamento concluído. `accepted` significa apenas aceitação comercial.
 
-A origem escolhida pelo cliente (país, cidade, aeroporto) manda sempre; localização por IP é apenas sugestão. A origem influencia aeroporto, rota, voo, moeda e disponibilidade — **nunca a margem por nacionalidade**.
+## 6. Validade
 
-Multi-moeda: guardar moeda de origem do custo, taxa usada, momento da taxa e moeda cobrada. A conversão acontece num único ponto do motor de preços, nunca no ecrã nem na IA.
+Validade da cotação = **mínimo** entre: validade escolhida pela política/operador, expiração da oferta de voo, e a menor `valid_until` das tarifas usadas. Tarifas com `validity_unknown` impedem estado confirmável e forçam revisão. Uma oferta de voo expirada nunca pode sustentar uma cotação válida.
 
-Critérios do cliente aceites pelo motor: pessoas, adultos, crianças, datas, duração, origem, interesses, orçamento e nível de conforto. Resposta do motor: pacote adequado, componentes, custo, preço, condições, confiança e validade — ou uma recusa clara quando não há combinação real.
+## 7. Recálculo antes da confirmação
 
-## 12. Rotas à Medida
+Sequência: verificar estado → verificar expiração do voo → reconsultar preço do voo (7E) → verificar tarifas dos componentes → chamar o motor de preços → comparar com a versão atual. Resultado: mantém, ou cria nova versão com o diferencial explícito (preço antigo, preço novo, diferença, motivo, nova validade). A versão original nunca é sobrescrita nem a diferença escondida.
 
-Duração mínima de 5 dias, composição variável a partir de componentes que existam mesmo, cálculo automático pelas mesmas regras e proposta própria. A IA nunca acrescenta componentes inexistentes nem altera preço.
+## 8. Falhas — nunca inventar preço
 
-## 13. Modelo de dados proposto (só no Build)
+Tarifa expirada, voo expirado, componente indisponível, fornecedor indisponível, câmbio em falta, política inativa, versão do produto arquivada: em todos os casos a cotação fica em revisão ou é recusada, com motivo estruturado. Sem valores por omissão, sem estimativas silenciosas.
 
-Produtos de pacote; versões de pacote; componentes da versão; fornecedores; custos de fornecedor com fonte e validade; políticas de preço com versão; regras de preço; ofertas de voo guardadas; cotações; itens da cotação. Nomes finais decididos no Build, depois de confirmar convenções. Todas as tabelas com acesso restrito: leitura pública apenas do que for publicado, escrita apenas por administração ou por funções do servidor.
+## 9. Moeda
 
-## 14. Ligação a reservas e pagamento
+A cotação guarda moeda de custo, moeda de venda, câmbio usado e o momento da conversão. Não se cria serviço de câmbio externo nesta fase: se as moedas divergirem e não houver taxa registada válida, a cotação exige revisão.
 
-Uma futura reserva de pacote refere a versão do pacote, a cotação, a oferta de voo escolhida, os componentes, o preço final, o cliente, a reserva e o pagamento — reutilizando a tabela de reservas atual, sem criar um sistema de reservas paralelo. O Stripe não muda agora; no futuro o valor cobrado tem de ser exatamente o preço confirmado da cotação, validado no servidor.
+## 10. Segurança
 
-## 15. Ligação aos agentes
+Criação sempre no servidor. O cliente envia apenas critérios (destino, datas, pessoas, conforto, orçamento indicativo). Nunca preço, margem, markup, custos, política ou tarifa. Uma proposta simples pode ser gerada sem conta, com dados pessoais mínimos e limites de utilização; tudo o que seja sensível depois exige o fluxo autenticado já existente. Agentes podem propor, nunca escrever preço nem alterar cotações.
 
-Conversão: conversa → critérios → motor de pacotes → opções → cotação → confirmação → fluxo de reserva → Stripe. Nenhuma lógica de preço vive dentro do agente. Aquisição: pode conhecer produtos, preço inicial, mercados, margem potencial e capacidade, mas **nunca alterar preço**.
+## 11. Admin (só desenho)
 
-## 16. Administração, segurança, privacidade e auditoria
+Futura secção "Cotações": número, produto, contexto do cliente, preço, moeda, estado, criação, validade, voo e versão; filtros por estado, produto, período, moeda, origem e autor. Não é implementada nesta fase.
 
-Futura área "Pacotes": produtos, versões, componentes, fornecedores, custos, regras, margens, preços, cotações, voos e configurações. Não se implementa agora.
+## 12. Testes previstos para o Build
 
-Segurança: chamadas a fornecedores de voo só no servidor, nenhuma chave no site, regras de preço só no servidor, o cliente nunca altera preço, a IA nunca escreve preço, todas as ferramentas validam valores e alterações sensíveis exigem aprovação.
+Criação, imutabilidade, versionamento, expiração da cotação/tarifa/voo, reconsulta de voo, alteração de preço, moeda, atribuição, versão da política, fotografia da tarifa, permissões de admin e de cliente, duplicação/idempotência e falha do fornecedor.
 
-Privacidade: dados de passageiro só quando forem mesmo necessários para emitir, minimizados, nunca enviados ao modelo.
+Testes críticos de dinheiro: preço ao cliente diferente do custo; motor de preços como única fonte do preço; impossibilidade de alterar preço pelo frontend; versão de política correta; ausência de dupla margem; nenhuma tarifa expirada usada; nenhum voo expirado usado; alteração de preço gera sempre nova versão.
 
-Auditoria: quem alterou regra, custo, margem; quem publicou pacote; que versão de preço foi usada; que oferta de voo e que fornecedor foram usados.
+## 13. Riscos
 
-## 17. Testes previstos
+- Dupla margem se o custo do voo entrar já marcado — mitigado por o Quote Engine passar apenas custo de fornecedor.
+- Validade otimista se o mínimo entre elementos não for aplicado.
+- Fotografia incompleta se as linhas guardarem apenas chaves em vez de valores.
+- Sem chave de teste Duffel configurada, cotações com voo real não são testáveis ponta a ponta.
+- Ainda não existem fornecedores, tarifas nem política ativa reais: o motor funcionará mas devolverá "sem tarifa válida" até existirem dados reais.
 
-Cálculo e arredondamento, markup e margem mínima, proteção de tarifa, alteração de preço do voo, expiração, reconsulta, moedas, repetição de pedidos, imutabilidade da cotação, versões, permissões, auditoria e falha do fornecedor de voos.
+## 14. Dependências
 
-## 18. Dependências e riscos
+Política de preços ativa; tarifas reais de fornecedores; opcionalmente a chave de teste Duffel para cotações com voo.
 
-Dependências: decisão da empresa sobre margens e proteção; fornecedores reais com custos documentados; contrato e credenciais de voos; confirmação das obrigações legais de operador turístico.
+## 15. Ordem exata do Build (Fase 7G)
 
-Riscos: variação de tarifa aérea entre cotação e pagamento (mitigado com validade curta, reconsulta e proteção); dupla margem (mitigado com ordem de cálculo fixa); custos desatualizados (mitigado com validade obrigatória e bloqueio de venda); complexidade a mais cedo demais (mitigado pela ordem de construção abaixo); expectativa de voos antes de existir contrato.
-
-## 19. Ordem exata de construção futura
-
-1. Produtos, versões e publicação (sem preços).
-2. Fornecedores, componentes e custos com fonte e validade.
-3. Motor de custos (estimado vs confirmado).
-4. Políticas e regras de preço com versão + motor de preços e arredondamento.
-5. Motor de cotações imutável e estados de preço.
-6. Interface de fornecedor de voos e simulação, sem ligação externa.
-7. Ligação real a Duffel, só no servidor, com credenciais aprovadas.
-8. Reconsulta e proteção de tarifa.
-9. Ligação da cotação à reserva e ao pagamento existente.
-10. Área de administração "Pacotes".
-11. Consumo pelo agente de Conversão.
-12. Testes completos e verificação em computador e telemóvel.
-
-## 20. O que continua desligado
-
-Sem tabelas, sem interface, sem Duffel, sem chaves, sem produtos, custos, fornecedores, preços, voos ou cotações fictícias, sem alterações ao Stripe, sem agendamentos e sem agentes ativos.
-
-## 21. Nota de acompanhamento
-
-O plano do agente de Conversão (Fase 6) continua por aprovar e passa a depender deste núcleo comercial; a lista de tarefas do projeto será atualizada com a Fase 7A quando começarmos a construir.
+1. Migração: `travel_quotes`, `travel_quote_versions`, `travel_quote_items` com grants, RLS de admin, guardas de imutabilidade e de eliminação, auditoria e `quote_stats()`.
+2. Lógica pura partilhada `quote-engine.ts` (numeração, validade mínima, estados, comparação de versões) + testes unitários.
+3. Função servidor `quote-engine` integrada com o motor de preços e com o motor de voos.
+4. Recálculo e criação de nova versão com diferencial explícito.
+5. `src/lib/quotes.ts` e hooks de admin.
+6. Secção admin "Cotações" (leitura e recálculo).
+7. Suite de testes completa, incluindo os testes críticos de dinheiro.
+8. Relatório final. Parar antes de reserva de pacote, pagamento, orders Duffel e Conversion Agent.
