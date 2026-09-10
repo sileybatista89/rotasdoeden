@@ -3186,6 +3186,385 @@ export type Database = {
           },
         ]
       }
+      travel_quote_items: {
+        Row: {
+          cancellation_summary: string | null
+          cancellation_type: string | null
+          component_id: string | null
+          component_type: string
+          created_at: string
+          currency: string | null
+          display_name: string
+          estimated: boolean
+          id: string
+          line_order: number
+          notes: Json
+          quantity: number
+          quote_version_id: string
+          rate_id: string | null
+          rate_kind: string | null
+          rate_status: string | null
+          rate_valid_from: string | null
+          rate_valid_until: string | null
+          rule_mode: string | null
+          rule_pct: number | null
+          selling_price: number
+          source_reference: string | null
+          source_type: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+          total_cost: number
+          unit: string | null
+          unit_cost: number
+          validity_unknown: boolean
+        }
+        Insert: {
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          component_id?: string | null
+          component_type: string
+          created_at?: string
+          currency?: string | null
+          display_name: string
+          estimated?: boolean
+          id?: string
+          line_order?: number
+          notes?: Json
+          quantity?: number
+          quote_version_id: string
+          rate_id?: string | null
+          rate_kind?: string | null
+          rate_status?: string | null
+          rate_valid_from?: string | null
+          rate_valid_until?: string | null
+          rule_mode?: string | null
+          rule_pct?: number | null
+          selling_price?: number
+          source_reference?: string | null
+          source_type?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_cost?: number
+          unit?: string | null
+          unit_cost?: number
+          validity_unknown?: boolean
+        }
+        Update: {
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          component_id?: string | null
+          component_type?: string
+          created_at?: string
+          currency?: string | null
+          display_name?: string
+          estimated?: boolean
+          id?: string
+          line_order?: number
+          notes?: Json
+          quantity?: number
+          quote_version_id?: string
+          rate_id?: string | null
+          rate_kind?: string | null
+          rate_status?: string | null
+          rate_valid_from?: string | null
+          rate_valid_until?: string | null
+          rule_mode?: string | null
+          rule_pct?: number | null
+          selling_price?: number
+          source_reference?: string | null
+          source_type?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_cost?: number
+          unit?: string | null
+          unit_cost?: number
+          validity_unknown?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_quote_items_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "package_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_items_quote_version_id_fkey"
+            columns: ["quote_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_items_rate_id_fkey"
+            columns: ["rate_id"]
+            isOneToOne: false
+            referencedRelation: "component_rates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_quote_versions: {
+        Row: {
+          blocking_reasons: Json
+          change_reason: string | null
+          confirmable: boolean
+          cost_currency: string | null
+          created_at: string
+          created_by: string | null
+          customer_criteria: Json
+          flight_expires_at: string | null
+          flight_offer_id: string | null
+          flight_provider_offer_id: string | null
+          flight_snapshot: Json | null
+          fx_at: string | null
+          fx_rate: number | null
+          id: string
+          policy_id: string | null
+          policy_version_id: string | null
+          policy_version_number: number | null
+          previous_price: number | null
+          previous_version_id: string | null
+          price_difference: number | null
+          pricing_calculation_id: string | null
+          pricing_status: string | null
+          quote_id: string
+          sale_currency: string | null
+          status: string
+          superseded_at: string | null
+          total_cost: number
+          total_price: number
+          updated_at: string
+          valid_until: string | null
+          validity_limited_by: string | null
+          version_number: number
+          warnings: Json
+        }
+        Insert: {
+          blocking_reasons?: Json
+          change_reason?: string | null
+          confirmable?: boolean
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_criteria?: Json
+          flight_expires_at?: string | null
+          flight_offer_id?: string | null
+          flight_provider_offer_id?: string | null
+          flight_snapshot?: Json | null
+          fx_at?: string | null
+          fx_rate?: number | null
+          id?: string
+          policy_id?: string | null
+          policy_version_id?: string | null
+          policy_version_number?: number | null
+          previous_price?: number | null
+          previous_version_id?: string | null
+          price_difference?: number | null
+          pricing_calculation_id?: string | null
+          pricing_status?: string | null
+          quote_id: string
+          sale_currency?: string | null
+          status?: string
+          superseded_at?: string | null
+          total_cost?: number
+          total_price?: number
+          updated_at?: string
+          valid_until?: string | null
+          validity_limited_by?: string | null
+          version_number: number
+          warnings?: Json
+        }
+        Update: {
+          blocking_reasons?: Json
+          change_reason?: string | null
+          confirmable?: boolean
+          cost_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_criteria?: Json
+          flight_expires_at?: string | null
+          flight_offer_id?: string | null
+          flight_provider_offer_id?: string | null
+          flight_snapshot?: Json | null
+          fx_at?: string | null
+          fx_rate?: number | null
+          id?: string
+          policy_id?: string | null
+          policy_version_id?: string | null
+          policy_version_number?: number | null
+          previous_price?: number | null
+          previous_version_id?: string | null
+          price_difference?: number | null
+          pricing_calculation_id?: string | null
+          pricing_status?: string | null
+          quote_id?: string
+          sale_currency?: string | null
+          status?: string
+          superseded_at?: string | null
+          total_cost?: number
+          total_price?: number
+          updated_at?: string
+          valid_until?: string | null
+          validity_limited_by?: string | null
+          version_number?: number
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_quote_versions_flight_offer_id_fkey"
+            columns: ["flight_offer_id"]
+            isOneToOne: false
+            referencedRelation: "flight_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_versions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_versions_policy_version_id_fkey"
+            columns: ["policy_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policy_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_versions_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_versions_pricing_calculation_id_fkey"
+            columns: ["pricing_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_calculations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quote_versions_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_quotes: {
+        Row: {
+          accepted_at: string | null
+          attribution: Json
+          cancelled_at: string | null
+          channel: string
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          customer_email: string | null
+          customer_name: string | null
+          expires_at: string | null
+          id: string
+          idempotency_key: string | null
+          notes: string | null
+          product_id: string | null
+          product_version_id: string | null
+          public_token_expires_at: string | null
+          public_token_hash: string | null
+          quote_number: string
+          sale_currency: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+          version_count: number
+          visitor_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          attribution?: Json
+          cancelled_at?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          notes?: string | null
+          product_id?: string | null
+          product_version_id?: string | null
+          public_token_expires_at?: string | null
+          public_token_hash?: string | null
+          quote_number?: string
+          sale_currency?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          version_count?: number
+          visitor_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          attribution?: Json
+          cancelled_at?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          expires_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          notes?: string | null
+          product_id?: string | null
+          product_version_id?: string | null
+          public_token_expires_at?: string | null
+          public_token_hash?: string | null
+          quote_number?: string
+          sale_currency?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          version_count?: number
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_quotes_current_version_fk"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quotes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quotes_product_version_id_fkey"
+            columns: ["product_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_product_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3387,6 +3766,10 @@ export type Database = {
         Args: { _note?: string; _status: string; _version_id: string }
         Returns: Json
       }
+      admin_set_quote_status: {
+        Args: { _note?: string; _quote_id: string; _status: string }
+        Returns: Json
+      }
       admin_set_rate_status: {
         Args: { _note?: string; _rate_id: string; _status: string }
         Returns: Json
@@ -3539,7 +3922,9 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      next_quote_number: { Args: never; Returns: string }
       pricing_stats: { Args: never; Returns: Json }
+      quote_stats: { Args: never; Returns: Json }
       record_traffic_event: {
         Args: {
           _attribution?: Json
