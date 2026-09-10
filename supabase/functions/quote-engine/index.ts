@@ -605,3 +605,5 @@ Deno.serve(async (req) => {
     return json({ error: "Erro inesperado no motor de cotações." }, 500);
   }
 });
+
+// deploy touch

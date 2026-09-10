@@ -77,3 +77,5 @@ Deno.serve(async (req) => {
     return json({ error: "Erro inesperado." }, 500);
   }
 });
+
+// deploy touch
