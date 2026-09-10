@@ -19,6 +19,7 @@ import { PackagesPanel } from "@/components/admin/packages/PackagesPanel";
 import { SuppliersPanel } from "@/components/admin/suppliers/SuppliersPanel";
 import { PricingPanel } from "@/components/admin/pricing/PricingPanel";
 import { FlightsPanel } from "@/components/admin/flights/FlightsPanel";
+import { QuotesPanel } from "@/components/admin/quotes/QuotesPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -293,6 +294,17 @@ export default function AdminPage() {
               description="Pesquisa de ofertas aéreas reais no ambiente de teste da Duffel. Os valores são custo de fornecedor: a margem, a proteção e o arredondamento continuam a ser aplicados em Preços. Não há reservas, pagamentos nem emissão de bilhetes."
             />
             <FlightsPanel />
+          </>
+        )}
+
+        {section === "cotacoes" && (
+          <>
+            <AdminSectionHeader
+              eyebrow="Comercial"
+              title="Cotações"
+              description="Propostas comerciais versionadas e imutáveis. O preço vem sempre do motor de preços no servidor; cada alteração cria uma nova versão com a diferença explícita. Uma cotação não é reserva nem pagamento."
+            />
+            <QuotesPanel />
           </>
         )}
 

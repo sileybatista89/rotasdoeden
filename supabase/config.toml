@@ -7,3 +7,5 @@ project_id = "hiurdjlnnbrdsyplesfb"
     verify_jwt = false
   [functions.payments-webhook]
     verify_jwt = false
+  [functions.quote-public]
+    verify_jwt = false
