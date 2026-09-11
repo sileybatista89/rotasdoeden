@@ -19,6 +19,11 @@ import {
   isPaymentStatus,
   rejectForbiddenBookingInput,
   snapshotItemsFromQuote,
+  evaluateAcceptance,
+  evaluateRevalidation,
+  initialFlightStatus,
+  packageBookingIdempotencyKey,
+  sanitizeBookingForCustomer,
 } from "@/lib/packageBookings";
 
 describe("Fase 7I — estados separados", () => {
