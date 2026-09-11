@@ -391,6 +391,14 @@ export function QuotesPanel() {
                 <Button size="sm" variant="outline" onClick={() => onToken(detail.data!.quote.id)}>
                   <Copy size={14} className="mr-1" /> Ligação do cliente
                 </Button>
+                <Button size="sm" variant="outline" disabled={revalidate.isPending}
+                  onClick={() => onRevalidate(detail.data!.quote.id)}>
+                  Revalidar
+                </Button>
+                <Button size="sm" disabled={createBooking.isPending || !!booking.data}
+                  onClick={() => onCreateBooking(detail.data!.quote.id)}>
+                  Criar reserva de pacote
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">
                 Aceitar significa apenas aceitação comercial. Não cria reserva, não cobra e não emite bilhetes.
