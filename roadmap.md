@@ -50,3 +50,9 @@
 - [ ] Conversion agent (plano da Fase 6 por aprovar)
 
 
+## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)
+- [x] package_bookings, package_booking_items, booking_flight, supplier_confirmations, payment_events
+- [x] Estados separados (reserva / voo / pagamento / operações), RLS só admin, sem acesso público
+- [x] Guardas: nada é eliminado, linhas imutáveis, cotação/versão coerentes, sem reserva duplicada
+- [x] Auditoria de criação e de mudança de estado; modelo partilhado + 9 testes
+- [ ] Passo 2 (aceitação, revalidação, pagamento, voo real) — requer autorização
