@@ -626,9 +626,10 @@ Deno.serve(async (req) => {
           flightNote = `Voo: ${refreshBody.reprice?.status ?? "desconhecido"}.`;
           if (refreshBody.reprice?.status === "unavailable") flightAvailable = false;
         }
-        const { data: o } = await admin.from("flight_offers").select("*")
-          .eq("provider_offer_id", current.flight_provider_offer_id).maybeSingle();
-        flightOffer = o ?? null;
+        const { data: offers } = await admin.from("flight_offers").select("*")
+          .eq("provider_offer_id", current.flight_provider_offer_id)
+          .order("created_at", { ascending: false }).limit(1);
+        flightOffer = (offers ?? [])[0] ?? null;
         if (!flightOffer) flightAvailable = false;
       }
 
