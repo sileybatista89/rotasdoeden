@@ -51,6 +51,36 @@ export function QuotesPanel() {
   const reprice = useRepriceQuote();
   const setStatus = useSetQuoteStatus();
   const issueToken = useIssueQuoteToken();
+  const revalidate = useRevalidateQuote();
+  const createBooking = useCreatePackageBooking();
+  const revalidations = useQuoteRevalidations(openId);
+  const booking = usePackageBookingForQuote(openId);
+
+  async function onRevalidate(quoteId: string) {
+    try {
+      const res: any = await revalidate.mutateAsync(quoteId);
+      const outcome = res?.revalidation?.outcome as keyof typeof REVALIDATION_OUTCOME_LABEL | undefined;
+      toast({
+        title: outcome ? REVALIDATION_OUTCOME_LABEL[outcome] : "Revalidação concluída",
+        description: (res?.revalidation?.reasons ?? []).join(" ") || "Condições verificadas junto das tarifas e do voo.",
+        variant: outcome === "blocked" ? "destructive" : undefined,
+      });
+    } catch (e) {
+      toast({ title: "Não foi possível revalidar", description: (e as Error).message, variant: "destructive" });
+    }
+  }
+
+  async function onCreateBooking(quoteId: string) {
+    try {
+      const res: any = await createBooking.mutateAsync(quoteId);
+      toast({
+        title: res?.already_existed ? "Reserva já existia" : "Reserva de pacote criada",
+        description: `${res?.booking?.bookingNumber ?? ""} — aguarda pagamento. Nada foi cobrado.`,
+      });
+    } catch (e) {
+      toast({ title: "Não foi possível criar a reserva", description: (e as Error).message, variant: "destructive" });
+    }
+  }
 
   const productName = useMemo(() => {
     const map = new Map<string, string>();
