@@ -19,6 +19,12 @@ export interface QuoteRow {
   expires_at: string | null;
   created_by: string | null;
   created_at: string;
+  accepted_at?: string | null;
+  accepted_version_id?: string | null;
+  accepted_channel?: string | null;
+  requires_reacceptance?: boolean;
+  package_booking_id?: string | null;
+  last_revalidated_at?: string | null;
 }
 
 export interface QuoteVersionRow {
