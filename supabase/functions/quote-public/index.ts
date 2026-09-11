@@ -116,7 +116,14 @@ Deno.serve(async (req) => {
         requires_reacceptance: false,
         // Contexto mínimo: sem PII adicional, sem documentos de passageiros.
         acceptance_context: { channel: "public_token", version_number: version.version_number, user_agent_present: Boolean(req.headers.get("user-agent")) },
-      }).eq("id", quote.id).is("accepted_at", null).select("*").maybeSingle();
+      }).eq("id", quote.id);
+
+      update = quote.requires_reacceptance
+        ? update.eq("requires_reacceptance", true)
+        : update.is("accepted_at", null);
+
+      const { data: updated, error: updateError } = await update.select("*").maybeSingle();
+
 
       if (updateError) return json({ accepted: false, code: "acceptance_failed", error: "Não foi possível registar a aceitação." }, 500);
       if (!updated) {
