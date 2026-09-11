@@ -146,7 +146,8 @@ Deno.serve(async (req) => {
         quote_version_id: version.id,
         product_id: quote.product_id,
         product_version_id: quote.product_version_id,
-        user_id: quote.user_id ?? null,
+        // As cotações não guardam conta de utilizador: o cliente pode não ter conta.
+        user_id: null,
         customer_name: quote.customer_name,
         customer_email: quote.customer_email,
         visitor_id: quote.visitor_id,
