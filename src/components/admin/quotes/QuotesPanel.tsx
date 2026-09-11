@@ -323,6 +323,63 @@ export function QuotesPanel() {
                 </div>
               </div>
 
+              <div>
+                <p className="text-sm font-medium mb-2">Aceitação do cliente</p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Aceite em</p>
+                    <p>{dt((detail.data.quote as any).accepted_at)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Canal</p>
+                    <p>{(detail.data.quote as any).accepted_channel ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Última revalidação</p>
+                    <p>{dt((detail.data.quote as any).last_revalidated_at)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Nova aceitação necessária</p>
+                    <p>{(detail.data.quote as any).requires_reacceptance ? "Sim" : "Não"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {(revalidations.data ?? []).length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Revalidações</p>
+                  <div className="space-y-2">
+                    {(revalidations.data ?? []).map((r) => (
+                      <div key={r.id} className="border border-border rounded-xl p-3 text-xs">
+                        <div className="flex justify-between gap-3">
+                          <span>{REVALIDATION_OUTCOME_LABEL[r.outcome] ?? r.outcome}</span>
+                          <span>{money(r.new_price, r.currency)}</span>
+                        </div>
+                        {r.previous_price != null && (
+                          <p className="text-muted-foreground mt-1">
+                            Anterior {money(r.previous_price, r.currency)} · diferença {money(r.price_difference, r.currency)}
+                          </p>
+                        )}
+                        {(r.blocking_reasons ?? []).length > 0 && (
+                          <p className="text-muted-foreground mt-1">{r.blocking_reasons.join(" ")}</p>
+                        )}
+                        <p className="text-muted-foreground mt-1">{dt(r.created_at)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {booking.data && (
+                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm">
+                  <p className="font-medium">Reserva de pacote {booking.data.booking_number}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Estado {booking.data.booking_status} · pagamento {booking.data.payment_status} · operações {booking.data.operations_status}
+                    {" · "}{money(booking.data.confirmed_price, booking.data.currency)}
+                  </p>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                 <Button size="sm" variant="outline" disabled={reprice.isPending}
                   onClick={() => onReprice(detail.data!.quote.id)}>
