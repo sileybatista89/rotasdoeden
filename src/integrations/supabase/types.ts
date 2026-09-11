@@ -1003,6 +1003,90 @@ export type Database = {
           },
         ]
       }
+      booking_flight: {
+        Row: {
+          created_at: string
+          failure_reason: string | null
+          flight_offer_id: string | null
+          hold_capable: boolean | null
+          hold_expires_at: string | null
+          hold_reference: string | null
+          id: string
+          offer_expires_at: string | null
+          offer_snapshot: Json | null
+          package_booking_id: string
+          provider: string | null
+          provider_offer_id: string | null
+          provider_order_id: string | null
+          requires_instant_payment: boolean | null
+          status: string
+          supplier_cost: number | null
+          supplier_currency: string | null
+          ticket_numbers: Json
+          ticketed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          failure_reason?: string | null
+          flight_offer_id?: string | null
+          hold_capable?: boolean | null
+          hold_expires_at?: string | null
+          hold_reference?: string | null
+          id?: string
+          offer_expires_at?: string | null
+          offer_snapshot?: Json | null
+          package_booking_id: string
+          provider?: string | null
+          provider_offer_id?: string | null
+          provider_order_id?: string | null
+          requires_instant_payment?: boolean | null
+          status?: string
+          supplier_cost?: number | null
+          supplier_currency?: string | null
+          ticket_numbers?: Json
+          ticketed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          failure_reason?: string | null
+          flight_offer_id?: string | null
+          hold_capable?: boolean | null
+          hold_expires_at?: string | null
+          hold_reference?: string | null
+          id?: string
+          offer_expires_at?: string | null
+          offer_snapshot?: Json | null
+          package_booking_id?: string
+          provider?: string | null
+          provider_offer_id?: string | null
+          provider_order_id?: string | null
+          requires_instant_payment?: boolean | null
+          status?: string
+          supplier_cost?: number | null
+          supplier_currency?: string | null
+          ticket_numbers?: Json
+          ticketed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_flight_flight_offer_id_fkey"
+            columns: ["flight_offer_id"]
+            isOneToOne: false
+            referencedRelation: "flight_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_flight_package_booking_id_fkey"
+            columns: ["package_booking_id"]
+            isOneToOne: true
+            referencedRelation: "package_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           attribution: Json
@@ -2258,6 +2342,261 @@ export type Database = {
         }
         Relationships: []
       }
+      package_booking_items: {
+        Row: {
+          cancellation_summary: string | null
+          cancellation_type: string | null
+          component_id: string | null
+          component_type: string
+          created_at: string
+          currency: string | null
+          display_name: string
+          estimated: boolean
+          id: string
+          line_order: number
+          package_booking_id: string
+          quantity: number
+          quote_item_id: string | null
+          rate_id: string | null
+          rate_kind: string | null
+          rate_valid_from: string | null
+          rate_valid_until: string | null
+          selling_price: number
+          source_reference: string | null
+          source_type: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+          total_cost: number
+          unit: string | null
+          unit_cost: number
+          validity_unknown: boolean
+        }
+        Insert: {
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          component_id?: string | null
+          component_type: string
+          created_at?: string
+          currency?: string | null
+          display_name: string
+          estimated?: boolean
+          id?: string
+          line_order?: number
+          package_booking_id: string
+          quantity?: number
+          quote_item_id?: string | null
+          rate_id?: string | null
+          rate_kind?: string | null
+          rate_valid_from?: string | null
+          rate_valid_until?: string | null
+          selling_price?: number
+          source_reference?: string | null
+          source_type?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_cost?: number
+          unit?: string | null
+          unit_cost?: number
+          validity_unknown?: boolean
+        }
+        Update: {
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          component_id?: string | null
+          component_type?: string
+          created_at?: string
+          currency?: string | null
+          display_name?: string
+          estimated?: boolean
+          id?: string
+          line_order?: number
+          package_booking_id?: string
+          quantity?: number
+          quote_item_id?: string | null
+          rate_id?: string | null
+          rate_kind?: string | null
+          rate_valid_from?: string | null
+          rate_valid_until?: string | null
+          selling_price?: number
+          source_reference?: string | null
+          source_type?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          total_cost?: number
+          unit?: string | null
+          unit_cost?: number
+          validity_unknown?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_booking_items_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "package_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_booking_items_package_booking_id_fkey"
+            columns: ["package_booking_id"]
+            isOneToOne: false
+            referencedRelation: "package_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_booking_items_quote_item_id_fkey"
+            columns: ["quote_item_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_booking_items_rate_id_fkey"
+            columns: ["rate_id"]
+            isOneToOne: false
+            referencedRelation: "component_rates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_booking_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      package_bookings: {
+        Row: {
+          attribution: Json
+          booking_number: string
+          booking_status: string
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_cost: number
+          confirmed_price: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          flight_status: string
+          id: string
+          idempotency_key: string | null
+          internal_notes: string | null
+          issue_reason: string | null
+          operations_status: string
+          payment_status: string
+          pricing_calculation_id: string | null
+          product_id: string | null
+          product_version_id: string | null
+          quote_accepted_at: string | null
+          quote_id: string
+          quote_valid_until: string | null
+          quote_version_id: string
+          updated_at: string
+          user_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          attribution?: Json
+          booking_number?: string
+          booking_status?: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_cost?: number
+          confirmed_price?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          flight_status?: string
+          id?: string
+          idempotency_key?: string | null
+          internal_notes?: string | null
+          issue_reason?: string | null
+          operations_status?: string
+          payment_status?: string
+          pricing_calculation_id?: string | null
+          product_id?: string | null
+          product_version_id?: string | null
+          quote_accepted_at?: string | null
+          quote_id: string
+          quote_valid_until?: string | null
+          quote_version_id: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          attribution?: Json
+          booking_number?: string
+          booking_status?: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_cost?: number
+          confirmed_price?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          flight_status?: string
+          id?: string
+          idempotency_key?: string | null
+          internal_notes?: string | null
+          issue_reason?: string | null
+          operations_status?: string
+          payment_status?: string
+          pricing_calculation_id?: string | null
+          product_id?: string | null
+          product_version_id?: string | null
+          quote_accepted_at?: string | null
+          quote_id?: string
+          quote_valid_until?: string | null
+          quote_version_id?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_bookings_pricing_calculation_id_fkey"
+            columns: ["pricing_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_calculations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_bookings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_bookings_product_version_id_fkey"
+            columns: ["product_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_product_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_bookings_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_bookings_quote_version_id_fkey"
+            columns: ["quote_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       package_components: {
         Row: {
           accommodation_id: string | null
@@ -2347,6 +2686,47 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string
+          id: string
+          package_booking_id: string | null
+          processed_at: string
+          provider: string
+          result: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type: string
+          id?: string
+          package_booking_id?: string | null
+          processed_at?: string
+          provider?: string
+          result?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string
+          id?: string
+          package_booking_id?: string | null
+          processed_at?: string
+          provider?: string
+          result?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_package_booking_id_fkey"
+            columns: ["package_booking_id"]
+            isOneToOne: false
+            referencedRelation: "package_bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -2818,6 +3198,76 @@ export type Database = {
             columns: ["locality_id"]
             isOneToOne: false
             referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_confirmations: {
+        Row: {
+          component_id: string | null
+          confirmed_at: string | null
+          created_at: string
+          created_by: string | null
+          deadline_at: string | null
+          id: string
+          notes: string | null
+          package_booking_id: string
+          requested_at: string | null
+          status: string
+          supplier_id: string | null
+          supplier_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          component_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          id?: string
+          notes?: string | null
+          package_booking_id: string
+          requested_at?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          component_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline_at?: string | null
+          id?: string
+          notes?: string | null
+          package_booking_id?: string
+          requested_at?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_confirmations_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "package_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_confirmations_package_booking_id_fkey"
+            columns: ["package_booking_id"]
+            isOneToOne: false
+            referencedRelation: "package_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_confirmations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -3922,6 +4372,7 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_banned: { Args: { _user_id: string }; Returns: boolean }
+      next_package_booking_number: { Args: never; Returns: string }
       next_quote_number: { Args: never; Returns: string }
       pricing_stats: { Args: never; Returns: Json }
       quote_stats: { Args: never; Returns: Json }
