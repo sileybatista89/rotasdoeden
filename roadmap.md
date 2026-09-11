@@ -55,4 +55,6 @@
 - [x] Estados separados (reserva / voo / pagamento / operações), RLS só admin, sem acesso público
 - [x] Guardas: nada é eliminado, linhas imutáveis, cotação/versão coerentes, sem reserva duplicada
 - [x] Auditoria de criação e de mudança de estado; modelo partilhado + 9 testes
-- [ ] Passo 2 (aceitação, revalidação, pagamento, voo real) — requer autorização
+- [x] Passos 2-4: aceitação pelo cliente (ligação com código), revalidação final server-side, criação da reserva
+- [x] Página pública /proposta (só preço final, sem custos) + ações de revalidar/criar reserva no painel
+- [ ] Passo 5 (pagamento, Stripe de pacote, voo real, confirmação de fornecedores) — requer autorização

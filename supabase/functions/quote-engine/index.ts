@@ -25,6 +25,7 @@ import {
   sanitizeCriteria,
   validateCriteria,
 } from "../_shared/quote-engine.ts";
+import { evaluateRevalidation } from "../_shared/package-booking.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -564,6 +565,275 @@ Deno.serve(async (req) => {
       });
 
       return json({ changed: true, comparison, version: newVersion, items, flight: flightNote });
+    }
+
+    // ============ REVALIDATE (Fase 7I) ============
+    // Revalidação final server-side. NUNCA reutiliza cegamente o preço antigo:
+    // reconsulta o voo, recarrega tarifas e política e recalcula tudo.
+    if (action === "revalidate") {
+      const quoteId = String(body.quote_id ?? "");
+      const { data: quote } = await admin.from("travel_quotes").select("*").eq("id", quoteId).maybeSingle();
+      if (!quote) return json({ error: "Cotação inexistente.", code: "quote_not_found" }, 404);
+      if (quote.status === "cancelled") return json({ error: "Cotação cancelada.", code: "quote_cancelled" }, 409);
+
+      const baseVersionId = quote.accepted_version_id ?? quote.current_version_id;
+      const { data: current } = await admin.from("travel_quote_versions").select("*").eq("id", baseVersionId).maybeSingle();
+      if (!current) return json({ error: "Versão inexistente.", code: "version_not_found" }, 404);
+
+      const recordRevalidation = async (row: Record<string, unknown>) => {
+        const { data } = await admin.from("quote_revalidations").insert({
+          quote_id: quote.id, quote_version_id: current.id, created_by: user.id, ...row,
+        }).select("*").single();
+        await admin.from("travel_quotes").update({ last_revalidated_at: new Date().toISOString() }).eq("id", quote.id);
+        await admin.from("admin_audit_log").insert({
+          admin_id: user.id, action: `quote_revalidation_${row.outcome}`, entity_type: "travel_quote", entity_id: quote.id,
+          details: { version: current.version_number, ...row },
+        });
+        return data;
+      };
+
+      if (quote.current_version_id !== current.id) {
+        const rec = await recordRevalidation({ outcome: "blocked", blocking_reasons: ["Existe uma versão mais recente desta cotação."] });
+        return json({ ok: false, outcome: "blocked", code: "quote_superseded", reasons: ["Existe uma versão mais recente desta cotação."], revalidation: rec }, 409);
+      }
+
+      // produto / versão do produto
+      let productVersionStatus: string | null = null;
+      if (quote.product_version_id) {
+        const { data: pv } = await admin.from("travel_product_versions").select("status").eq("id", quote.product_version_id).maybeSingle();
+        productVersionStatus = pv?.status ?? null;
+      }
+
+      const { data: currentItems } = await admin.from("travel_quote_items").select("component_id")
+        .eq("quote_version_id", current.id);
+      const componentIds = [...new Set((currentItems ?? []).map((i: any) => i.component_id).filter(Boolean))] as string[];
+
+      // voo: refresh/reprice apenas para VALIDAR — nunca hold, order ou bilhete
+      let flightOffer: Record<string, any> | null = null;
+      let flightNote: string | null = null;
+      let flightAvailable = true;
+      if (current.flight_provider_offer_id) {
+        const refreshRes = await fetch(`${supabaseUrl}/functions/v1/flight-engine`, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", apikey: anonKey },
+          body: JSON.stringify({ action: "refresh_offer", provider_offer_id: current.flight_provider_offer_id }),
+        });
+        const refreshBody = await refreshRes.json().catch(() => ({}));
+        if (!refreshRes.ok) {
+          flightAvailable = false;
+          flightNote = `Reconsulta de voo indisponível: ${refreshBody.code ?? "erro"}.`;
+        } else {
+          flightNote = `Voo: ${refreshBody.reprice?.status ?? "desconhecido"}.`;
+          if (refreshBody.reprice?.status === "unavailable") flightAvailable = false;
+        }
+        const { data: offers } = await admin.from("flight_offers").select("*")
+          .eq("provider_offer_id", current.flight_provider_offer_id)
+          .order("created_at", { ascending: false }).limit(1);
+        flightOffer = (offers ?? [])[0] ?? null;
+        if (!flightOffer) flightAvailable = false;
+      }
+
+      const { policy, components, rateRows } = await loadPricingContext(admin, componentIds);
+      if (!policy) {
+        const rec = await recordRevalidation({ outcome: "blocked", blocking_reasons: ["Não existe política de preços ativa."], flight_note: flightNote });
+        return json({ ok: false, outcome: "blocked", code: "no_active_policy", reasons: ["Não existe política de preços ativa."], revalidation: rec }, 409);
+      }
+
+      const criteria = sanitizeCriteria(current.customer_criteria ?? {});
+      const referenceDate = criteria.departureDate ?? new Date().toISOString().slice(0, 10);
+      const result = calculatePricing({
+        policy,
+        productId: quote.product_id,
+        productVersionId: quote.product_version_id,
+        durationDays: criteria.durationDays,
+        nights: criteria.nights ?? Math.max(criteria.durationDays - 1, 0),
+        adults: criteria.adults,
+        children: criteria.children ?? 0,
+        rooms: criteria.rooms ?? 1,
+        referenceDate,
+        components,
+        flightCost: flightOffer
+          ? { amount: Number(flightOffer.total_amount), currency: flightOffer.total_currency, confirmed: flightOffer.status === "active" }
+          : null,
+      });
+
+      const usedRateIds = new Set(result.components.map((c) => c.rateId).filter(Boolean) as string[]);
+      const usedRates = rateRows.filter((r) => usedRateIds.has(r.id));
+      const validity = resolveQuoteValidity({
+        operatorValidUntil: null,
+        flightExpiresAt: flightOffer?.expires_at ?? null,
+        rateValidUntil: usedRates.map((r) => r.valid_until),
+      });
+      const confirmability = evaluateConfirmability({
+        pricingStatus: result.status,
+        validationErrors: result.validationErrors,
+        productStatus: productVersionStatus,
+        policyActive: policy.status === "active",
+        flight: flightOffer ? { present: true, expiresAt: flightOffer.expires_at, expired: flightOffer.status === "expired" } : null,
+        rates: usedRates.map((r) => ({ validityUnknown: r.validity_unknown, validUntil: r.valid_until, status: r.status })),
+        validUntil: validity.validUntil,
+      });
+
+      const decision = evaluateRevalidation({
+        previousPrice: Number(current.total_price),
+        newPrice: result.finalPrice,
+        pricingStatus: result.status,
+        policyActive: policy.status === "active",
+        blockingReasons: confirmability.blockingReasons,
+        flightPresent: Boolean(current.flight_provider_offer_id),
+        flightAvailable,
+        flightExpired: flightOffer ? flightOffer.status === "expired" : false,
+        marginBelowMinimum: result.grossMarginPct < Number(policy.minMarginPct),
+      });
+
+      const { data: calcRow } = await admin.from("pricing_calculations").insert({
+        policy_id: policy.policyId,
+        policy_version_id: policy.id,
+        policy_version_number: policy.versionNumber,
+        product_id: result.productId,
+        product_version_id: result.productVersionId,
+        calculation_kind: "commercial",
+        status: result.status,
+        currency: result.currency,
+        cost_total: result.costTotal,
+        markup_total: result.markupTotal,
+        gross_margin_pct: result.grossMarginPct,
+        subtotal: result.subtotal,
+        final_price: result.finalPrice,
+        input: { componentIds, criteria, revalidation_of: current.id },
+        result: result as unknown as Record<string, unknown>,
+        warnings: result.warnings,
+        validation_errors: result.validationErrors,
+        created_by: user.id,
+      }).select("id").single();
+
+      const baseRow = {
+        previous_price: Number(current.total_price),
+        new_price: result.finalPrice,
+        price_difference: decision.difference,
+        price_difference_pct: decision.differencePct,
+        currency: result.currency,
+        pricing_status: result.status,
+        pricing_calculation_id: calcRow?.id ?? null,
+        warnings: result.warnings,
+        flight_note: flightNote,
+        flight_status: flightOffer?.status ?? null,
+      };
+
+      if (decision.outcome === "blocked") {
+        const rec = await recordRevalidation({ ...baseRow, outcome: "blocked", blocking_reasons: decision.reasons });
+        return json({ ok: false, outcome: "blocked", code: "revalidation_blocked", reasons: decision.reasons, revalidation: rec }, 409);
+      }
+
+      if (!decision.changed) {
+        const rec = await recordRevalidation({ ...baseRow, outcome: "unchanged", blocking_reasons: [] });
+        return json({
+          ok: true, outcome: "unchanged", changed: false, decision,
+          version: current, confirmed_price: Number(current.total_price),
+          currency: current.sale_currency, revalidation: rec, flight: flightNote,
+        });
+      }
+
+      // Houve alteração: a versão anterior permanece intacta e nasce uma nova.
+      const reason = `Revalidação: preço alterado de ${decision.difference >= 0 ? "" : ""}${current.total_price} para ${result.finalPrice} (${decision.difference >= 0 ? "+" : ""}${decision.difference}). ${flightNote ?? ""}`.trim();
+      const { data: newVersion, error: nvError } = await admin.from("travel_quote_versions").insert({
+        quote_id: quote.id,
+        version_number: Number(current.version_number) + 1,
+        status: "calculated",
+        customer_criteria: current.customer_criteria,
+        policy_id: policy.policyId,
+        policy_version_id: policy.id,
+        policy_version_number: policy.versionNumber,
+        pricing_calculation_id: calcRow?.id ?? null,
+        pricing_status: result.status,
+        total_cost: result.costTotal,
+        total_price: result.finalPrice,
+        cost_currency: result.currency,
+        sale_currency: result.currency,
+        flight_offer_id: flightOffer?.id ?? null,
+        flight_provider_offer_id: flightOffer?.provider_offer_id ?? null,
+        flight_expires_at: flightOffer?.expires_at ?? null,
+        flight_snapshot: flightSnapshotOf(flightOffer),
+        valid_until: validity.validUntil,
+        validity_limited_by: validity.limitedBy,
+        confirmable: confirmability.confirmable,
+        blocking_reasons: confirmability.blockingReasons,
+        warnings: result.warnings,
+        change_reason: reason,
+        previous_version_id: current.id,
+        previous_price: Number(current.total_price),
+        price_difference: decision.difference,
+        created_by: user.id,
+      }).select("*").single();
+      if (nvError) return json({ error: nvError.message }, 500);
+
+      const newItems = result.components.map((line, i) => {
+        const rate = rateRows.find((r) => r.id === line.rateId);
+        return {
+          quote_version_id: newVersion.id,
+          line_order: i,
+          component_id: line.componentId,
+          rate_id: line.rateId,
+          supplier_id: rate?.supplier_id ?? null,
+          display_name: line.name,
+          component_type: line.componentType,
+          quantity: line.quantity,
+          unit: line.unit,
+          unit_cost: line.unitPrice,
+          total_cost: line.cost,
+          rule_mode: line.ruleMode,
+          rule_pct: line.rulePct,
+          selling_price: line.sellPrice,
+          currency: line.currency,
+          rate_kind: line.rateKind,
+          rate_status: rate?.status ?? null,
+          source_type: rate?.source_type ?? null,
+          source_reference: rate?.source_reference ?? null,
+          rate_valid_from: rate?.valid_from ?? null,
+          rate_valid_until: rate?.valid_until ?? null,
+          validity_unknown: rate?.validity_unknown ?? false,
+          cancellation_type: rate?.cancellation_type ?? null,
+          cancellation_summary: rate?.cancellation_summary ?? null,
+          estimated: line.estimated,
+          notes: line.notes,
+        };
+      });
+      if (newItems.length > 0) await admin.from("travel_quote_items").insert(newItems);
+
+      await admin.from("travel_quote_versions")
+        .update({ status: "superseded", superseded_at: new Date().toISOString() }).eq("id", current.id);
+
+      const requiresReacceptance = decision.requiresReacceptance;
+      await admin.from("travel_quotes").update({
+        current_version_id: newVersion.id,
+        version_count: Number(quote.version_count ?? 1) + 1,
+        status: requiresReacceptance ? "calculated" : quote.status,
+        accepted_version_id: requiresReacceptance ? quote.accepted_version_id : newVersion.id,
+        requires_reacceptance: requiresReacceptance,
+        expires_at: validity.validUntil,
+        sale_currency: result.currency,
+      }).eq("id", quote.id);
+
+      const rec = await recordRevalidation({
+        ...baseRow,
+        outcome: decision.outcome,
+        new_quote_version_id: newVersion.id,
+        blocking_reasons: decision.reasons,
+        requires_reacceptance: requiresReacceptance,
+      });
+
+      return json({
+        ok: !requiresReacceptance,
+        outcome: decision.outcome,
+        changed: true,
+        decision,
+        version: newVersion,
+        confirmed_price: result.finalPrice,
+        currency: result.currency,
+        requires_reacceptance: requiresReacceptance,
+        revalidation: rec,
+        flight: flightNote,
+      }, requiresReacceptance ? 409 : 200);
     }
 
     // ============ GET ============

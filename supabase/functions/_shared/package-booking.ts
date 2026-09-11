@@ -204,3 +204,220 @@ export function confirmedPriceFromVersion(version: Record<string, any>): { price
     currency: String(version?.sale_currency ?? "EUR"),
   };
 }
+
+// ===================================================================
+// Fase 7I (passos 2-4) — aceitação, revalidação e criação da reserva.
+// Continua sem I/O: só regras puras, testáveis e partilhadas.
+// ===================================================================
+
+export type AcceptanceFailureCode =
+  | "invalid_token"
+  | "quote_not_found"
+  | "version_mismatch"
+  | "quote_expired"
+  | "quote_superseded"
+  | "quote_cancelled"
+  | "product_version_archived"
+  | "not_confirmable"
+  | "requires_reacceptance"
+  | "already_accepted";
+
+export interface AcceptanceInput {
+  quote: {
+    status: string;
+    current_version_id: string | null;
+    accepted_at?: string | null;
+    accepted_version_id?: string | null;
+    requires_reacceptance?: boolean;
+    public_token_expires_at?: string | null;
+  };
+  version: {
+    id: string;
+    version_number: number;
+    status?: string | null;
+    valid_until?: string | null;
+    confirmable?: boolean | null;
+    blocking_reasons?: unknown;
+  };
+  /** Versão que o cliente viu; protege contra aceitar algo já substituído. */
+  expectedVersionNumber?: number | null;
+  productVersionStatus?: string | null;
+  now?: Date;
+}
+
+export interface AcceptanceResult {
+  ok: boolean;
+  code?: AcceptanceFailureCode;
+  reason?: string;
+  /** Aceitação repetida da mesma versão é idempotente, não é um erro novo. */
+  alreadyAccepted?: boolean;
+}
+
+function expired(value: string | null | undefined, now: Date): boolean {
+  if (!value) return false;
+  const iso = value.length === 10 ? `${value}T23:59:59.000Z` : value;
+  return new Date(iso).getTime() <= now.getTime();
+}
+
+/** Nenhuma destas verificações tem valor por omissão permissivo. */
+export function evaluateAcceptance(input: AcceptanceInput): AcceptanceResult {
+  const now = input.now ?? new Date();
+  const { quote, version } = input;
+
+  if (quote.status === "cancelled") return { ok: false, code: "quote_cancelled", reason: "Esta cotação foi cancelada." };
+  if (quote.status === "superseded" || version.status === "superseded") {
+    return { ok: false, code: "quote_superseded", reason: "Existe uma versão mais recente desta cotação." };
+  }
+  if (quote.current_version_id && quote.current_version_id !== version.id) {
+    return { ok: false, code: "quote_superseded", reason: "Existe uma versão mais recente desta cotação." };
+  }
+  if (input.expectedVersionNumber != null && input.expectedVersionNumber !== version.version_number) {
+    return { ok: false, code: "version_mismatch", reason: "A proposta foi atualizada. Reveja a versão mais recente." };
+  }
+  if (quote.accepted_at && quote.accepted_version_id === version.id && !quote.requires_reacceptance) {
+    return { ok: true, alreadyAccepted: true, code: "already_accepted", reason: "Esta proposta já tinha sido aceite." };
+  }
+  if (expired(quote.public_token_expires_at, now)) {
+    return { ok: false, code: "quote_expired", reason: "Esta ligação expirou." };
+  }
+  if (expired(version.valid_until, now) || quote.status === "expired") {
+    return { ok: false, code: "quote_expired", reason: "Esta proposta está fora de validade." };
+  }
+  if (input.productVersionStatus === "archived") {
+    return { ok: false, code: "product_version_archived", reason: "Este pacote já não está disponível." };
+  }
+  if (version.confirmable === false) {
+    return { ok: false, code: "not_confirmable", reason: "Esta proposta precisa de ser revista antes de ser aceite." };
+  }
+  return { ok: true };
+}
+
+/**
+ * Tolerância de re-aceitação: qualquer subida de preço obriga a nova
+ * aceitação. Descidas dentro da tolerância seguem sem incomodar o cliente.
+ */
+export const REACCEPTANCE_TOLERANCE = { increasePct: 0, decreasePct: 100 };
+
+export type RevalidationOutcome =
+  | "unchanged"
+  | "changed_within_tolerance"
+  | "changed_requires_reacceptance"
+  | "blocked";
+
+export interface RevalidationInput {
+  previousPrice: number;
+  newPrice: number;
+  pricingStatus: "estimated" | "confirmed" | "requires_review";
+  policyActive: boolean;
+  blockingReasons: string[];
+  flightPresent?: boolean;
+  flightAvailable?: boolean;
+  flightExpired?: boolean;
+  marginBelowMinimum?: boolean;
+  tolerance?: { increasePct: number; decreasePct: number };
+}
+
+export interface RevalidationDecision {
+  outcome: RevalidationOutcome;
+  changed: boolean;
+  difference: number;
+  differencePct: number | null;
+  requiresReacceptance: boolean;
+  canCreateBooking: boolean;
+  reasons: string[];
+}
+
+export function evaluateRevalidation(input: RevalidationInput): RevalidationDecision {
+  const tolerance = input.tolerance ?? REACCEPTANCE_TOLERANCE;
+  const difference = Number((input.newPrice - input.previousPrice).toFixed(2));
+  const changed = Math.abs(difference) > 0.01;
+  const differencePct = input.previousPrice > 0
+    ? Number(((difference / input.previousPrice) * 100).toFixed(2))
+    : null;
+
+  const reasons = [...input.blockingReasons];
+  if (!input.policyActive) reasons.push("Não existe política de preços ativa.");
+  if (input.pricingStatus === "requires_review") reasons.push("O cálculo de preço requer revisão.");
+  if (input.marginBelowMinimum) reasons.push("A margem ficou abaixo do mínimo da política.");
+  if (input.flightPresent && input.flightAvailable === false) reasons.push("A oferta de voo deixou de estar disponível.");
+  if (input.flightPresent && input.flightExpired) reasons.push("A oferta de voo expirou.");
+
+  const unique = [...new Set(reasons)];
+  if (unique.length > 0) {
+    return {
+      outcome: "blocked", changed, difference, differencePct,
+      requiresReacceptance: false, canCreateBooking: false, reasons: unique,
+    };
+  }
+  if (!changed) {
+    return { outcome: "unchanged", changed: false, difference: 0, differencePct: 0, requiresReacceptance: false, canCreateBooking: true, reasons: [] };
+  }
+
+  const pct = differencePct ?? 0;
+  const within = difference > 0
+    ? pct <= tolerance.increasePct
+    : Math.abs(pct) <= tolerance.decreasePct;
+
+  return within
+    ? { outcome: "changed_within_tolerance", changed: true, difference, differencePct, requiresReacceptance: false, canCreateBooking: true, reasons: [] }
+    : {
+        outcome: "changed_requires_reacceptance", changed: true, difference, differencePct,
+        requiresReacceptance: true, canCreateBooking: false,
+        reasons: ["O preço mudou face à proposta aceite. É necessária nova aceitação."],
+      };
+}
+
+/** Mesma versão aceite = mesma chave = nunca duas reservas ativas. */
+export function packageBookingIdempotencyKey(quoteVersionId: string): string {
+  return `pb_${quoteVersionId}`;
+}
+
+/** Estado inicial do voo: só refletir o que foi verificado, nunca hold/ordem. */
+export function initialFlightStatus(input: { present: boolean; revalidated: boolean }): BookingFlightStatus {
+  if (!input.present) return "none";
+  return input.revalidated ? "revalidated" : "selected";
+}
+
+export interface PublicBookingView {
+  bookingNumber: string;
+  productName: string | null;
+  departureDate: string | null;
+  returnDate: string | null;
+  durationDays: number | null;
+  totalPrice: number;
+  currency: string;
+  status: PackageBookingStatus;
+  statusLabel: string;
+  paymentStatus: BookingPaymentStatus;
+  paymentStatusLabel: string;
+  nextSteps: string[];
+}
+
+/** Só informação que o cliente pode ver. Sem custos, margens nem UUIDs. */
+export function sanitizeBookingForCustomer(input: {
+  booking: Record<string, any>;
+  productName?: string | null;
+  criteria?: Record<string, any> | null;
+}): PublicBookingView {
+  const c = input.criteria ?? {};
+  const status = (isBookingStatus(input.booking.booking_status) ? input.booking.booking_status : "draft") as PackageBookingStatus;
+  const payment = (isPaymentStatus(input.booking.payment_status) ? input.booking.payment_status : "none") as BookingPaymentStatus;
+  return {
+    bookingNumber: String(input.booking.booking_number ?? ""),
+    productName: input.productName ?? null,
+    departureDate: (c.departureDate ?? c.departure_date ?? null) as string | null,
+    returnDate: (c.returnDate ?? c.return_date ?? null) as string | null,
+    durationDays: c.durationDays ?? c.duration_days ?? null,
+    totalPrice: Number(input.booking.confirmed_price ?? 0),
+    currency: String(input.booking.currency ?? "EUR"),
+    status,
+    statusLabel: BOOKING_STATUS_LABEL[status],
+    paymentStatus: payment,
+    paymentStatusLabel: PAYMENT_STATUS_LABEL[payment],
+    nextSteps: [
+      "A equipa da Rotas do Éden vai confirmar a disponibilidade com os parceiros locais.",
+      "Depois disso receberá as instruções de pagamento.",
+      "A reserva só fica confirmada após pagamento e confirmação dos parceiros.",
+    ],
+  };
+}
