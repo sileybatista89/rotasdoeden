@@ -3100,6 +3100,101 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_revalidations: {
+        Row: {
+          blocking_reasons: Json
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          flight_note: string | null
+          flight_status: string | null
+          id: string
+          new_price: number | null
+          new_quote_version_id: string | null
+          outcome: string
+          previous_price: number | null
+          price_difference: number | null
+          price_difference_pct: number | null
+          pricing_calculation_id: string | null
+          pricing_status: string | null
+          quote_id: string
+          quote_version_id: string
+          requires_reacceptance: boolean
+          warnings: Json
+        }
+        Insert: {
+          blocking_reasons?: Json
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          flight_note?: string | null
+          flight_status?: string | null
+          id?: string
+          new_price?: number | null
+          new_quote_version_id?: string | null
+          outcome: string
+          previous_price?: number | null
+          price_difference?: number | null
+          price_difference_pct?: number | null
+          pricing_calculation_id?: string | null
+          pricing_status?: string | null
+          quote_id: string
+          quote_version_id: string
+          requires_reacceptance?: boolean
+          warnings?: Json
+        }
+        Update: {
+          blocking_reasons?: Json
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          flight_note?: string | null
+          flight_status?: string | null
+          id?: string
+          new_price?: number | null
+          new_quote_version_id?: string | null
+          outcome?: string
+          previous_price?: number | null
+          price_difference?: number | null
+          price_difference_pct?: number | null
+          pricing_calculation_id?: string | null
+          pricing_status?: string | null
+          quote_id?: string
+          quote_version_id?: string
+          requires_reacceptance?: boolean
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_revalidations_new_quote_version_id_fkey"
+            columns: ["new_quote_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_revalidations_pricing_calculation_id_fkey"
+            columns: ["pricing_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_calculations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_revalidations_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_revalidations_quote_version_id_fkey"
+            columns: ["quote_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           additional_info: string | null
@@ -3914,7 +4009,10 @@ export type Database = {
       }
       travel_quotes: {
         Row: {
+          acceptance_context: Json
           accepted_at: string | null
+          accepted_channel: string | null
+          accepted_version_id: string | null
           attribution: Json
           cancelled_at: string | null
           channel: string
@@ -3926,12 +4024,15 @@ export type Database = {
           expires_at: string | null
           id: string
           idempotency_key: string | null
+          last_revalidated_at: string | null
           notes: string | null
+          package_booking_id: string | null
           product_id: string | null
           product_version_id: string | null
           public_token_expires_at: string | null
           public_token_hash: string | null
           quote_number: string
+          requires_reacceptance: boolean
           sale_currency: string
           sent_at: string | null
           status: string
@@ -3940,7 +4041,10 @@ export type Database = {
           visitor_id: string | null
         }
         Insert: {
+          acceptance_context?: Json
           accepted_at?: string | null
+          accepted_channel?: string | null
+          accepted_version_id?: string | null
           attribution?: Json
           cancelled_at?: string | null
           channel?: string
@@ -3952,12 +4056,15 @@ export type Database = {
           expires_at?: string | null
           id?: string
           idempotency_key?: string | null
+          last_revalidated_at?: string | null
           notes?: string | null
+          package_booking_id?: string | null
           product_id?: string | null
           product_version_id?: string | null
           public_token_expires_at?: string | null
           public_token_hash?: string | null
           quote_number?: string
+          requires_reacceptance?: boolean
           sale_currency?: string
           sent_at?: string | null
           status?: string
@@ -3966,7 +4073,10 @@ export type Database = {
           visitor_id?: string | null
         }
         Update: {
+          acceptance_context?: Json
           accepted_at?: string | null
+          accepted_channel?: string | null
+          accepted_version_id?: string | null
           attribution?: Json
           cancelled_at?: string | null
           channel?: string
@@ -3978,12 +4088,15 @@ export type Database = {
           expires_at?: string | null
           id?: string
           idempotency_key?: string | null
+          last_revalidated_at?: string | null
           notes?: string | null
+          package_booking_id?: string | null
           product_id?: string | null
           product_version_id?: string | null
           public_token_expires_at?: string | null
           public_token_hash?: string | null
           quote_number?: string
+          requires_reacceptance?: boolean
           sale_currency?: string
           sent_at?: string | null
           status?: string
@@ -3993,10 +4106,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "travel_quotes_accepted_version_id_fkey"
+            columns: ["accepted_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "travel_quotes_current_version_fk"
             columns: ["current_version_id"]
             isOneToOne: false
             referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_quotes_package_booking_id_fkey"
+            columns: ["package_booking_id"]
+            isOneToOne: false
+            referencedRelation: "package_bookings"
             referencedColumns: ["id"]
           },
           {
