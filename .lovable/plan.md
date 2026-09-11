@@ -1,111 +1,136 @@
-# Fase 7F — Plano Técnico do Quote Engine (só desenho)
+# Fase 7H — Plano Técnico: Reserva de Pacote + Pagamento (só desenho)
 
-Nada é construído nesta fase: sem tabelas, sem UI, sem código, sem reservas, sem pagamentos, sem orders Duffel, sem produção.
+Nada é construído: sem tabelas, sem UI, sem código, sem Stripe, sem orders Duffel, sem pagamentos, sem reservas reais.
 
-## 1. Auditoria do que já existe
+## 1. Auditoria
 
-Verificado diretamente na base de dados e no código:
+Verificado no código e na base de dados:
 
-- **Produtos (7B)**: `travel_products`, `travel_product_versions`. Versão publicada é imutável; nova alteração exige nova versão. Reutilizável tal como está.
-- **Supply (7C)**: `suppliers`, `accommodations`, `accommodation_rooms`, `package_components`, `component_rates`. As tarifas já guardam `rate_kind` (observado / fornecedor / negociado / estimado), `source_type`, `source_reference`, `observed_at`, `valid_from`, `valid_until`, `validity_unknown`, ocupação, regime alimentar e política de cancelamento. Tudo o que a cotação precisa de fotografar já existe na origem.
-- **Preços (7D)**: `pricing_policies`, `pricing_policy_versions`, `pricing_calculations` e a função servidor `pricing-engine`, que só aceita admin, carrega a política ativa da base de dados e nunca aceita preço ou margem do cliente. `pricing_calculations` já guarda política, versão, custos, margem, subtotal, preço final, input e resultado completo — é o registo de cálculo que a cotação vai referenciar.
-- **Voos (7E)**: `flight_searches`, `flight_offers` com custo de fornecedor, validade, requisitos de pagamento, capacidade de reserva sem pagamento e reprice. Sem chave de teste configurada, o motor devolve "não configurado" e não inventa resultados.
-- **Reservas atuais**: `bookings` é de serviços individuais (`service_id`, `guide_id`, Stripe). Não é adequado a pacotes e **não será alterado**.
-- **Atribuição (5A)**: `traffic_visitors`, `traffic_events`, e `bookings` já guarda `visitor_id` + `attribution` jsonb. A cotação segue exatamente o mesmo padrão — nada de novo sistema de atribuição.
+- **`bookings`**: reserva de **serviço único** — `service_id`, `guide_id`, `service_title`, `date`, `num_people`, `total_price`, comissão 15%, `guide_payout`, `stripe_session_id`, `payment_status`, `visitor_id`, `attribution`. Não tem lugar para múltiplos componentes, voo, fornecedores nem confirmações parciais.
+- **`create-checkout`**: exige sessão autenticada, calcula o preço **no servidor** a partir de `services.price_per_person`, cria a reserva em `pending_payment` e só depois abre a sessão Stripe, com `bookingId` em metadata. Ambiente Stripe decidido no servidor.
+- **`payments-webhook`**: verifica assinatura, trata `checkout.session.completed`, `async_payment_succeeded`, `expired`, `async_payment_failed`; atualiza a reserva e regista o evento de conversão em `traffic_events`. **Não é idempotente por evento** — não existe registo de `event.id` processado; hoje isso é inofensivo porque a atualização é idempotente, mas não serve para pacotes (voo, fornecedores, emails).
+- **Cotações (7G)**: `travel_quotes` / `travel_quote_versions` / `travel_quote_items` — versões imutáveis, `valid_until` limitado pelo elemento mais curto, `confirmable` + `blocking_reasons`, `pricing_calculation_id`, snapshot do voo, token público com hash. Estados terminam em `accepted` = **aceitação comercial apenas**.
+- **Voos (7E)**: `flight_offers` com `expires_at`, `hold_capable`, `requires_instant_payment`, refresh/reprice; `createOrder` está bloqueado. Sem `DUFFEL_TEST_API_KEY` configurada.
+- **Preços (7D)**: `pricing-engine` é a única fonte do preço; política ativa carregada do servidor.
+- **Notificações**: `notifications` + `create_notification(...)` com `dedupe_key` — já dá idempotência de mensagens.
+- **Atribuição**: `traffic_visitors`, `traffic_events`, `visitor_id`+`attribution` nas reservas e nas cotações. Reutilizar tal e qual.
+- **Admin/auditoria**: `is_admin`, `admin_audit_log`, guardas de eliminação e RLS só-admin nas tabelas de operação.
 
-**Conclusão**: nada precisa de ser duplicado. O Quote Engine é uma camada de composição e fotografia por cima do que já existe.
+## 2. Arquitetura escolhida — opção B
 
-## 2. Arquitetura
+**`package_bookings` novo, ligado à cotação, sem tocar em `bookings`.**
+`bookings` continua a servir exclusivamente reservas de serviços com guias (Stripe atual intacto). Um pacote tem N componentes, um voo, vários fornecedores e confirmações parciais — forçar isso em `bookings` quebraria o fluxo estável e as políticas existentes. Ligação opcional `bookings.package_booking_id` só se, mais tarde, um serviço de guia for vendido dentro de um pacote.
 
-```text
-critérios do cliente
-   -> produto + versão do produto        (7B)
-   -> componentes + tarifas válidas      (7C)
-   -> oferta de voo válida               (7E)
-   -> Pricing Engine (única fonte do preço)  (7D)
-   -> Quote Engine: fotografa tudo e emite a cotação
-```
+## 3. Aceitação ≠ reserva ≠ pagamento
 
-O Quote Engine **não tem matemática de preço**. Chama o motor de preços existente, recebe o resultado e guarda-o. Se o motor recusar, não há cotação.
+- **QUOTE ACCEPTED** — o cliente aceita comercialmente uma versão concreta. Não bloqueia nada, não cobra, não cria order.
+- **BOOKING CONFIRMED** — só depois de revalidação, pagamento e confirmação de fornecedores/voo.
+- **PAYMENT COMPLETED** — só o webhook Stripe verificado o declara. Nunca o browser.
 
-Componentes a criar no Build (7G):
-- `supabase/functions/_shared/quote-engine.ts` — lógica pura: numeração, validade limitada pelo elemento mais curto, comparação entre versões, decisão de revalidação, estados. Sem I/O.
-- `supabase/functions/quote-engine/index.ts` — função servidor: valida entrada, carrega dados reais, chama o motor de preços, grava a cotação e as suas linhas.
-- `src/lib/quotes.ts` — reexporta os tipos e etiquetas para o admin, tal como `src/lib/pricing.ts`.
+## 4. Revalidação final (obrigatória antes de qualquer cobrança)
 
-## 3. Modelo de dados proposto (a criar só no Build)
+Sequência no servidor: estado e validade da cotação → versão do produto não arquivada → componentes ativos → tarifas dentro de validade e sem `validity_unknown` → voo não expirado → refresh/reprice do voo → recálculo pelo Pricing Engine → margem mínima → comparação de preço.
+Sem alteração: emite-se um **payment intent token** de curta duração ligado à versão. Com alteração: nova versão da cotação com preço antigo/novo/diferença e, acima de tolerância definida pela política, **nova aceitação obrigatória**. Nunca se cobra um valor não revalidado.
 
-Nomes seguem as convenções já usadas (`travel_*`, `*_versions`, uuid, `created_at`/`updated_at`, `created_by`):
+## 5. Árvore de decisão do voo
 
-**`travel_quotes`** — identidade estável da cotação: número legível, produto e versão do produto, estado, moeda de venda, versão atual, criador, canal de criação (`admin`/`public`/`agent`), visitante e atribuição, contacto mínimo do cliente, validade.
+**A) `requires_instant_payment = true`** — nunca criar order antes do dinheiro. Ordem: revalidar → cobrar cliente → confirmar pagamento por webhook → criar order Duffel → emitir. Falha na order depois do pagamento: estado `issue`, intervenção humana, reembolso total ou nova oferta com diferencial aceite. Expiração antes da cobrança: nova pesquisa, nova versão.
 
-**`travel_quote_versions`** — a fotografia imutável. Cada versão guarda: número da versão, estado, critérios do cliente, versão da política de preços, referência ao `pricing_calculations` gerado, custo total, preço total, moeda de custo e de venda, câmbio usado e momento da conversão, referência à oferta de voo, validade da versão, motivo da nova versão, comparação com a versão anterior (preço antigo, novo, diferença), quem criou e quando foi substituída.
+**B) `requires_instant_payment = false` e `hold_capable = true`** — hold primeiro: revalidar → criar order em hold → guardar `hold_expires_at` → cobrar → pagar a companhia dentro do prazo → emitir. Hold expirado antes do pagamento: cancelar hold, nova pesquisa, nova versão, sem cobrança. Se já houve cobrança e o hold expirou: `issue` + reembolso ou reoferta.
 
-**`travel_quote_items`** — uma linha por componente da versão: componente e tarifa de origem, fornecedor, nome apresentado, quantidade, unidade, custo unitário e total no momento, regra de margem aplicada, preço resultante, moeda, tipo de tarifa, fonte, validade da tarifa e condições de cancelamento. As linhas guardam texto e valores, não apenas chaves: a cotação continua legível mesmo que o fornecedor mude o preço depois.
+Sem `hold_capable` e sem pagamento imediato: tratar como A.
 
-Regras: sem eliminação (guardas de `delete` como em 7C/7D), acesso apenas a admin via RLS, `GRANT` explícito, alterações registadas em `admin_audit_log`, e uma RPC `quote_stats()` protegida por `is_admin`.
+## 6. Pagamento e Stripe
 
-## 4. Imutabilidade e versionamento
+Continua o modelo atual: Checkout Session criada no servidor, valor derivado exclusivamente do **preço final confirmado no servidor** (última versão revalidada), metadata com `package_booking_id`, `quote_version_id` e `revalidation_id`. Nunca aceitar valor do frontend, de IA, de cotação expirada ou de versão diferente. Um webhook dedicado a pacotes, separado do de serviços, para não perturbar o fluxo estável.
 
-- Assim que uma versão sai de `draft`, torna-se imutável por trigger: preço, itens, política, voo e validade não podem ser alterados.
-- Qualquer mudança cria **nova versão**; a anterior passa a `superseded` e permanece no histórico.
-- O cabeçalho (`travel_quotes`) só pode mudar de estado e apontar para a versão atual.
+## 7. Idempotência
 
-## 5. Estados
+- Tabela de eventos Stripe processados (`event.id` único) — descarta webhooks repetidos.
+- `package_bookings.quote_version_id` único enquanto ativo — impede reserva duplicada.
+- Uma só sessão Stripe aberta por reserva.
+- Order Duffel guardada com chave de idempotência própria; nunca recriada se já existir referência.
+- Confirmações de fornecedor com chave única por (reserva, componente).
+- Emails via `create_notification` com `dedupe_key`.
 
-`draft` → `calculated` → `sent` → `awaiting_confirmation` → `accepted` → `superseded` / `expired` / `cancelled`.
+## 8. Falha de fornecedor
 
-Separação obrigatória, nunca colapsada: cotação válida ≠ cliente aceitou ≠ reserva criada ≠ pagamento iniciado ≠ pagamento concluído. `accepted` significa apenas aceitação comercial.
+Alojamento indisponível, tarifa alterada, voo alterado/indisponível, fornecedor sem resposta: a reserva passa a `issue` com motivo estruturado, sem cobrança nova automática e sem substituição silenciosa. Pagamento feito e fornecedor falha: dinheiro fica retido em estado explícito até decisão humana — alternativa equivalente aceite pelo cliente, ou reembolso. Nunca degradar o pacote sem aceitação escrita.
 
-## 6. Validade
+## 9. Matrizes de estados (separadas)
 
-Validade da cotação = **mínimo** entre: validade escolhida pela política/operador, expiração da oferta de voo, e a menor `valid_until` das tarifas usadas. Tarifas com `validity_unknown` impedem estado confirmável e forçam revisão. Uma oferta de voo expirada nunca pode sustentar uma cotação válida.
+- **BOOKING**: `draft` → `awaiting_payment` → `paid` → `confirmed` → `completed`; ramos `cancelled`, `issue`.
+- **FLIGHT**: `none` → `selected` → `revalidated` → `held` → `ordered` → `ticketed`; ramos `expired`, `unavailable`, `failed`, `cancelled`.
+- **PAYMENT**: `none` → `pending` → `paid` → `partially_refunded` / `refunded`; ramos `failed`, `expired`.
+- **OPERATIONS**: `preparing` → `supplier_confirmation` → `flight_confirmation` → `accommodation_confirmation` → `ready` → `completed`; ramos `issue`, `cancelled`.
 
-## 7. Recálculo antes da confirmação
+Nenhum estado colapsa noutro; a reserva só é `confirmed` quando pagamento, voo e fornecedores estiverem cada um no seu estado final positivo.
 
-Sequência: verificar estado → verificar expiração do voo → reconsultar preço do voo (7E) → verificar tarifas dos componentes → chamar o motor de preços → comparar com a versão atual. Resultado: mantém, ou cria nova versão com o diferencial explícito (preço antigo, preço novo, diferença, motivo, nova validade). A versão original nunca é sobrescrita nem a diferença escondida.
+## 10. Cliente sem conta
 
-## 8. Falhas — nunca inventar preço
+Ver e aceitar cotação: apenas com o token público já existente, sem conta. Fornecer dados de passageiros, pagar e gerir a reserva: exige conta ou magic link, ligando a reserva a um utilizador antes da cobrança.
 
-Tarifa expirada, voo expirado, componente indisponível, fornecedor indisponível, câmbio em falta, política inativa, versão do produto arquivada: em todos os casos a cotação fica em revisão ou é recusada, com motivo estruturado. Sem valores por omissão, sem estimativas silenciosas.
+## 11. Dados de passageiros
 
-## 9. Moeda
+Recolhidos **só depois da aceitação e antes da emissão**, e só o que a companhia exige: nome completo como no documento, data de nascimento, género quando exigido, nacionalidade, documento e validade, contacto do titular. Guardados na reserva, acesso restrito a administradores e ao próprio titular, nunca no payload público, nunca em logs, nunca enviados a agentes IA.
 
-A cotação guarda moeda de custo, moeda de venda, câmbio usado e o momento da conversão. Não se cria serviço de câmbio externo nesta fase: se as moedas divergirem e não houver taxa registada válida, a cotação exige revisão.
+## 12. Notificações
 
-## 10. Segurança
+Ciclo, todas com `dedupe_key`: cotação aceite, pagamento pendente, pagamento recebido, reserva criada, confirmação de fornecedor, estado do voo, confirmação de alojamento, confirmação final, incidente, cancelamento/reembolso.
 
-Criação sempre no servidor. O cliente envia apenas critérios (destino, datas, pessoas, conforto, orçamento indicativo). Nunca preço, margem, markup, custos, política ou tarifa. Uma proposta simples pode ser gerada sem conta, com dados pessoais mínimos e limites de utilização; tudo o que seja sensível depois exige o fluxo autenticado já existente. Agentes podem propor, nunca escrever preço nem alterar cotações.
+## 13. Cancelamento e reembolso
 
-## 11. Admin (só desenho)
+Quatro planos distintos: cancelar cotação (não afeta dinheiro), cancelar reserva, cancelamento pelo fornecedor, reembolso de pagamento. As condições comerciais vêm das `cancellation_type`/`cancellation_summary` já guardadas nas linhas da cotação e da política do voo — **não se inventa política**; enquanto não houver política escrita da empresa, qualquer reembolso é decisão humana registada.
 
-Futura secção "Cotações": número, produto, contexto do cliente, preço, moeda, estado, criação, validade, voo e versão; filtros por estado, produto, período, moeda, origem e autor. Não é implementada nesta fase.
+## 14. Atribuição
 
-## 12. Testes previstos para o Build
+`visitor_id` e `attribution` propagam-se da cotação para a reserva; a conversão paga gera um `traffic_events` como já acontece nas reservas de serviços. Nenhum sistema novo.
 
-Criação, imutabilidade, versionamento, expiração da cotação/tarifa/voo, reconsulta de voo, alteração de preço, moeda, atribuição, versão da política, fotografia da tarifa, permissões de admin e de cliente, duplicação/idempotência e falha do fornecedor.
+## 15. Segurança
 
-Testes críticos de dinheiro: preço ao cliente diferente do custo; motor de preços como única fonte do preço; impossibilidade de alterar preço pelo frontend; versão de política correta; ausência de dupla margem; nenhuma tarifa expirada usada; nenhum voo expirado usado; alteração de preço gera sempre nova versão.
+O frontend nunca decide preço, reserva, pagamento, voo ou fornecedor. A IA nunca confirma pagamento, nunca altera preço, nunca cria order e nunca executa ação irreversível: propõe, e um administrador aprova pelo mecanismo de aprovações já existente. Tabelas de operação só-admin com RLS, sem eliminação, tudo em `admin_audit_log`.
 
-## 13. Riscos
+## 16. Operações pós-pagamento
 
-- Dupla margem se o custo do voo entrar já marcado — mitigado por o Quote Engine passar apenas custo de fornecedor.
-- Validade otimista se o mínimo entre elementos não for aplicado.
-- Fotografia incompleta se as linhas guardarem apenas chaves em vez de valores.
-- Sem chave de teste Duffel configurada, cotações com voo real não são testáveis ponta a ponta.
-- Ainda não existem fornecedores, tarifas nem política ativa reais: o motor funcionará mas devolverá "sem tarifa válida" até existirem dados reais.
+Painel operacional com os estados de OPERATIONS acima, checklist por fornecedor, prazos, responsável e registo de cada confirmação recebida.
 
-## 14. Dependências
+## 17. Proposta de base de dados (a criar só no Build)
 
-Política de preços ativa; tarifas reais de fornecedores; opcionalmente a chave de teste Duffel para cotações com voo.
+`package_bookings` (identidade, cotação e versão, cliente, estados de booking/flight/payment/operations, preço confirmado, moeda, atribuição, validade), `package_booking_items` (fotografia das linhas confirmadas), `booking_flight` (oferta, order, hold, bilhetes, estado), `supplier_confirmations` (por componente/fornecedor, referência, estado, prazo), estado de pagamento com registo de eventos Stripe processados, e registo operacional. Sem duplicar `bookings`.
 
-## 15. Ordem exata do Build (Fase 7G)
+## 18. Matriz de falhas
 
-1. Migração: `travel_quotes`, `travel_quote_versions`, `travel_quote_items` com grants, RLS de admin, guardas de imutabilidade e de eliminação, auditoria e `quote_stats()`.
-2. Lógica pura partilhada `quote-engine.ts` (numeração, validade mínima, estados, comparação de versões) + testes unitários.
-3. Função servidor `quote-engine` integrada com o motor de preços e com o motor de voos.
-4. Recálculo e criação de nova versão com diferencial explícito.
-5. `src/lib/quotes.ts` e hooks de admin.
-6. Secção admin "Cotações" (leitura e recálculo).
-7. Suite de testes completa, incluindo os testes críticos de dinheiro.
-8. Relatório final. Parar antes de reserva de pacote, pagamento, orders Duffel e Conversion Agent.
+| Cenário | Estado | Ação | Retry | Notificação | Humano |
+|---|---|---|---|---|---|
+| Voo expirado antes de cobrar | flight `expired` | nova pesquisa, nova versão | auto 1x | cliente | não |
+| Preço do voo subiu | booking `draft` | nova versão com diferencial | não | cliente | se acima da tolerância |
+| Voo indisponível | flight `unavailable` | bloquear cobrança | não | cliente+admin | sim |
+| Hold expirado | flight `expired` | cancelar hold, reoferta | não | cliente+admin | se já pago |
+| Pagamento falhou | payment `failed` | manter reserva em espera | cliente repete | cliente | não |
+| Webhook duplicado | inalterado | descartar por `event.id` | — | nenhuma | não |
+| Tarifa de fornecedor subiu | booking `issue` | nova versão ou cancelar | não | cliente+admin | sim |
+| Alojamento indisponível | ops `issue` | procurar alternativa aceite | não | cliente+admin | sim |
+| Falha parcial de fornecedor | ops `issue` | confirmar o resto, isolar falha | não | cliente+admin | sim |
+| Reembolso | payment `refunded` | reembolso registado | não | cliente | sim |
+| Cancelamento | booking `cancelled` | libertar hold/ordens | não | cliente+fornecedor | conforme política |
+| Indisponibilidade do fornecedor externo | ops `issue` | fila e nova tentativa | auto com espera | admin | se persistir |
+
+## 19. Fronteira legal
+
+Cotação e reserva são técnicos; **cobrar por um pacote de viagem organizado e emitir bilhetes** depende da habilitação legal da empresa como agência/operador (registo próprio, seguro/garantia, condições gerais, direito de desistência e informação pré-contratual). O Build pode preparar toda a arquitetura, mas a ativação do pagamento de pacotes e da emissão fica dependente dessa habilitação e de política comercial escrita.
+
+## 20. Testes previstos
+
+Aceitação, revalidação, alteração de preço, hold, pagamento imediato, criação de reserva, pagamento, webhook, idempotência, prevenção de duplicados, cancelamento, reembolso, falha de fornecedor, RLS, adulteração pelo frontend e atribuição.
+
+## 21. Ordem mínima de Build (Fase 7I+)
+
+1. Migração das tabelas de reserva de pacote, com RLS, guardas e auditoria.
+2. Aceitação da cotação pelo cliente (token) e registo da aceitação.
+3. Revalidação final no servidor, com nova versão e diferencial.
+4. Criação da reserva de pacote e das suas linhas, sem pagamento.
+5. Estados de voo sem order real (hold e order continuam bloqueados).
+6. Pagamento: sessão Stripe dedicada a pacotes + webhook idempotente.
+7. Confirmações de fornecedor e painel operacional.
+8. Cancelamento/reembolso manual registado.
+9. Suíte de testes completa e relatório. Parar antes de orders Duffel reais, emissão e produção.
