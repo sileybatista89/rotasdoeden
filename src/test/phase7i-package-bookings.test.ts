@@ -108,3 +108,124 @@ describe("Fase 7I — fotografia da cotação", () => {
     expect(snapshotItemsFromQuote(undefined as unknown as [])).toEqual([]);
   });
 });
+
+// ===== Fase 7I passos 2-4: aceitação, revalidação e criação =====
+describe("Fase 7I — aceitação da cotação", () => {
+  const base = {
+    quote: { status: "sent", current_version_id: "v1", accepted_at: null, accepted_version_id: null, requires_reacceptance: false, public_token_expires_at: "2999-01-01T00:00:00Z" },
+    version: { id: "v1", version_number: 3, status: "calculated", valid_until: "2999-01-01T00:00:00Z", confirmable: true },
+  };
+
+  it("aceita uma proposta válida e confirmável", () => {
+    expect(evaluateAcceptance({ ...base, expectedVersionNumber: 3 }).ok).toBe(true);
+  });
+
+  it("recusa se o cliente estiver a ver uma versão antiga", () => {
+    const r = evaluateAcceptance({ ...base, expectedVersionNumber: 2 });
+    expect(r.ok).toBe(false);
+    expect(r.code).toBe("version_mismatch");
+  });
+
+  it("recusa proposta fora de validade", () => {
+    const r = evaluateAcceptance({ ...base, version: { ...base.version, valid_until: "2020-01-01T00:00:00Z" } });
+    expect(r.code).toBe("quote_expired");
+  });
+
+  it("recusa proposta não confirmável", () => {
+    const r = evaluateAcceptance({ ...base, version: { ...base.version, confirmable: false } });
+    expect(r.code).toBe("not_confirmable");
+  });
+
+  it("recusa cotação cancelada ou substituída", () => {
+    expect(evaluateAcceptance({ ...base, quote: { ...base.quote, status: "cancelled" } }).code).toBe("quote_cancelled");
+    expect(evaluateAcceptance({ ...base, quote: { ...base.quote, current_version_id: "v2" } }).code).toBe("quote_superseded");
+  });
+
+  it("recusa pacote arquivado", () => {
+    expect(evaluateAcceptance({ ...base, productVersionStatus: "archived" }).code).toBe("product_version_archived");
+  });
+
+  it("aceitação repetida da mesma versão é idempotente", () => {
+    const r = evaluateAcceptance({
+      ...base,
+      quote: { ...base.quote, accepted_at: "2026-01-01T00:00:00Z", accepted_version_id: "v1" },
+    });
+    expect(r.ok).toBe(true);
+    expect(r.alreadyAccepted).toBe(true);
+  });
+});
+
+describe("Fase 7I — revalidação final", () => {
+  const ok = { previousPrice: 1000, newPrice: 1000, pricingStatus: "confirmed" as const, policyActive: true, blockingReasons: [] };
+
+  it("sem alteração permite criar reserva", () => {
+    const d = evaluateRevalidation(ok);
+    expect(d.outcome).toBe("unchanged");
+    expect(d.canCreateBooking).toBe(true);
+  });
+
+  it("qualquer subida de preço exige nova aceitação", () => {
+    const d = evaluateRevalidation({ ...ok, newPrice: 1000.5 });
+    expect(d.outcome).toBe("changed_requires_reacceptance");
+    expect(d.canCreateBooking).toBe(false);
+    expect(d.requiresReacceptance).toBe(true);
+  });
+
+  it("descida de preço não incomoda o cliente", () => {
+    const d = evaluateRevalidation({ ...ok, newPrice: 900 });
+    expect(d.outcome).toBe("changed_within_tolerance");
+    expect(d.difference).toBe(-100);
+    expect(d.canCreateBooking).toBe(true);
+  });
+
+  it("bloqueia sem política ativa", () => {
+    const d = evaluateRevalidation({ ...ok, policyActive: false });
+    expect(d.outcome).toBe("blocked");
+    expect(d.canCreateBooking).toBe(false);
+  });
+
+  it("bloqueia com preço a rever ou margem abaixo do mínimo", () => {
+    expect(evaluateRevalidation({ ...ok, pricingStatus: "requires_review" }).outcome).toBe("blocked");
+    expect(evaluateRevalidation({ ...ok, marginBelowMinimum: true }).outcome).toBe("blocked");
+  });
+
+  it("bloqueia quando o voo deixou de estar disponível ou expirou", () => {
+    expect(evaluateRevalidation({ ...ok, flightPresent: true, flightAvailable: false }).outcome).toBe("blocked");
+    expect(evaluateRevalidation({ ...ok, flightPresent: true, flightExpired: true }).outcome).toBe("blocked");
+  });
+
+  it("propaga bloqueios de confirmabilidade sem os duplicar", () => {
+    const d = evaluateRevalidation({ ...ok, blockingReasons: ["Tarifa expirada.", "Tarifa expirada."] });
+    expect(d.reasons).toEqual(["Tarifa expirada."]);
+  });
+});
+
+describe("Fase 7I — criação da reserva", () => {
+  it("a chave de idempotência depende da versão aceite", () => {
+    expect(packageBookingIdempotencyKey("abc")).toBe("pb_abc");
+    expect(packageBookingIdempotencyKey("abc")).toBe(packageBookingIdempotencyKey("abc"));
+    expect(packageBookingIdempotencyKey("abc")).not.toBe(packageBookingIdempotencyKey("def"));
+  });
+
+  it("o estado inicial do voo nunca é hold nem emitido", () => {
+    expect(initialFlightStatus({ present: false, revalidated: true })).toBe("none");
+    expect(initialFlightStatus({ present: true, revalidated: false })).toBe("selected");
+    expect(initialFlightStatus({ present: true, revalidated: true })).toBe("revalidated");
+  });
+
+  it("a vista do cliente não expõe custos, fornecedores nem margens", () => {
+    const view = sanitizeBookingForCustomer({
+      booking: {
+        booking_number: "PKG-1", confirmed_price: 2500, confirmed_cost: 1800, currency: "EUR",
+        booking_status: "awaiting_payment", payment_status: "pending",
+      },
+      productName: "Rotas Essencial",
+      criteria: { departureDate: "2026-05-01", durationDays: 7 },
+    });
+    const serialized = JSON.stringify(view);
+    expect(view.totalPrice).toBe(2500);
+    expect(serialized).not.toContain("1800");
+    ["confirmed_cost", "supplier", "margin", "markup"].forEach((f) => expect(serialized).not.toContain(f));
+    expect(view.nextSteps.length).toBeGreaterThan(0);
+  });
+});
