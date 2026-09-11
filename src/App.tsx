@@ -70,6 +70,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
             <Route path="/parceiros" element={<ParceirosPage />} />
+            <Route path="/proposta" element={<PropostaPage />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
             } />
