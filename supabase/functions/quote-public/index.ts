@@ -106,8 +106,9 @@ Deno.serve(async (req) => {
       }
 
       const acceptedAt = new Date().toISOString();
-      // Concorrência: só aceita se ainda não houver aceitação desta versão.
-      const { data: updated, error: updateError } = await admin.from("travel_quotes").update({
+      // Concorrência: primeira aceitação exige accepted_at nulo; a re-aceitação
+      // (preço mudou) exige que a versão aceite anterior ainda seja a registada.
+      let update = admin.from("travel_quotes").update({
         status: "accepted",
         accepted_at: acceptedAt,
         accepted_version_id: version.id,
