@@ -192,3 +192,93 @@ export function useIssueQuoteToken() {
     },
   });
 }
+
+// ===== Fase 7I — aceitação, revalidação e reserva de pacote =====
+
+export interface QuoteAcceptanceFields {
+  accepted_at: string | null;
+  accepted_version_id: string | null;
+  accepted_channel: string | null;
+  requires_reacceptance: boolean;
+  package_booking_id: string | null;
+  last_revalidated_at: string | null;
+}
+
+export interface QuoteRevalidationRow {
+  id: string;
+  quote_id: string;
+  quote_version_id: string;
+  new_quote_version_id: string | null;
+  outcome: "unchanged" | "changed_within_tolerance" | "changed_requires_reacceptance" | "blocked" | "failed";
+  previous_price: number | null;
+  new_price: number | null;
+  price_difference: number | null;
+  price_difference_pct: number | null;
+  currency: string | null;
+  pricing_status: string | null;
+  blocking_reasons: string[];
+  flight_note: string | null;
+  requires_reacceptance: boolean;
+  created_at: string;
+}
+
+export const REVALIDATION_OUTCOME_LABEL: Record<QuoteRevalidationRow["outcome"], string> = {
+  unchanged: "Sem alteração",
+  changed_within_tolerance: "Alterada dentro da tolerância",
+  changed_requires_reacceptance: "Precisa de nova aceitação",
+  blocked: "Bloqueada",
+  failed: "Falhou",
+};
+
+async function callPackageBooking(body: Record<string, unknown>) {
+  const { data, error } = await anyDb.functions.invoke("package-booking", { body });
+  if (error && !data) throw new Error(error.message);
+  return data;
+}
+
+export function useQuoteRevalidations(quoteId: string | null) {
+  return useQuery({
+    queryKey: ["quote-revalidations", quoteId],
+    enabled: !!quoteId,
+    queryFn: async () => {
+      const { data, error } = await anyDb.from("quote_revalidations").select("*")
+        .eq("quote_id", quoteId).order("created_at", { ascending: false }).limit(10);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as QuoteRevalidationRow[];
+    },
+  });
+}
+
+export function usePackageBookingForQuote(quoteId: string | null) {
+  return useQuery({
+    queryKey: ["package-booking-for-quote", quoteId],
+    enabled: !!quoteId,
+    queryFn: async () => {
+      const { data, error } = await anyDb.from("package_bookings").select("*")
+        .eq("quote_id", quoteId).order("created_at", { ascending: false }).limit(1);
+      if (error) throw new Error(error.message);
+      return ((data ?? [])[0] ?? null) as Record<string, any> | null;
+    },
+  });
+}
+
+function invalidateAll(qc: ReturnType<typeof useQueryClient>) {
+  ["quotes", "quote-detail", "quote-stats", "quote-revalidations", "package-booking-for-quote"]
+    .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+}
+
+export function useRevalidateQuote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (quoteId: string) => callPackageBooking({ action: "revalidate", quote_id: quoteId }),
+    onSuccess: () => invalidateAll(qc),
+  });
+}
+
+export function useCreatePackageBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (quoteId: string) => callPackageBooking({ action: "create", quote_id: quoteId }),
+    onSuccess: () => invalidateAll(qc),
+  });
+}
