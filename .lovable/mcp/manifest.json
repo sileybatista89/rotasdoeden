@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.4",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://hiurdjlnnbrdsyplesfb.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "eden-explorer",
+      "version": "0.1.0",
+      "title": "Eden Explorer"
+    },
+    "tools": [
+      {
+        "name": "search_experiences",
+        "title": "Procurar experiências",
+        "description": "Lista as experiências turísticas ativas e aprovadas em São Tomé e Príncipe, com filtro por texto e categoria.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Texto a procurar no título ou descrição."
+            },
+            "category": {
+              "type": "string",
+              "description": "Categoria da experiência."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Número máximo de resultados (1-50, por omissão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_experience",
+        "title": "Detalhe de uma experiência",
+        "description": "Devolve os detalhes completos de uma experiência ativa e aprovada, a partir do seu identificador.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Identificador da experiência."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_guides",
+        "title": "Listar guias verificados",
+        "description": "Lista os guias e profissionais verificados e ativos da Rotas do Éden.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Número máximo de resultados (1-50, por omissão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_bookings",
+        "title": "As minhas reservas",
+        "description": "Lista as reservas de experiências do utilizador autenticado (como turista ou como guia), da mais recente para a mais antiga.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Número máximo de resultados (1-50, por omissão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
