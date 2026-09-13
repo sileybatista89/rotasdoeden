@@ -16,6 +16,7 @@ import GuidesPage from "./pages/GuidesPage.tsx";
 import GuideProfilePage from "./pages/GuideProfilePage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import OAuthConsent from "./pages/OAuthConsent.tsx";
 import KycPage from "./pages/KycPage.tsx";
 import MessagesPage from "./pages/MessagesPage.tsx";
 import ConversationPage from "./pages/ConversationPage.tsx";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/seja-parceiro" element={<SejaParceiroPage />} />
             <Route path="/guia-parceiro" element={<GuiaParceiroPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
             <Route path="/parceiros" element={<ParceirosPage />} />
