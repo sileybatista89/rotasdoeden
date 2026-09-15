@@ -13,6 +13,8 @@ import { SupplierTable } from "./SupplierTable";
 import { SupplierDrawer } from "./SupplierDrawer";
 import { ComponentsTab } from "./ComponentsTab";
 import { SupplyReadiness } from "./SupplyReadiness";
+import { StaysTab } from "./StaysTab";
+
 
 export function SuppliersPanel() {
   const suppliers = useSuppliers();
@@ -74,6 +76,8 @@ export function SuppliersPanel() {
             <TabsTrigger value="suppliers">Fornecedores e alojamentos</TabsTrigger>
             <TabsTrigger value="components">Componentes e tarifas</TabsTrigger>
             <TabsTrigger value="readiness">Prontidão comercial</TabsTrigger>
+            <TabsTrigger value="stays">Alojamento (fornecedor)</TabsTrigger>
+
           </TabsList>
           <Dialog open={creating} onOpenChange={setCreating}>
             <DialogTrigger asChild><Button size="sm">Novo fornecedor</Button></DialogTrigger>
@@ -140,6 +144,11 @@ export function SuppliersPanel() {
         <TabsContent value="components" className="mt-4">
           <ComponentsTab />
         </TabsContent>
+
+        <TabsContent value="stays" className="mt-4">
+          <StaysTab />
+        </TabsContent>
+
       </Tabs>
     </div>
   );

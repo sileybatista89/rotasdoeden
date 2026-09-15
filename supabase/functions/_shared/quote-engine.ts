@@ -95,21 +95,43 @@ export interface ConfirmabilityInput {
   rates: { validityUnknown?: boolean; validUntil?: string | null; status?: string | null }[];
   validUntil?: string | null;
   now?: Date;
+  /**
+   * Base comercial do cálculo. Quando a proposta assenta em preços de mercado
+   * observados não fica bloqueada: fica marcada como dependente de revalidação.
+   */
+  basis?: "confirmed" | "market_based" | "insufficient";
+  allowMarketBased?: boolean;
 }
 
 export interface ConfirmabilityResult {
   confirmable: boolean;
   blockingReasons: string[];
+  /** Passos obrigatórios antes de confirmar, sem bloquear a proposta. */
+  validationRequired: string[];
 }
+
+export const QUOTE_BASIS_LABEL: Record<"confirmed" | "market_based" | "insufficient", string> = {
+  confirmed: "Tarifas confirmadas por fornecedor",
+  market_based: "Preços de mercado observados (exige revalidação)",
+  insufficient: "Informação insuficiente",
+};
 
 /** Nenhum bloqueio pode ser contornado com um valor por omissão. */
 export function evaluateConfirmability(input: ConfirmabilityInput): ConfirmabilityResult {
   const now = input.now ?? new Date();
   const reasons: string[] = [];
+  const validation: string[] = [];
+  const marketBased = input.allowMarketBased === true && input.basis === "market_based";
 
   if (!input.policyActive) reasons.push("Não existe política de preços ativa.");
   if (input.pricingStatus === "requires_review") reasons.push("O cálculo de preço requer revisão.");
-  if (input.pricingStatus === "estimated") reasons.push("O cálculo contém custos estimados ou não confirmados.");
+  if (input.pricingStatus === "estimated") {
+    if (marketBased) {
+      validation.push("Proposta baseada em preços de mercado observados — revalidar custos antes de confirmar.");
+    } else {
+      reasons.push("O cálculo contém custos estimados ou não confirmados.");
+    }
+  }
   for (const e of input.validationErrors) reasons.push(e);
   if (input.productStatus && input.productStatus === "archived") {
     reasons.push("A versão do produto está arquivada.");
@@ -129,8 +151,9 @@ export function evaluateConfirmability(input: ConfirmabilityInput): Confirmabili
   if (isExpired(input.validUntil, now)) reasons.push("A cotação está fora de validade.");
 
   const unique = [...new Set(reasons)];
-  return { confirmable: unique.length === 0, blockingReasons: unique };
+  return { confirmable: unique.length === 0, blockingReasons: unique, validationRequired: [...new Set(validation)] };
 }
+
 
 export interface PriceComparison {
   changed: boolean;

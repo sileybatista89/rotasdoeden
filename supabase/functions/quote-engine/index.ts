@@ -270,7 +270,10 @@ Deno.serve(async (req) => {
         flight: flightOffer ? { present: true, expiresAt: flightOffer.expires_at, expired: flightOffer.status === "expired" } : null,
         rates: usedRates.map((r) => ({ validityUnknown: r.validity_unknown, validUntil: r.valid_until, status: r.status })),
         validUntil: validity.validUntil,
+        basis: result.basis,
+        allowMarketBased: true,
       });
+
 
       const { data: quote, error: quoteError } = await admin.from("travel_quotes").insert({
         product_id: productRow?.id ?? null,
@@ -311,7 +314,12 @@ Deno.serve(async (req) => {
         validity_limited_by: validity.limitedBy,
         confirmable: confirmability.confirmable,
         blocking_reasons: confirmability.blockingReasons,
+        pricing_basis: result.basis,
+        requires_validation: result.requiresValidation,
+        validation_required: confirmability.validationRequired,
+        category_subtotals: result.categorySubtotals as unknown as Record<string, unknown>[],
         warnings: result.warnings,
+
         change_reason: "Cotação inicial",
         created_by: user.id,
       }).select("*").single();
@@ -345,7 +353,9 @@ Deno.serve(async (req) => {
           cancellation_type: rate?.cancellation_type ?? null,
           cancellation_summary: rate?.cancellation_summary ?? null,
           estimated: line.estimated,
+          provenance: line.provenance,
           notes: line.notes,
+
         };
       });
       if (items.length > 0) await admin.from("travel_quote_items").insert(items);
@@ -360,9 +370,15 @@ Deno.serve(async (req) => {
         quote: { ...quote, current_version_id: version.id },
         version,
         items,
-        pricing: { status: result.status, warnings: result.warnings, validation_errors: result.validationErrors },
+        pricing: {
+          status: result.status, warnings: result.warnings, validation_errors: result.validationErrors,
+          basis: result.basis, requires_validation: result.requiresValidation,
+          category_subtotals: result.categorySubtotals,
+        },
         confirmable: confirmability.confirmable,
         blocking_reasons: confirmability.blockingReasons,
+        validation_required: confirmability.validationRequired,
+
       });
     }
 
@@ -470,7 +486,10 @@ Deno.serve(async (req) => {
         flight: flightOffer ? { present: true, expiresAt: flightOffer.expires_at, expired: flightOffer.status === "expired" } : null,
         rates: usedRates.map((r) => ({ validityUnknown: r.validity_unknown, validUntil: r.valid_until, status: r.status })),
         validUntil: validity.validUntil,
+        basis: result.basis,
+        allowMarketBased: true,
       });
+
 
       const reasonParts = [
         comparison.changed ? `Preço alterado de ${comparison.previousPrice} para ${comparison.newPrice} (${comparison.difference >= 0 ? "+" : ""}${comparison.difference}).` : null,
@@ -500,7 +519,12 @@ Deno.serve(async (req) => {
         validity_limited_by: validity.limitedBy,
         confirmable: confirmability.confirmable,
         blocking_reasons: confirmability.blockingReasons,
+        pricing_basis: result.basis,
+        requires_validation: result.requiresValidation,
+        validation_required: confirmability.validationRequired,
+        category_subtotals: result.categorySubtotals as unknown as Record<string, unknown>[],
         warnings: result.warnings,
+
         change_reason: reasonParts.join(" ") || "Recálculo",
         previous_version_id: current.id,
         previous_price: Number(current.total_price),
@@ -537,7 +561,9 @@ Deno.serve(async (req) => {
           cancellation_type: rate?.cancellation_type ?? null,
           cancellation_summary: rate?.cancellation_summary ?? null,
           estimated: line.estimated,
+          provenance: line.provenance,
           notes: line.notes,
+
         };
       });
       if (items.length > 0) await admin.from("travel_quote_items").insert(items);

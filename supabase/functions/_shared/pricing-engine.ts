@@ -31,6 +31,38 @@ export type PricingRateKind =
 export type PricingRateStatus =
   | "observed" | "quoted" | "negotiated" | "confirmed" | "expired" | "withdrawn";
 
+/**
+ * Proveniência comercial de cada linha do cálculo.
+ * Nunca transforma incerteza em certeza: um preço observado no mercado
+ * continua a ser identificado como tal até existir tarifa de fornecedor.
+ */
+export type LineProvenance =
+  | "confirmed"
+  | "market_observed"
+  | "estimated"
+  | "expired"
+  | "unavailable"
+  | "pending_validation";
+
+export const LINE_PROVENANCE_LABEL: Record<LineProvenance, string> = {
+  confirmed: "Tarifa confirmada por fornecedor",
+  market_observed: "Preço público observado no mercado",
+  estimated: "Custo estimado",
+  expired: "Tarifa expirada",
+  unavailable: "Sem custo utilizável",
+  pending_validation: "Por validar com o fornecedor",
+};
+
+/** Base comercial da proposta inteira. */
+export type PricingBasis = "confirmed" | "market_based" | "insufficient";
+
+export const PRICING_BASIS_LABEL: Record<PricingBasis, string> = {
+  confirmed: "Proposta com tarifas confirmadas por fornecedor",
+  market_based: "Proposta baseada em preços de mercado observados",
+  insufficient: "Informação insuficiente para uma proposta responsável",
+};
+
+
 export interface ComponentRule {
   /** Como o componente entra no preço. */
   mode: MarginMode | "pass_through";
@@ -146,8 +178,20 @@ export interface PricedComponentLine {
   markup: number;
   sellPrice: number;
   estimated: boolean;
+  /** Origem e estado do custo desta linha. */
+  provenance: LineProvenance;
+  sourceType: string | null;
   notes: string[];
 }
+
+export interface CategorySubtotal {
+  componentType: PricingComponentType;
+  cost: number;
+  sellPrice: number;
+  lines: number;
+  provenances: LineProvenance[];
+}
+
 
 export interface PricingResult {
   productId: string | null;
@@ -170,9 +214,15 @@ export interface PricingResult {
   grossMarginPct: number | null;
   markupPct: number | null;
   status: PricingStatus;
+  /** Base comercial: tarifas confirmadas, preços de mercado ou insuficiente. */
+  basis: PricingBasis;
+  /** true quando a proposta precisa de revalidação antes de confirmar. */
+  requiresValidation: boolean;
+  categorySubtotals: CategorySubtotal[];
   warnings: string[];
   validationErrors: string[];
 }
+
 
 // ============ matemática explícita ============
 
@@ -317,6 +367,18 @@ export function applyFlightProtection(flightCost: number, rule: FlightProtection
 
 const DEFAULT_RULE: ComponentRule = { mode: "markup", value: 0 };
 
+/** Classifica a origem do custo escolhido para uma linha. */
+export function rateProvenance(rate: RateCandidate | null, referenceDate?: string): LineProvenance {
+  if (!rate) return "unavailable";
+  if (rate.status === "expired" || rate.status === "withdrawn") return "expired";
+  if (referenceDate && !isRateValidOn(rate, referenceDate)) return "expired";
+  if (rate.kind === "market_observed_price") return "market_observed";
+  if (rate.kind === "estimated_cost") return "estimated";
+  if (rate.status === "confirmed") return "confirmed";
+  return "pending_validation";
+}
+
+
 // ============ motor ============
 
 export function calculatePricing(req: PricingRequest): PricingResult {
@@ -350,11 +412,12 @@ export function calculatePricing(req: PricingRequest): PricingResult {
         componentId: comp.id, name: comp.name, componentType: comp.componentType,
         rateId: null, rateKind: null, unit: null, unitPrice: 0, quantity: 0, currency: null,
         cost: 0, ruleMode: rule.mode, rulePct: rule.value, markup: 0, sellPrice: 0,
-        estimated: true, notes,
+        estimated: true, provenance: "unavailable", sourceType: null, notes,
       });
       anyEstimated = true;
       continue;
     }
+
 
     const rate = sel.rate;
     if (rate.currency !== currency) {
@@ -380,13 +443,20 @@ export function calculatePricing(req: PricingRequest): PricingResult {
 
     if (sel.estimated) anyEstimated = true;
 
+    const provenance = rateProvenance(rate, req.referenceDate);
+    if (provenance === "market_observed") {
+      notes.push("Preço público observado no mercado — exige revalidação antes da confirmação.");
+    }
+
     lines.push({
       componentId: comp.id, name: comp.name, componentType: comp.componentType,
       rateId: rate.id, rateKind: rate.kind, unit: rate.unit, unitPrice: rate.price,
       quantity, currency: rate.currency, cost,
       ruleMode: rule.mode, rulePct: rule.marginIncluded ? 0 : rule.value,
-      markup: sellPrice - cost, sellPrice, estimated: sel.estimated, notes,
+      markup: sellPrice - cost, sellPrice, estimated: sel.estimated,
+      provenance, sourceType: rate.sourceType ?? null, notes,
     });
+
   }
 
   // 3. custo terrestre
@@ -482,6 +552,36 @@ export function calculatePricing(req: PricingRequest): PricingResult {
     status = "confirmed";
   }
 
+
+  // 10. proveniência agregada e base comercial da proposta
+  const categoryMap = new Map<PricingComponentType, CategorySubtotal>();
+  for (const l of lines) {
+    const entry = categoryMap.get(l.componentType) ?? {
+      componentType: l.componentType, cost: 0, sellPrice: 0, lines: 0, provenances: [],
+    };
+    entry.cost += l.cost;
+    entry.sellPrice += l.sellPrice;
+    entry.lines += 1;
+    if (!entry.provenances.includes(l.provenance)) entry.provenances.push(l.provenance);
+    categoryMap.set(l.componentType, entry);
+  }
+  const categorySubtotals = [...categoryMap.values()];
+
+  const hasMarketObserved = lines.some((l) => l.provenance === "market_observed");
+  const softProvenance = lines.some((l) =>
+    l.provenance === "market_observed" || l.provenance === "estimated" || l.provenance === "pending_validation"
+  );
+  let basis: PricingBasis;
+  if (errors.length > 0) basis = "insufficient";
+  else if (softProvenance) basis = "market_based";
+  else basis = "confirmed";
+
+  if (hasMarketObserved && errors.length === 0) {
+    warnings.push(
+      "Proposta baseada em preços de mercado observados — exige revalidação junto do fornecedor antes de qualquer confirmação.",
+    );
+  }
+
   return {
     productId: req.productId ?? null,
     productVersionId: req.productVersionId ?? null,
@@ -503,9 +603,13 @@ export function calculatePricing(req: PricingRequest): PricingResult {
     grossMarginPct: margin,
     markupPct,
     status,
+    basis,
+    requiresValidation: basis === "market_based",
+    categorySubtotals,
     warnings,
     validationErrors: errors,
   };
+
 }
 
 function applyMarkupByPolicy(cost: number, policy: PricingPolicyVersion): number {

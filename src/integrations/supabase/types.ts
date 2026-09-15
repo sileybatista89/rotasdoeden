@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      accommodation_offers: {
+        Row: {
+          accommodation_name: string | null
+          adults: number | null
+          board_type: string | null
+          cancellation_summary: string | null
+          cancellation_type: string | null
+          check_in: string | null
+          check_out: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          due_at_accommodation_amount: number | null
+          expires_at: string | null
+          fee_amount: number | null
+          id: string
+          imported_rate_id: string | null
+          kind: string
+          locality: string | null
+          nights: number | null
+          provider: string
+          provider_accommodation_id: string | null
+          provider_mode: string
+          provider_quote_id: string | null
+          provider_rate_id: string | null
+          provider_search_result_id: string | null
+          public_amount: number | null
+          public_currency: string | null
+          raw: Json
+          rooms: number | null
+          status: string
+          tax_amount: number | null
+          total_amount: number | null
+          total_currency: string | null
+          updated_at: string
+        }
+        Insert: {
+          accommodation_name?: string | null
+          adults?: number | null
+          board_type?: string | null
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          check_in?: string | null
+          check_out?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_at_accommodation_amount?: number | null
+          expires_at?: string | null
+          fee_amount?: number | null
+          id?: string
+          imported_rate_id?: string | null
+          kind?: string
+          locality?: string | null
+          nights?: number | null
+          provider?: string
+          provider_accommodation_id?: string | null
+          provider_mode?: string
+          provider_quote_id?: string | null
+          provider_rate_id?: string | null
+          provider_search_result_id?: string | null
+          public_amount?: number | null
+          public_currency?: string | null
+          raw?: Json
+          rooms?: number | null
+          status?: string
+          tax_amount?: number | null
+          total_amount?: number | null
+          total_currency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accommodation_name?: string | null
+          adults?: number | null
+          board_type?: string | null
+          cancellation_summary?: string | null
+          cancellation_type?: string | null
+          check_in?: string | null
+          check_out?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_at_accommodation_amount?: number | null
+          expires_at?: string | null
+          fee_amount?: number | null
+          id?: string
+          imported_rate_id?: string | null
+          kind?: string
+          locality?: string | null
+          nights?: number | null
+          provider?: string
+          provider_accommodation_id?: string | null
+          provider_mode?: string
+          provider_quote_id?: string | null
+          provider_rate_id?: string | null
+          provider_search_result_id?: string | null
+          public_amount?: number | null
+          public_currency?: string | null
+          raw?: Json
+          rooms?: number | null
+          status?: string
+          tax_amount?: number | null
+          total_amount?: number | null
+          total_currency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodation_offers_imported_rate_id_fkey"
+            columns: ["imported_rate_id"]
+            isOneToOne: false
+            referencedRelation: "component_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accommodation_rooms: {
         Row: {
           accommodation_id: string
@@ -1172,6 +1288,10 @@ export type Database = {
           occupancy_children: number | null
           occupancy_total: number | null
           price: number
+          provider: string | null
+          provider_rate_id: string | null
+          public_amount: number | null
+          public_currency: string | null
           quantity: number
           rate_kind: string
           source_document_url: string | null
@@ -1200,6 +1320,10 @@ export type Database = {
           occupancy_children?: number | null
           occupancy_total?: number | null
           price: number
+          provider?: string | null
+          provider_rate_id?: string | null
+          public_amount?: number | null
+          public_currency?: string | null
           quantity?: number
           rate_kind: string
           source_document_url?: string | null
@@ -1228,6 +1352,10 @@ export type Database = {
           occupancy_children?: number | null
           occupancy_total?: number | null
           price?: number
+          provider?: string | null
+          provider_rate_id?: string | null
+          public_amount?: number | null
+          public_currency?: string | null
           quantity?: number
           rate_kind?: string
           source_document_url?: string | null
@@ -4109,6 +4237,7 @@ export type Database = {
           id: string
           line_order: number
           notes: Json
+          provenance: string
           quantity: number
           quote_version_id: string
           rate_id: string | null
@@ -4140,6 +4269,7 @@ export type Database = {
           id?: string
           line_order?: number
           notes?: Json
+          provenance?: string
           quantity?: number
           quote_version_id: string
           rate_id?: string | null
@@ -4171,6 +4301,7 @@ export type Database = {
           id?: string
           line_order?: number
           notes?: Json
+          provenance?: string
           quantity?: number
           quote_version_id?: string
           rate_id?: string | null
@@ -4224,6 +4355,7 @@ export type Database = {
       travel_quote_versions: {
         Row: {
           blocking_reasons: Json
+          category_subtotals: Json
           change_reason: string | null
           confirmable: boolean
           cost_currency: string | null
@@ -4243,9 +4375,11 @@ export type Database = {
           previous_price: number | null
           previous_version_id: string | null
           price_difference: number | null
+          pricing_basis: string
           pricing_calculation_id: string | null
           pricing_status: string | null
           quote_id: string
+          requires_validation: boolean
           sale_currency: string | null
           status: string
           superseded_at: string | null
@@ -4253,12 +4387,14 @@ export type Database = {
           total_price: number
           updated_at: string
           valid_until: string | null
+          validation_required: string[]
           validity_limited_by: string | null
           version_number: number
           warnings: Json
         }
         Insert: {
           blocking_reasons?: Json
+          category_subtotals?: Json
           change_reason?: string | null
           confirmable?: boolean
           cost_currency?: string | null
@@ -4278,9 +4414,11 @@ export type Database = {
           previous_price?: number | null
           previous_version_id?: string | null
           price_difference?: number | null
+          pricing_basis?: string
           pricing_calculation_id?: string | null
           pricing_status?: string | null
           quote_id: string
+          requires_validation?: boolean
           sale_currency?: string | null
           status?: string
           superseded_at?: string | null
@@ -4288,12 +4426,14 @@ export type Database = {
           total_price?: number
           updated_at?: string
           valid_until?: string | null
+          validation_required?: string[]
           validity_limited_by?: string | null
           version_number: number
           warnings?: Json
         }
         Update: {
           blocking_reasons?: Json
+          category_subtotals?: Json
           change_reason?: string | null
           confirmable?: boolean
           cost_currency?: string | null
@@ -4313,9 +4453,11 @@ export type Database = {
           previous_price?: number | null
           previous_version_id?: string | null
           price_difference?: number | null
+          pricing_basis?: string
           pricing_calculation_id?: string | null
           pricing_status?: string | null
           quote_id?: string
+          requires_validation?: boolean
           sale_currency?: string | null
           status?: string
           superseded_at?: string | null
@@ -4323,6 +4465,7 @@ export type Database = {
           total_price?: number
           updated_at?: string
           valid_until?: string | null
+          validation_required?: string[]
           validity_limited_by?: string | null
           version_number?: number
           warnings?: Json
