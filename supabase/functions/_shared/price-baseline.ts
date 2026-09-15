@@ -350,6 +350,7 @@ export function publicBaseline(row: {
   adults: number | null;
   computed_at: string;
   expires_at: string | null;
+  includes_flight?: boolean | null;
 }) {
   const stale = row.expires_at != null && Date.parse(row.expires_at) < Date.now();
   if (row.status !== "published" || row.price_per_person == null || stale) return null;
@@ -359,6 +360,7 @@ export function publicBaseline(row: {
     duration_days: row.duration_days,
     adults: row.adults,
     indicative: row.commercial_state !== "confirmed_pricing",
+    includes_flight: row.includes_flight === true,
     computed_at: row.computed_at,
   };
 }
