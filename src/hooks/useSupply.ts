@@ -182,7 +182,7 @@ export function useComponentRates(componentId: string | null) {
 function useInvalidate() {
   const qc = useQueryClient();
   return () => {
-    for (const key of ["suppliers", "accommodations", "accommodation-rooms", "package-components", "component-rates", "supply-stats"]) {
+    for (const key of ["suppliers", "accommodations", "accommodation-rooms", "package-components", "component-rates", "supply-stats", "supply-readiness"]) {
       qc.invalidateQueries({ queryKey: [key] });
     }
   };
