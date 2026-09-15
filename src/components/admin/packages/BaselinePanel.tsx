@@ -118,7 +118,35 @@ export function BaselinePanel() {
               {b.expires_at ? ` · revalidar até ${new Date(b.expires_at).toLocaleDateString("pt-PT")}` : ""}
             </p>
 
-            {b.blocked_reason && <p className="text-sm text-destructive">{b.blocked_reason}</p>}
+            {b.blocked_reason && (
+              <div className="space-y-1">
+                <p className="text-sm text-destructive">{b.blocked_reason}</p>
+                {/^Não existe política/.test(b.blocked_reason) && (
+                  <p className="text-xs text-muted-foreground">
+                    Falta apenas a decisão comercial da Rotas. Abre o separador <strong>Preços</strong>, cria uma versão
+                    de política com a margem que decidires e coloca-a como ativa. Não é preenchido nenhum valor por
+                    omissão. Assim que a política ficar ativa, carrega em "Recalcular" e o "desde" fica publicado.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {Array.isArray(b.source_flags) && b.source_flags.some((f: any) => f.lower_bound || f.expiring_soon) && (
+              <ul className="text-xs text-muted-foreground space-y-1">
+                {b.source_flags.filter((f: any) => f.lower_bound).length > 0 && (
+                  <li>
+                    {b.source_flags.filter((f: any) => f.lower_bound).length} origem(ns) registada(s) como limite
+                    inferior de um intervalo observado — o valor real pode ser mais alto.
+                  </li>
+                )}
+                {b.source_flags.filter((f: any) => f.expiring_soon).map((f: any) => (
+                  <li key={f.rate_id}>
+                    Observação expira em {f.expires_at ? new Date(f.expires_at).toLocaleDateString("pt-PT") : "breve"} —
+                    atualizar antes disso ou o preço público deixa de aparecer.
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {Array.isArray(b.breakdown) && b.breakdown.length > 0 && (
               <div className="space-y-1">
