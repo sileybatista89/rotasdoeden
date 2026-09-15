@@ -10,6 +10,7 @@ import { validateDurationRange } from "@/lib/travelProducts";
 import { useSaveTravelProduct, useTravelProductStats, useTravelProducts } from "@/hooks/useTravelProducts";
 import { PackageProductTable } from "./PackageProductTable";
 import { PackageProductDrawer } from "./PackageProductDrawer";
+import { BaselinePanel } from "./BaselinePanel";
 
 function slugify(value: string) {
   return value
@@ -112,6 +113,11 @@ export function PackagesPanel() {
         onRetry={() => products.refetch()}
         onOpen={setOpenId}
       />
+
+      <div className="space-y-2">
+        <h3 className="font-display text-lg font-medium text-foreground">Preço de referência "desde €X"</h3>
+        <BaselinePanel />
+      </div>
 
       <PackageProductDrawer product={selected} onClose={() => setOpenId(null)} />
     </div>
