@@ -101,6 +101,9 @@ export function BaselinePanel() {
                   <Badge variant="outline">{COMMERCIAL_STATE_LABEL[b.commercial_state as keyof typeof COMMERCIAL_STATE_LABEL]}</Badge>
                 )}
                 {expired && <Badge variant="outline">Precisa de atualização</Badge>}
+                {b.status === "published" && (
+                  <Badge variant="outline">{b.includes_flight ? "Com voo" : "Base terrestre (sem voo)"}</Badge>
+                )}
                 <Button size="sm" variant="outline" disabled={recompute.isPending}
                   onClick={() => recompute.mutate(b.travel_products?.slug)}>
                   Recalcular
