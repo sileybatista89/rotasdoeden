@@ -56,7 +56,7 @@ function comp(id: string, type: string, rates: RateCandidate[]): PricingComponen
   return { id, name: id, componentType: type as PricingComponentInput["componentType"], rates };
 }
 
-const config: BaselineConfig = { enabled: true, adults: 2, rooms: 1, required: ["flight", "room"] };
+const config: BaselineConfig = { enabled: true, adults: 2, rooms: 1, required: ["flight", "room"], optional: [] };
 
 const components = [
   comp("voo", "flight", [rate({ id: "r-voo", price: 580, unit: "per_person" })]),
@@ -132,11 +132,64 @@ describe("Fase 13 — preço de referência 'desde €X'", () => {
       adults: r.adults,
       computed_at: new Date().toISOString(),
       expires_at: r.expiresAt,
+      includes_flight: r.includesFlight,
     })!;
     expect(Object.keys(pub).sort()).toEqual(
-      ["adults", "computed_at", "currency", "duration_days", "indicative", "price_per_person"],
+      ["adults", "computed_at", "currency", "duration_days", "includes_flight", "indicative", "price_per_person"],
     );
     expect(pub.indicative).toBe(true);
+  });
+
+  // ---- correção: voo opcional e ocupação filtrada antes da escolha ----
+
+  const landConfig: BaselineConfig = {
+    enabled: true, adults: 2, rooms: 1,
+    required: ["room", "transport", "experience"], optional: ["flight"],
+  };
+  const land = [
+    comp("quarto", "room", [rate({ id: "r-quarto", price: 200, unit: "per_night" })]),
+    comp("carro", "transport", [rate({ id: "r-carro", price: 40, unit: "per_day" })]),
+    comp("tour", "experience", [rate({ id: "r-tour", price: 60, unit: "per_person" })]),
+  ];
+
+  it("lê categorias opcionais da configuração do produto", () => {
+    expect(normalizeBaselineConfig({
+      baseline: { enabled: true, adults: 2, rooms: 1, required: ["room"], optional: ["flight", "room"] },
+    })).toMatchObject({ required: ["room"], optional: ["flight"] });
+  });
+
+  it("publica preço de base terrestre sem voo disponível", () => {
+    const r = computeBaseline({ ...base, config: landConfig, components: land });
+    expect(r.status).toBe("published");
+    expect(r.includesFlight).toBe(false);
+    // 200*4 + 40*5 + 60*2 = 1120 → 560 por pessoa.
+    expect(r.priceTotal).toBe(1120);
+    expect(r.pricePerPerson).toBe(560);
+  });
+
+  it("inclui o voo no preço quando existe dado elegível", () => {
+    const withFlight = [...land, comp("voo", "flight", [rate({ id: "r-voo", price: 580, unit: "per_person" })])];
+    const r = computeBaseline({ ...base, config: landConfig, components: withFlight });
+    expect(r.includesFlight).toBe(true);
+    expect(r.priceTotal).toBe(1120 + 1160);
+  });
+
+  it("não escolhe tarifa incompatível com a ocupação configurada", () => {
+    const rooms = comp("quarto", "room", [
+      rate({ id: "r-single", price: 120, unit: "per_night", occupancyAdults: 1 }),
+      rate({ id: "r-duplo", price: 200, unit: "per_night" }),
+    ]);
+    const r = computeBaseline({ ...base, config: landConfig, components: [rooms, land[1], land[2]] });
+    expect(r.status).toBe("published");
+    expect(r.sourceRateIds).toContain("r-duplo");
+    expect(r.sourceRateIds).not.toContain("r-single");
+  });
+
+  it("continua a bloquear quando falta uma categoria obrigatória", () => {
+    const r = computeBaseline({ ...base, config: landConfig, components: [land[0], land[1]] });
+    expect(r.status).toBe("blocked");
+    expect(r.missing).toContain("experience");
+    expect(r.priceTotal).toBeNull();
   });
 
   it("não mostra publicamente um baseline bloqueado ou expirado", () => {

@@ -14,6 +14,7 @@
 import {
   calculatePricing,
   classifyRateEligibility,
+  isOccupancyCompatible,
   MARKET_OBSERVATION_MAX_AGE_DAYS,
   resolveQuantity,
   type CommercialState,
@@ -30,7 +31,10 @@ export interface BaselineConfig {
   enabled: boolean;
   adults: number;
   rooms: number;
+  /** Categorias sem as quais não há preço público. */
   required: PricingComponentType[];
+  /** Categorias que entram no preço só quando existem dados elegíveis. */
+  optional: PricingComponentType[];
 }
 
 const COMPONENT_TYPES: PricingComponentType[] = [
@@ -60,11 +64,16 @@ export function normalizeBaselineConfig(raw: unknown): BaselineConfig | null {
     ? (baseline.required.filter((t) => COMPONENT_TYPES.includes(t as PricingComponentType)) as PricingComponentType[])
     : [];
   if (required.length === 0) return null;
+  const optionalRaw = Array.isArray(baseline.optional)
+    ? (baseline.optional.filter((t) => COMPONENT_TYPES.includes(t as PricingComponentType)) as PricingComponentType[])
+    : [];
+  const optional = optionalRaw.filter((t) => !required.includes(t));
   const adults = Number(baseline.adults);
   const rooms = Number(baseline.rooms);
   return {
     enabled: true,
     required,
+    optional,
     adults: Number.isFinite(adults) && adults >= 1 ? Math.trunc(adults) : 2,
     rooms: Number.isFinite(rooms) && rooms >= 1 ? Math.trunc(rooms) : 1,
   };
@@ -78,15 +87,21 @@ export interface BaselineContext {
   rooms: number;
 }
 
-/** Custo total de um componente com a tarifa elegível mais barata, ou null. */
+/**
+ * Custo total de um componente com a tarifa elegível mais barata, ou null.
+ * A compatibilidade de ocupação é filtrada ANTES da escolha: nunca é escolhida
+ * uma tarifa que não serve a ocupação configurada para depois bloquear tudo.
+ */
 export function cheapestEligibleCost(
   component: PricingComponentInput,
   referenceDate: string,
   ctx: BaselineContext,
 ): { rate: RateCandidate; cost: number } | null {
+  const guests = { adults: ctx.adults, children: ctx.children };
   let best: { rate: RateCandidate; cost: number } | null = null;
   for (const rate of component.rates) {
     if (classifyRateEligibility(rate, referenceDate).eligibility === "ineligible") continue;
+    if (!isOccupancyCompatible(rate, guests)) continue;
     const qty = (component.quantityOverride ?? resolveQuantity(rate.unit as PricingRateUnit, ctx)) * (rate.quantity ?? 1);
     if (!(qty > 0)) continue;
     const cost = rate.price * qty;
@@ -95,17 +110,23 @@ export function cheapestEligibleCost(
   return best;
 }
 
-/** Para cada categoria obrigatória escolhe o componente real mais barato. */
+/**
+ * Para cada categoria escolhe o componente real mais barato.
+ * Categorias obrigatórias em falta bloqueiam o preço; categorias opcionais
+ * apenas ficam de fora quando não têm dados elegíveis.
+ */
 export function selectBaselineComponents(
   required: PricingComponentType[],
   components: PricingComponentInput[],
   referenceDate: string,
   ctx: BaselineContext,
-): { selected: PricingComponentInput[]; missing: PricingComponentType[] } {
+  optional: PricingComponentType[] = [],
+): { selected: PricingComponentInput[]; missing: PricingComponentType[]; includedTypes: PricingComponentType[] } {
   const selected: PricingComponentInput[] = [];
   const missing: PricingComponentType[] = [];
+  const includedTypes: PricingComponentType[] = [];
 
-  for (const type of required) {
+  const pick = (type: PricingComponentType) => {
     const candidates = components.filter((c) => c.componentType === type);
     let best: { component: PricingComponentInput; cost: number } | null = null;
     for (const candidate of candidates) {
@@ -113,11 +134,22 @@ export function selectBaselineComponents(
       if (!cheapest) continue;
       if (!best || cheapest.cost < best.cost) best = { component: candidate, cost: cheapest.cost };
     }
+    return best;
+  };
+
+  for (const type of required) {
+    const best = pick(type);
     if (!best) missing.push(type);
-    else selected.push(best.component);
+    else { selected.push(best.component); includedTypes.push(type); }
   }
 
-  return { selected, missing };
+  for (const type of optional) {
+    const best = pick(type);
+    // Ausência de componente opcional nunca vira zero: fica simplesmente fora.
+    if (best) { selected.push(best.component); includedTypes.push(type); }
+  }
+
+  return { selected, missing, includedTypes };
 }
 
 /** Quando a referência de preço deixa de poder ser usada sem revalidação. */
@@ -158,6 +190,10 @@ export interface BaselineResult {
   /** Detalhe interno: só para o admin. Nunca sai para o site público. */
   breakdown: BaselineLine[];
   missing: PricingComponentType[];
+  /** Categorias efetivamente incluídas no cálculo (obrigatórias + opcionais com dados). */
+  includedTypes: PricingComponentType[];
+  /** true quando o voo entrou no cálculo. Caso contrário o valor é base terrestre. */
+  includesFlight: boolean;
   sourceRateIds: string[];
   expiresAt: string | null;
   warnings: string[];
@@ -188,6 +224,8 @@ function blocked(req: BaselineRequest, reason: string, missing: PricingComponent
     policyVersionId: req.policy?.id ?? null,
     breakdown: [],
     missing,
+    includedTypes: [],
+    includesFlight: false,
     sourceRateIds: [],
     expiresAt: null,
     warnings: [],
@@ -214,7 +252,13 @@ export function computeBaseline(req: BaselineRequest): BaselineResult {
     rooms: req.config.rooms,
   };
 
-  const { selected, missing } = selectBaselineComponents(req.config.required, req.components, req.referenceDate, ctx);
+  const { selected, missing, includedTypes } = selectBaselineComponents(
+    req.config.required,
+    req.components,
+    req.referenceDate,
+    ctx,
+    req.config.optional ?? [],
+  );
   if (missing.length > 0) {
     return blocked(
       req,
@@ -261,6 +305,8 @@ export function computeBaseline(req: BaselineRequest): BaselineResult {
     policyVersionId: req.policy.id,
     breakdown,
     missing: [],
+    includedTypes,
+    includesFlight: includedTypes.includes("flight"),
     sourceRateIds: result.components.map((l) => l.rateId).filter(Boolean) as string[],
     expiresAt: null,
     warnings: result.warnings,
@@ -304,6 +350,7 @@ export function publicBaseline(row: {
   adults: number | null;
   computed_at: string;
   expires_at: string | null;
+  includes_flight?: boolean | null;
 }) {
   const stale = row.expires_at != null && Date.parse(row.expires_at) < Date.now();
   if (row.status !== "published" || row.price_per_person == null || stale) return null;
@@ -313,6 +360,7 @@ export function publicBaseline(row: {
     duration_days: row.duration_days,
     adults: row.adults,
     indicative: row.commercial_state !== "confirmed_pricing",
+    includes_flight: row.includes_flight === true,
     computed_at: row.computed_at,
   };
 }

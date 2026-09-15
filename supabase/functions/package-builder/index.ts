@@ -4,9 +4,10 @@
  * Responsabilidades: servir o catálogo editorial, guardar a configuração do
  * visitante por token opaco e registar o pedido de proposta.
  *
- * Esta função NÃO calcula preços, não cria cotações, não reserva, não cobra,
- * não contacta fornecedores e não emite voos. O preço continua a ser produzido
- * exclusivamente pelo Quote Engine a partir do Pricing Engine, já existentes.
+ * Calcula apenas o preço de referência indicativo ("desde X") delegando no
+ * Pricing Engine existente. Não cria cotações, não reserva, não cobra, não
+ * contacta fornecedores e não emite voos: a proposta comercial continua a ser
+ * produzida exclusivamente pelo Quote Engine.
  */
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import {
@@ -171,11 +172,13 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
   const { data: policyRow } = await client
     .from("pricing_policy_versions").select("*").eq("status", "active").maybeSingle();
 
+  // Obrigatórias e opcionais: as opcionais entram só quando têm dados elegíveis.
+  const wantedTypes = [...new Set([...config.required, ...config.optional])];
   const { data: compRows } = await client
     .from("package_components")
     .select("id, name, component_type, supplier_id")
     .eq("status", "approved")
-    .in("component_type", config.required);
+    .in("component_type", wantedTypes);
 
   const approved = (compRows ?? []).filter((c) => c.supplier_id);
   let rates: Record<string, any>[] = [];
@@ -220,6 +223,26 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     referenceDate: new Date().toISOString().slice(0, 10),
   });
 
+  // Avisos internos sobre as origens usadas: limite inferior de intervalo e
+  // observações que expiram em breve. Só para o admin, nunca para o visitante.
+  const soon = Date.now() + 30 * 86_400_000;
+  const sourceFlags = rates
+    .filter((r) => result.sourceRateIds.includes(r.id))
+    .map((r) => {
+      const expiry = r.valid_until
+        ? Date.parse(`${r.valid_until}T23:59:59Z`)
+        : r.observed_at
+        ? Date.parse(r.observed_at) + 180 * 86_400_000
+        : null;
+      return {
+        rate_id: r.id,
+        component_id: r.component_id,
+        lower_bound: r.is_lower_bound === true,
+        expires_at: expiry == null || Number.isNaN(expiry) ? null : new Date(expiry).toISOString(),
+        expiring_soon: expiry != null && !Number.isNaN(expiry) && expiry <= soon,
+      };
+    });
+
   const row = {
     product_id: product.id,
     status: result.status,
@@ -232,10 +255,12 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     rooms: result.rooms,
     basis: result.basis,
     commercial_state: result.commercialState,
+    includes_flight: result.includesFlight,
     policy_version_id: result.policyVersionId,
     breakdown: result.breakdown,
     missing_components: result.missing,
     source_rate_ids: result.sourceRateIds,
+    source_flags: sourceFlags,
     blocked_reason: result.blockedReason,
     computed_at: new Date().toISOString(),
     expires_at: result.expiresAt,
@@ -245,6 +270,10 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     .from("product_price_baselines")
     .upsert(row, { onConflict: "product_id" })
     .select("*").maybeSingle();
+
+  // Histórico: cada cálculo fica registado em vez de destruir o anterior.
+  await client.from("product_price_baseline_versions").insert(row);
+
   return data ?? row;
 }
 
@@ -287,7 +316,10 @@ Deno.serve(async (req) => {
 
     const expired = stored?.expires_at != null && Date.parse(stored.expires_at) < Date.now();
     const old = !stored || Date.now() - Date.parse(stored.computed_at) > BASELINE_MAX_AGE_MS;
-    const fresh = expired || old ? await recomputeBaseline(client, product) : stored;
+    // Um bloqueio é sempre reavaliado: assim que a política ou os dados existirem,
+    // o preço passa a ser calculado sem esperar pelo ciclo de 24h.
+    const wasBlocked = stored?.status !== "published";
+    const fresh = expired || old || wasBlocked ? await recomputeBaseline(client, product) : stored;
     if (!fresh) return json({ baseline: null });
 
     const row = fresh as Record<string, any>;
@@ -301,6 +333,7 @@ Deno.serve(async (req) => {
         adults: row.adults,
         computed_at: row.computed_at,
         expires_at: row.expires_at,
+        includes_flight: row.includes_flight,
       }),
     });
   }

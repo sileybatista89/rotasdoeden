@@ -40,6 +40,8 @@ export interface PublicBaseline {
   duration_days: number | null;
   adults: number | null;
   indicative: boolean;
+  /** false quando o valor cobre apenas a base terrestre (voo não incluído). */
+  includes_flight: boolean;
   computed_at: string;
 }
 

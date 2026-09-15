@@ -26,6 +26,20 @@ export function BaselinePanel() {
     },
   });
 
+  /** Histórico: cada recálculo fica guardado, o anterior não se perde. */
+  const history = useQuery({
+    queryKey: ["admin-price-baseline-versions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_price_baseline_versions")
+        .select("id, product_id, status, price_per_person, currency, includes_flight, blocked_reason, computed_at")
+        .order("computed_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const recompute = useMutation({
     mutationFn: async (slug: string) => {
       const { data, error } = await supabase.functions.invoke("package-builder", {
@@ -37,6 +51,7 @@ export function BaselinePanel() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-price-baselines"] });
+      qc.invalidateQueries({ queryKey: ["admin-price-baseline-versions"] });
       toast({ title: "Preço de referência recalculado" });
     },
     onError: (e) => toast({ title: "Não foi possível recalcular", description: (e as Error).message, variant: "destructive" }),
@@ -86,6 +101,9 @@ export function BaselinePanel() {
                   <Badge variant="outline">{COMMERCIAL_STATE_LABEL[b.commercial_state as keyof typeof COMMERCIAL_STATE_LABEL]}</Badge>
                 )}
                 {expired && <Badge variant="outline">Precisa de atualização</Badge>}
+                {b.status === "published" && (
+                  <Badge variant="outline">{b.includes_flight ? "Com voo" : "Base terrestre (sem voo)"}</Badge>
+                )}
                 <Button size="sm" variant="outline" disabled={recompute.isPending}
                   onClick={() => recompute.mutate(b.travel_products?.slug)}>
                   Recalcular
@@ -100,7 +118,35 @@ export function BaselinePanel() {
               {b.expires_at ? ` · revalidar até ${new Date(b.expires_at).toLocaleDateString("pt-PT")}` : ""}
             </p>
 
-            {b.blocked_reason && <p className="text-sm text-destructive">{b.blocked_reason}</p>}
+            {b.blocked_reason && (
+              <div className="space-y-1">
+                <p className="text-sm text-destructive">{b.blocked_reason}</p>
+                {/^Não existe política/.test(b.blocked_reason) && (
+                  <p className="text-xs text-muted-foreground">
+                    Falta apenas a decisão comercial da Rotas. Abre o separador <strong>Preços</strong>, cria uma versão
+                    de política com a margem que decidires e coloca-a como ativa. Não é preenchido nenhum valor por
+                    omissão. Assim que a política ficar ativa, carrega em "Recalcular" e o "desde" fica publicado.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {Array.isArray(b.source_flags) && b.source_flags.some((f: any) => f.lower_bound || f.expiring_soon) && (
+              <ul className="text-xs text-muted-foreground space-y-1">
+                {b.source_flags.filter((f: any) => f.lower_bound).length > 0 && (
+                  <li>
+                    {b.source_flags.filter((f: any) => f.lower_bound).length} origem(ns) registada(s) como limite
+                    inferior de um intervalo observado — o valor real pode ser mais alto.
+                  </li>
+                )}
+                {b.source_flags.filter((f: any) => f.expiring_soon).map((f: any) => (
+                  <li key={f.rate_id}>
+                    Observação expira em {f.expires_at ? new Date(f.expires_at).toLocaleDateString("pt-PT") : "breve"} —
+                    atualizar antes disso ou o preço público deixa de aparecer.
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {Array.isArray(b.breakdown) && b.breakdown.length > 0 && (
               <div className="space-y-1">
@@ -114,6 +160,24 @@ export function BaselinePanel() {
                   </div>
                 ))}
               </div>
+            )}
+
+            {(history.data ?? []).filter((h: any) => h.product_id === b.product_id).length > 1 && (
+              <details className="text-xs text-muted-foreground">
+                <summary className="cursor-pointer">Histórico de cálculos</summary>
+                <ul className="mt-2 space-y-1">
+                  {(history.data ?? [])
+                    .filter((h: any) => h.product_id === b.product_id)
+                    .map((h: any) => (
+                      <li key={h.id}>
+                        {new Date(h.computed_at).toLocaleString("pt-PT")} ·{" "}
+                        {h.status === "published"
+                          ? `${money(Number(h.price_per_person), h.currency)} / pessoa${h.includes_flight ? " (com voo)" : " (base terrestre)"}`
+                          : `bloqueado — ${h.blocked_reason ?? "sem motivo registado"}`}
+                      </li>
+                    ))}
+                </ul>
+              </details>
             )}
           </Card>
         );
