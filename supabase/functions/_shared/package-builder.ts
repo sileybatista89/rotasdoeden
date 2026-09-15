@@ -265,15 +265,23 @@ export interface BuilderConfigInput {
   children: number;
   rooms: number;
   selections: DaySelection[];
+  /** Limite por dia definido no produto. Omissão: 4, como no Rotas Essencial. */
+  maxSelectionsPerDay?: number;
 }
 
 export function validateBuilderConfig(input: BuilderConfigInput): string[] {
   const errors: string[] = [];
+  const maxPerDay = Number.isInteger(input.maxSelectionsPerDay) && (input.maxSelectionsPerDay as number) > 0
+    ? (input.maxSelectionsPerDay as number)
+    : DEFAULT_MAX_SELECTIONS_PER_DAY;
   if (!Number.isInteger(input.durationDays) || input.durationDays < input.minimumDays) {
     errors.push(`A duração tem de ser de pelo menos ${input.minimumDays} dias.`);
   }
   if (input.maximumDays !== null && input.durationDays > input.maximumDays) {
     errors.push(`A duração não pode ultrapassar ${input.maximumDays} dias.`);
+  }
+  if (input.maximumDays === null && input.durationDays > ABSOLUTE_MAX_DAYS) {
+    errors.push(`A duração não pode ultrapassar ${ABSOLUTE_MAX_DAYS} dias.`);
   }
   if (!Number.isInteger(input.adults) || input.adults < 1) errors.push("É necessário pelo menos um adulto.");
   if (input.children < 0) errors.push("Número de crianças inválido.");
