@@ -295,7 +295,7 @@ export function validateBuilderConfig(input: BuilderConfigInput): string[] {
     }
   }
   for (const day of allowed) {
-    if (selectionsForDay(input.selections, day).length > MAX_SELECTIONS_PER_DAY) {
+    if (selectionsForDay(input.selections, day).length > maxPerDay) {
       errors.push(`O dia ${day} tem escolhas a mais.`);
       break;
     }
