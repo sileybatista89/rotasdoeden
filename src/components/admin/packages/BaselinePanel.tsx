@@ -51,6 +51,7 @@ export function BaselinePanel() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-price-baselines"] });
+      qc.invalidateQueries({ queryKey: ["admin-price-baseline-versions"] });
       toast({ title: "Preço de referência recalculado" });
     },
     onError: (e) => toast({ title: "Não foi possível recalcular", description: (e as Error).message, variant: "destructive" }),
