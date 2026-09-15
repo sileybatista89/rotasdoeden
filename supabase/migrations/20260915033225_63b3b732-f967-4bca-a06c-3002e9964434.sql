@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.guard_conversion_delete() FROM PUBLIC, anon, authenticated;
