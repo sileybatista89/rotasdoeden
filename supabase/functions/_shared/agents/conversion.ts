@@ -268,6 +268,7 @@ O QUE PODES FAZER
 - Encaminhar para a equipa humana sempre que o visitante pedir.
 
 FORMATO DE RESPOSTA
+Não escrevas raciocínio, notas nem explicações. A tua resposta começa em "{" e termina em "}".
 Devolve apenas JSON válido, sem texto à volta:
 {"intent":"inspiracao|duvida|interesse_pacote|pedido_orcamento|intencao_reserva","reply":"texto para o visitante","lead":null ou {"contact_name":"","contact_email":"","contact_phone":"","travel_start":"AAAA-MM-DD","travel_end":"AAAA-MM-DD","duration_days":0,"travelers_adults":0,"travelers_children":0,"origin_city":"","interests":[],"notes":""},"handoff":false}
 Preenche "lead" apenas quando já tiveres um contacto (email ou telefone) dado pelo visitante. Caso contrário, "lead": null.`;
@@ -320,8 +321,10 @@ export function parseAgentOutput(raw: string, fallbackIntent: ConversionIntent):
   const text = (raw ?? "").trim();
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
+  // Sem JSON não há resposta fiável: nunca reencaminhamos texto cru do modelo,
+  // que pode conter raciocínio interno ou pedaços do próprio prompt.
   if (start === -1 || end <= start) {
-    return { intent: fallbackIntent, reply: text || NO_DATA_FALLBACK, lead: null, handoff: false };
+    return { intent: fallbackIntent, reply: NO_DATA_FALLBACK, lead: null, handoff: false };
   }
   try {
     const parsed = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
