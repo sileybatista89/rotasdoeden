@@ -39,6 +39,7 @@ import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
 import ParceirosPage from "./pages/ParceirosPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import PropostaPage from "./pages/PropostaPage.tsx";
+import RotasEssencialPage from "./pages/RotasEssencialPage.tsx";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
 import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
 import SupportConversationPage from "./pages/SupportConversationPage.tsx";
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
             <Route path="/parceiros" element={<ParceirosPage />} />
             <Route path="/proposta" element={<PropostaPage />} />
+            <Route path="/pacotes/rotas-essencial" element={<RotasEssencialPage />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
             } />

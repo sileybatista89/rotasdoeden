@@ -3,7 +3,7 @@ import { LogoMark } from "@/components/brand/Logo";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "servicos" | "discovery" | "conteudo" | "aquisicao" | "pacotes" | "fornecedores" | "precos" | "voos" | "cotacoes" | "assistente" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
+export type AdminSection = "dashboard" | "users" | "guias" | "kyc" | "verificacao" | "servicos" | "discovery" | "conteudo" | "aquisicao" | "pacotes" | "catalogo" | "fornecedores" | "precos" | "voos" | "cotacoes" | "assistente" | "territorio" | "reservas" | "chats" | "reviews" | "definicoes";
 
 interface Props {
   active: AdminSection;
@@ -21,6 +21,7 @@ const items: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "conteudo", label: "Conteúdo IA", icon: FileText },
   { id: "aquisicao", label: "Aquisição IA", icon: Megaphone },
   { id: "pacotes", label: "Pacotes", icon: Package },
+  { id: "catalogo", label: "Catálogo e viagens", icon: MapPin },
   { id: "fornecedores", label: "Fornecedores", icon: Building2 },
   { id: "precos", label: "Preços", icon: Calculator },
   { id: "voos", label: "Voos (teste)", icon: Plane },
