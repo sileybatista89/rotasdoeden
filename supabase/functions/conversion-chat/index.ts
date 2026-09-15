@@ -51,14 +51,18 @@ function newToken(): string {
 const isHexToken = (value: unknown): value is string =>
   typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
 
-/** Limite por sessão, em memória da instância: chega para travar abuso trivial. */
-const hits = new Map<string, number[]>();
-function rateLimited(key: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < CONVERSION_LIMITS.rateWindowMs);
-  recent.push(now);
-  hits.set(key, recent);
-  return recent.length > CONVERSION_LIMITS.maxRequestsPerWindow;
+/**
+ * Limite por sessão, contado na base de dados: as instâncias da função são
+ * efémeras e paralelas, por isso um contador em memória não trava nada.
+ */
+async function rateLimited(client: SupabaseClient, conversationId: string): Promise<boolean> {
+  const since = new Date(Date.now() - CONVERSION_LIMITS.rateWindowMs).toISOString();
+  const { count } = await client.from("conversion_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("conversation_id", conversationId)
+    .eq("role", "user")
+    .gte("created_at", since);
+  return Number(count ?? 0) >= CONVERSION_LIMITS.maxRequestsPerWindow;
 }
 
 async function loadConversation(client: SupabaseClient, tokenHash: string) {
