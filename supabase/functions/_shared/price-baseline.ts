@@ -252,7 +252,13 @@ export function computeBaseline(req: BaselineRequest): BaselineResult {
     rooms: req.config.rooms,
   };
 
-  const { selected, missing } = selectBaselineComponents(req.config.required, req.components, req.referenceDate, ctx);
+  const { selected, missing, includedTypes } = selectBaselineComponents(
+    req.config.required,
+    req.components,
+    req.referenceDate,
+    ctx,
+    req.config.optional ?? [],
+  );
   if (missing.length > 0) {
     return blocked(
       req,
