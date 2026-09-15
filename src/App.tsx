@@ -75,7 +75,10 @@ const App = () => (
             <Route path="/sobre-sao-tome" element={<SobreSaoTomePage />} />
             <Route path="/parceiros" element={<ParceirosPage />} />
             <Route path="/proposta" element={<PropostaPage />} />
-            <Route path="/pacotes/rotas-essencial" element={<RotasEssencialPage />} />
+            <Route path="/pacotes/rotas-essencial" element={<PackageBuilderPage key="rotas-essencial" slug="rotas-essencial" />} />
+            <Route path="/pacotes/rotas-explorar" element={<PackageBuilderPage key="rotas-explorar" slug="rotas-explorar" />} />
+            <Route path="/pacotes/rotas-imersao" element={<PackageBuilderPage key="rotas-imersao" slug="rotas-imersao" />} />
+            <Route path="/pacotes/rotas-a-medida" element={<PackageBuilderPage key="rotas-a-medida" slug="rotas-a-medida" />} />
             <Route path="/book/:serviceId" element={
               <ProtectedRoute><BookingPage /></ProtectedRoute>
             } />
