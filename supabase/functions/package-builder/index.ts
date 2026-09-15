@@ -16,6 +16,16 @@ import {
   sanitizeSelections,
   validateBuilderConfig,
 } from "../_shared/package-builder.ts";
+import {
+  computeBaseline,
+  normalizeBaselineConfig,
+  publicBaseline,
+} from "../_shared/price-baseline.ts";
+import type {
+  PricingComponentInput,
+  PricingPolicyVersion,
+  RateCandidate,
+} from "../_shared/pricing-engine.ts";
 
 /** Os quatro produtos oficiais. Nenhum outro slug é servido publicamente. */
 const PUBLIC_PRODUCT_SLUGS = ["rotas-essencial", "rotas-explorar", "rotas-imersao", "rotas-a-medida"];
