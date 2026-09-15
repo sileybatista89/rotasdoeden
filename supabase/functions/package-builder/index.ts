@@ -172,11 +172,13 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
   const { data: policyRow } = await client
     .from("pricing_policy_versions").select("*").eq("status", "active").maybeSingle();
 
+  // Obrigatórias e opcionais: as opcionais entram só quando têm dados elegíveis.
+  const wantedTypes = [...new Set([...config.required, ...config.optional])];
   const { data: compRows } = await client
     .from("package_components")
     .select("id, name, component_type, supplier_id")
     .eq("status", "approved")
-    .in("component_type", config.required);
+    .in("component_type", wantedTypes);
 
   const approved = (compRows ?? []).filter((c) => c.supplier_id);
   let rates: Record<string, any>[] = [];
