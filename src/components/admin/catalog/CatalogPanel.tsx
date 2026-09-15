@@ -55,6 +55,7 @@ interface ConfigRow {
   status: string;
   created_at: string;
   submitted_at: string | null;
+  travel_products: { name: string; slug: string } | null;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -102,7 +103,7 @@ export function CatalogPanel() {
     queryKey: ["admin-builder-configs"],
     queryFn: async () => {
       const { data, error } = await anyDb.from("package_builder_configs")
-        .select("*").order("created_at", { ascending: false }).limit(50);
+        .select("*, travel_products(name, slug)").order("created_at", { ascending: false }).limit(50);
       if (error) throw new Error(error.message);
       return (data ?? []) as ConfigRow[];
     },
@@ -207,7 +208,7 @@ export function CatalogPanel() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium text-foreground">
-                      {c.contact_name ?? "Sem contacto"} · {c.duration_days} dias · {c.adults} adultos
+                      {c.travel_products?.name ?? "Pacote"} · {c.contact_name ?? "Sem contacto"} · {c.duration_days} dias · {c.adults} adultos
                       {c.children > 0 ? ` + ${c.children} crianças` : ""}
                     </p>
                     <p className="text-xs text-muted-foreground">

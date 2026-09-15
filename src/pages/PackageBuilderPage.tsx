@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
@@ -11,26 +11,49 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { DayConfigurator } from "@/components/packages/DayConfigurator";
 import { TripSummary } from "@/components/packages/TripSummary";
-import { useBuilderSession, useCatalogItems } from "@/hooks/usePackageBuilder";
+import { useBuilderProduct, useBuilderSession, useCatalogItems } from "@/hooks/usePackageBuilder";
 import {
   addSelection,
   buildDayPlan,
+  durationOptions,
   removeSelectionAt,
   summarizeBuilder,
   type CatalogItem,
 } from "@/lib/packageBuilder";
 
-const PRODUCT_SLUG = "rotas-essencial";
-const DURATIONS = [5, 6, 7];
-
-export default function RotasEssencialPage() {
+/**
+ * Página única do configurador. Todo o comportamento (duração, limites, dias,
+ * categorias) vem da configuração do produto no servidor, não de código por produto.
+ */
+export default function PackageBuilderPage({ slug }: { slug: string }) {
+  const product = useBuilderProduct(slug);
   const catalog = useCatalogItems();
-  const { config, update, submit, status, restored } = useBuilderSession(PRODUCT_SLUG);
+  const minimumDays = product.data?.minimum_days ?? 5;
+  const { config, update, submit, status, restored } = useBuilderSession(slug, minimumDays);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", notes: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
   const items = catalog.data ?? [];
+  const rules = product.data;
+  const maxPerDay = rules?.max_selections_per_day ?? 4;
+  const durations = useMemo(() => (rules ? durationOptions(rules) : []), [rules]);
+
+  // Quando o produto carrega, a duração guardada tem de caber nas regras dele.
+  useEffect(() => {
+    if (!rules || !restored) return;
+    const max = rules.maximum_days ?? rules.duration_cap_days;
+    if (config.durationDays < rules.minimum_days || config.durationDays > max) {
+      const days = Math.min(Math.max(config.durationDays, rules.minimum_days), max);
+      update((prev) => ({
+        ...prev,
+        durationDays: days,
+        selections: prev.selections.filter((s) => s.day > 1 && s.day < days),
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rules, restored]);
+
   const plan = useMemo(() => buildDayPlan(config.durationDays), [config.durationDays]);
   const summary = useMemo(
     () => summarizeBuilder(config.selections, items, config.durationDays),
@@ -40,7 +63,12 @@ export default function RotasEssencialPage() {
   const add = (day: number, item: CatalogItem) =>
     update((prev) => ({
       ...prev,
-      selections: addSelection(prev.selections, { day, item_id: item.id, item_slug: item.slug }, prev.durationDays),
+      selections: addSelection(
+        prev.selections,
+        { day, item_id: item.id, item_slug: item.slug },
+        prev.durationDays,
+        maxPerDay,
+      ),
     }));
 
   const removeAt = (day: number, index: number) =>
@@ -57,7 +85,12 @@ export default function RotasEssencialPage() {
   const send = async () => {
     setSending(true);
     try {
-      await submit({ name: contact.name.trim(), email: contact.email.trim(), phone: contact.phone.trim(), notes: contact.notes.trim() });
+      await submit({
+        name: contact.name.trim(),
+        email: contact.email.trim(),
+        phone: contact.phone.trim(),
+        notes: contact.notes.trim(),
+      });
       setSent(true);
       toast({ title: "Pedido enviado", description: "A equipa prepara a proposta com preços confirmados." });
     } catch (e) {
@@ -67,29 +100,54 @@ export default function RotasEssencialPage() {
     }
   };
 
+  const durationLabel = rules
+    ? rules.maximum_days === null
+      ? `a partir de ${rules.minimum_days} dias`
+      : `de ${rules.minimum_days} a ${rules.maximum_days} dias`
+    : "";
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Rotas Essencial — monte a sua viagem de 5 a 7 dias"
-        description="Pacote-base de 5 a 7 dias em São Tomé e Príncipe. Escolha, dia a dia, as praias, roças, natureza e cultura que quer conhecer e receba uma proposta personalizada."
-        path="/pacotes/rotas-essencial"
+        title={`${rules?.name ?? "Pacote"} — monte a sua viagem em São Tomé e Príncipe`}
+        description={
+          rules?.description ??
+          "Monte a sua viagem dia a dia em São Tomé e Príncipe e receba uma proposta personalizada, sem reservar nem pagar."
+        }
+        path={`/pacotes/${slug}`}
       />
       <Navbar />
 
       <main className="container py-10 md:py-14 space-y-10">
         <header className="max-w-2xl space-y-3">
-          <span className="eyebrow">Pacote-base</span>
-          <h1 className="font-display text-3xl md:text-4xl font-medium text-foreground">Rotas Essencial</h1>
+          <span className="eyebrow">
+            {rules?.product_type === "custom_package" ? "Viagem à medida" : "Pacote"}
+          </span>
+          <h1 className="font-display text-3xl md:text-4xl font-medium text-foreground">
+            {rules?.name ?? <Skeleton className="h-9 w-64" />}
+          </h1>
           <p className="text-muted-foreground leading-relaxed">
-            Cinco a sete dias em São Tomé e Príncipe, sem itinerário rígido. A chegada e o regresso ficam tratados; os
-            dias no meio são seus para montar. Pode repetir o mesmo tipo de programa em dias diferentes.
+            {rules?.description}{" "}
+            {rules && (
+              <>
+                Uma viagem {durationLabel}, sem itinerário rígido: a chegada e o regresso ficam tratados e os dias no
+                meio são seus para montar. Pode repetir o mesmo tipo de programa em dias diferentes.
+              </>
+            )}
           </p>
         </header>
+
+        {product.error && (
+          <Card className="p-5 space-y-3">
+            <p className="text-sm text-muted-foreground">Não foi possível carregar este pacote.</p>
+            <Button size="sm" variant="outline" onClick={() => product.refetch()}>Tentar de novo</Button>
+          </Card>
+        )}
 
         <section aria-labelledby="duracao-title" className="space-y-3">
           <h2 id="duracao-title" className="font-display text-2xl font-medium text-foreground">1. Duração e viajantes</h2>
           <div className="flex flex-wrap gap-2">
-            {DURATIONS.map((d) => (
+            {durations.map((d) => (
               <Button key={d} variant={config.durationDays === d ? "default" : "outline"} onClick={() => setDuration(d)}>
                 {d} dias
               </Button>
@@ -121,7 +179,7 @@ export default function RotasEssencialPage() {
 
         <section aria-labelledby="dias-title" className="space-y-3">
           <h2 id="dias-title" className="font-display text-2xl font-medium text-foreground">2. Os seus dias</h2>
-          {(catalog.isLoading || !restored) && (
+          {(catalog.isLoading || product.isLoading || !restored) && (
             <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full" />)}</div>
           )}
           {catalog.error && (
@@ -138,6 +196,8 @@ export default function RotasEssencialPage() {
                   slot={slot}
                   items={items}
                   selections={config.selections}
+                  maxPerDay={maxPerDay}
+                  categories={rules?.categories}
                   warnings={summary.warnings.filter((w) => w.day === slot.day).map((w) => w.message)}
                   onAdd={(item) => add(slot.day, item)}
                   onRemoveAt={(index) => removeAt(slot.day, index)}

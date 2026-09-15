@@ -6,8 +6,8 @@ import { Card } from "@/components/ui/card";
 import {
   CATEGORY_LABEL,
   CATEGORY_ORDER,
+  DEFAULT_MAX_SELECTIONS_PER_DAY,
   ISLAND_LABEL,
-  MAX_SELECTIONS_PER_DAY,
   isBookable,
   selectionsForDay,
   type CatalogItem,
@@ -22,17 +22,36 @@ interface Props {
   items: CatalogItem[];
   selections: DaySelection[];
   warnings: string[];
+  /** Limite por dia definido no produto. */
+  maxPerDay?: number;
+  /** Categorias permitidas pelo produto. Vazio/omisso = todas as do catálogo. */
+  categories?: string[];
   onAdd: (item: CatalogItem) => void;
   onRemoveAt: (index: number) => void;
 }
 
-export function DayConfigurator({ slot, items, selections, warnings, onAdd, onRemoveAt }: Props) {
+export function DayConfigurator({
+  slot,
+  items,
+  selections,
+  warnings,
+  maxPerDay = DEFAULT_MAX_SELECTIONS_PER_DAY,
+  categories: allowed,
+  onAdd,
+  onRemoveAt,
+}: Props) {
   const [category, setCategory] = useState<string | null>(null);
   const chosen = selectionsForDay(selections, slot.day);
   const byId = new Map(items.map((i) => [i.id, i]));
-  const full = chosen.length >= MAX_SELECTIONS_PER_DAY;
+  const full = chosen.length >= maxPerDay;
 
-  const categories = CATEGORY_ORDER.filter((c) => items.some((i) => i.category === c));
+  // Categorias saem do próprio catálogo; o produto só pode restringi-las.
+  const catalogCategories = [...new Set(items.map((i) => i.category))];
+  const ordered = [
+    ...CATEGORY_ORDER.filter((c) => catalogCategories.includes(c)),
+    ...catalogCategories.filter((c) => !(CATEGORY_ORDER as string[]).includes(c)),
+  ];
+  const categories = allowed && allowed.length > 0 ? ordered.filter((c) => allowed.includes(c)) : ordered;
   const visible = category ? items.filter((i) => i.category === category) : [];
 
   if (!slot.configurable) {
@@ -56,7 +75,7 @@ export function DayConfigurator({ slot, items, selections, warnings, onAdd, onRe
           <Badge>Dia {slot.day}</Badge>
           <p className="font-medium text-foreground">{slot.title}</p>
         </div>
-        <p className="text-xs text-muted-foreground">{chosen.length} de {MAX_SELECTIONS_PER_DAY} escolhas</p>
+        <p className="text-xs text-muted-foreground">{chosen.length} de {maxPerDay} escolhas</p>
       </div>
 
       {chosen.length > 0 && (

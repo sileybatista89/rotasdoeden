@@ -61,6 +61,63 @@ export function isBookable(item: Pick<CatalogItem, "service_id" | "package_compo
   return Boolean(item.service_id || item.package_component_id);
 }
 
+/**
+ * Configuração do produto que orienta o configurador. Vem de travel_products
+ * (coluna builder_config), nunca de listas fixas espalhadas pelo frontend.
+ */
+export interface BuilderProduct {
+  slug: string;
+  name: string;
+  description: string | null;
+  product_type: string;
+  minimum_days: number;
+  maximum_days: number | null;
+  minimum_nights: number | null;
+  maximum_nights: number | null;
+  max_selections_per_day: number;
+  categories: string[];
+  base_components: string[];
+  duration_cap_days: number;
+}
+
+/** Limite por dia herdado do Rotas Essencial. Só serve de omissão. */
+export const DEFAULT_MAX_SELECTIONS_PER_DAY = 4;
+/** Alias histórico mantido para não quebrar o código já existente. */
+export const MAX_SELECTIONS_PER_DAY = DEFAULT_MAX_SELECTIONS_PER_DAY;
+/** Tecto de dias mostrado para pacotes sem máximo (à medida). */
+export const DEFAULT_CUSTOM_DURATION_CAP = 21;
+
+export function normalizeBuilderProduct(row: Record<string, unknown>): BuilderProduct {
+  const cfg = (row.builder_config ?? {}) as Record<string, unknown>;
+  const maxDays = row.maximum_days === null || row.maximum_days === undefined ? null : Number(row.maximum_days);
+  const cap = Number(cfg.duration_cap_days);
+  const perDay = Number(cfg.max_selections_per_day);
+  return {
+    slug: String(row.slug ?? ""),
+    name: String(row.name ?? ""),
+    description: (row.description as string | null) ?? null,
+    product_type: String(row.product_type ?? "standard_package"),
+    minimum_days: Number(row.minimum_days ?? 5),
+    maximum_days: maxDays,
+    minimum_nights: row.minimum_nights === null || row.minimum_nights === undefined ? null : Number(row.minimum_nights),
+    maximum_nights: row.maximum_nights === null || row.maximum_nights === undefined ? null : Number(row.maximum_nights),
+    max_selections_per_day: Number.isInteger(perDay) && perDay > 0 ? perDay : DEFAULT_MAX_SELECTIONS_PER_DAY,
+    categories: Array.isArray(cfg.categories) ? (cfg.categories as string[]).map(String) : [],
+    base_components: Array.isArray(cfg.base_components) ? (cfg.base_components as string[]).map(String) : [],
+    duration_cap_days: Number.isInteger(cap) && cap >= Number(row.minimum_days ?? 5)
+      ? cap
+      : maxDays ?? DEFAULT_CUSTOM_DURATION_CAP,
+  };
+}
+
+/** Durações oferecidas ao visitante, geradas a partir do produto. */
+export function durationOptions(product: Pick<BuilderProduct, "minimum_days" | "maximum_days" | "duration_cap_days">): number[] {
+  const max = product.maximum_days ?? product.duration_cap_days;
+  const out: number[] = [];
+  for (let d = product.minimum_days; d <= max; d++) out.push(d);
+  return out;
+}
+
 export type DayKind = "chegada" | "livre" | "regresso";
 
 export interface DaySlot {
@@ -119,7 +176,8 @@ export interface DaySelection {
 
 /** Horas úteis realistas de um dia de programa. Só usado para avisar, nunca para bloquear. */
 export const DAY_CAPACITY_HOURS = 8;
-export const MAX_SELECTIONS_PER_DAY = 4;
+/** Tecto absoluto de dias aceite pelo servidor, mesmo em pacotes à medida. */
+export const ABSOLUTE_MAX_DAYS = 60;
 
 export function selectionsForDay(selections: DaySelection[], day: number): DaySelection[] {
   return selections.filter((s) => s.day === day);
@@ -130,9 +188,10 @@ export function addSelection(
   selections: DaySelection[],
   selection: DaySelection,
   durationDays: number,
+  maxPerDay: number = DEFAULT_MAX_SELECTIONS_PER_DAY,
 ): DaySelection[] {
   if (!configurableDays(durationDays).includes(selection.day)) return selections;
-  if (selectionsForDay(selections, selection.day).length >= MAX_SELECTIONS_PER_DAY) return selections;
+  if (selectionsForDay(selections, selection.day).length >= maxPerDay) return selections;
   return [...selections, selection];
 }
 
@@ -206,15 +265,23 @@ export interface BuilderConfigInput {
   children: number;
   rooms: number;
   selections: DaySelection[];
+  /** Limite por dia definido no produto. Omissão: 4, como no Rotas Essencial. */
+  maxSelectionsPerDay?: number;
 }
 
 export function validateBuilderConfig(input: BuilderConfigInput): string[] {
   const errors: string[] = [];
+  const maxPerDay = Number.isInteger(input.maxSelectionsPerDay) && (input.maxSelectionsPerDay as number) > 0
+    ? (input.maxSelectionsPerDay as number)
+    : DEFAULT_MAX_SELECTIONS_PER_DAY;
   if (!Number.isInteger(input.durationDays) || input.durationDays < input.minimumDays) {
     errors.push(`A duração tem de ser de pelo menos ${input.minimumDays} dias.`);
   }
   if (input.maximumDays !== null && input.durationDays > input.maximumDays) {
     errors.push(`A duração não pode ultrapassar ${input.maximumDays} dias.`);
+  }
+  if (input.maximumDays === null && input.durationDays > ABSOLUTE_MAX_DAYS) {
+    errors.push(`A duração não pode ultrapassar ${ABSOLUTE_MAX_DAYS} dias.`);
   }
   if (!Number.isInteger(input.adults) || input.adults < 1) errors.push("É necessário pelo menos um adulto.");
   if (input.children < 0) errors.push("Número de crianças inválido.");
@@ -228,7 +295,7 @@ export function validateBuilderConfig(input: BuilderConfigInput): string[] {
     }
   }
   for (const day of allowed) {
-    if (selectionsForDay(input.selections, day).length > MAX_SELECTIONS_PER_DAY) {
+    if (selectionsForDay(input.selections, day).length > maxPerDay) {
       errors.push(`O dia ${day} tem escolhas a mais.`);
       break;
     }

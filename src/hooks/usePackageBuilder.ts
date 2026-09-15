@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getVisitorId } from "@/lib/attribution";
-import type { CatalogItem, DaySelection } from "@/lib/packageBuilder";
+import type { BuilderProduct, CatalogItem, DaySelection } from "@/lib/packageBuilder";
 
 const TOKEN_KEY = "rde_builder_token";
 
@@ -25,6 +25,15 @@ export function useCatalogItems() {
   });
 }
 
+/** Regras do produto vindas do servidor (travel_products.builder_config). */
+export function useBuilderProduct(slug: string) {
+  return useQuery({
+    queryKey: ["builder-product", slug],
+    queryFn: async () => (await call({ action: "product", product_slug: slug })).product as BuilderProduct,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export interface BuilderConfig {
   durationDays: number;
   adults: number;
@@ -34,22 +43,26 @@ export interface BuilderConfig {
   selections: DaySelection[];
 }
 
-const DEFAULT_CONFIG: BuilderConfig = {
-  durationDays: 7,
-  adults: 2,
-  children: 0,
-  rooms: 1,
-  startDate: null,
-  selections: [],
-};
+/** Cada produto tem a sua própria viagem guardada no dispositivo. */
+export function builderTokenKey(productSlug: string) {
+  return productSlug === "rotas-essencial" ? TOKEN_KEY : `${TOKEN_KEY}_${productSlug}`;
+}
 
 /**
  * Guarda a configuração do visitante no servidor através de um token opaco.
  * O token vive apenas no dispositivo; as tabelas não são acessíveis diretamente.
  */
-export function useBuilderSession(productSlug: string) {
-  const [config, setConfig] = useState<BuilderConfig>(DEFAULT_CONFIG);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+export function useBuilderSession(productSlug: string, defaultDurationDays: number) {
+  const storageKey = builderTokenKey(productSlug);
+  const [config, setConfig] = useState<BuilderConfig>({
+    durationDays: defaultDurationDays,
+    adults: 2,
+    children: 0,
+    rooms: 1,
+    startDate: null,
+    selections: [],
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(storageKey));
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [restored, setRestored] = useState(false);
 
@@ -70,7 +83,7 @@ export function useBuilderSession(productSlug: string) {
           selections: c.selections ?? [],
         });
       } catch {
-        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(storageKey);
         if (active) setToken(null);
       } finally {
         if (active) setRestored(true);
@@ -96,7 +109,7 @@ export function useBuilderSession(productSlug: string) {
         selections: next.selections,
       });
       if (data.session_token && data.session_token !== token) {
-        localStorage.setItem(TOKEN_KEY, data.session_token);
+        localStorage.setItem(storageKey, data.session_token);
         setToken(data.session_token);
       }
       setStatus("saved");
@@ -117,7 +130,7 @@ export function useBuilderSession(productSlug: string) {
     let current = token;
     if (!current) {
       await persist(config);
-      current = localStorage.getItem(TOKEN_KEY);
+      current = localStorage.getItem(storageKey);
     }
     if (!current) throw new Error("Não foi possível guardar a viagem. Tente de novo.");
     return call({
