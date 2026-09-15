@@ -3455,6 +3455,93 @@ export type Database = {
           },
         ]
       }
+      product_price_baselines: {
+        Row: {
+          adults: number | null
+          basis: string | null
+          blocked_reason: string | null
+          breakdown: Json
+          commercial_state: string | null
+          computed_at: string
+          created_at: string
+          currency: string | null
+          duration_days: number | null
+          expires_at: string | null
+          id: string
+          missing_components: Json
+          nights: number | null
+          policy_version_id: string | null
+          price_per_person: number | null
+          price_total: number | null
+          product_id: string
+          rooms: number | null
+          source_rate_ids: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adults?: number | null
+          basis?: string | null
+          blocked_reason?: string | null
+          breakdown?: Json
+          commercial_state?: string | null
+          computed_at?: string
+          created_at?: string
+          currency?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          missing_components?: Json
+          nights?: number | null
+          policy_version_id?: string | null
+          price_per_person?: number | null
+          price_total?: number | null
+          product_id: string
+          rooms?: number | null
+          source_rate_ids?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adults?: number | null
+          basis?: string | null
+          blocked_reason?: string | null
+          breakdown?: Json
+          commercial_state?: string | null
+          computed_at?: string
+          created_at?: string
+          currency?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          missing_components?: Json
+          nights?: number | null
+          policy_version_id?: string | null
+          price_per_person?: number | null
+          price_total?: number | null
+          product_id?: string
+          rooms?: number | null
+          source_rate_ids?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_baselines_policy_version_id_fkey"
+            columns: ["policy_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policy_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_price_baselines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_profiles: {
         Row: {
           admin_notes: string | null
