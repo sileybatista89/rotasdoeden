@@ -87,15 +87,21 @@ export interface BaselineContext {
   rooms: number;
 }
 
-/** Custo total de um componente com a tarifa elegível mais barata, ou null. */
+/**
+ * Custo total de um componente com a tarifa elegível mais barata, ou null.
+ * A compatibilidade de ocupação é filtrada ANTES da escolha: nunca é escolhida
+ * uma tarifa que não serve a ocupação configurada para depois bloquear tudo.
+ */
 export function cheapestEligibleCost(
   component: PricingComponentInput,
   referenceDate: string,
   ctx: BaselineContext,
 ): { rate: RateCandidate; cost: number } | null {
+  const guests = { adults: ctx.adults, children: ctx.children };
   let best: { rate: RateCandidate; cost: number } | null = null;
   for (const rate of component.rates) {
     if (classifyRateEligibility(rate, referenceDate).eligibility === "ineligible") continue;
+    if (!isOccupancyCompatible(rate, guests)) continue;
     const qty = (component.quantityOverride ?? resolveQuantity(rate.unit as PricingRateUnit, ctx)) * (rate.quantity ?? 1);
     if (!(qty > 0)) continue;
     const cost = rate.price * qty;
@@ -104,17 +110,23 @@ export function cheapestEligibleCost(
   return best;
 }
 
-/** Para cada categoria obrigatória escolhe o componente real mais barato. */
+/**
+ * Para cada categoria escolhe o componente real mais barato.
+ * Categorias obrigatórias em falta bloqueiam o preço; categorias opcionais
+ * apenas ficam de fora quando não têm dados elegíveis.
+ */
 export function selectBaselineComponents(
   required: PricingComponentType[],
   components: PricingComponentInput[],
   referenceDate: string,
   ctx: BaselineContext,
-): { selected: PricingComponentInput[]; missing: PricingComponentType[] } {
+  optional: PricingComponentType[] = [],
+): { selected: PricingComponentInput[]; missing: PricingComponentType[]; includedTypes: PricingComponentType[] } {
   const selected: PricingComponentInput[] = [];
   const missing: PricingComponentType[] = [];
+  const includedTypes: PricingComponentType[] = [];
 
-  for (const type of required) {
+  const pick = (type: PricingComponentType) => {
     const candidates = components.filter((c) => c.componentType === type);
     let best: { component: PricingComponentInput; cost: number } | null = null;
     for (const candidate of candidates) {
@@ -122,11 +134,22 @@ export function selectBaselineComponents(
       if (!cheapest) continue;
       if (!best || cheapest.cost < best.cost) best = { component: candidate, cost: cheapest.cost };
     }
+    return best;
+  };
+
+  for (const type of required) {
+    const best = pick(type);
     if (!best) missing.push(type);
-    else selected.push(best.component);
+    else { selected.push(best.component); includedTypes.push(type); }
   }
 
-  return { selected, missing };
+  for (const type of optional) {
+    const best = pick(type);
+    // Ausência de componente opcional nunca vira zero: fica simplesmente fora.
+    if (best) { selected.push(best.component); includedTypes.push(type); }
+  }
+
+  return { selected, missing, includedTypes };
 }
 
 /** Quando a referência de preço deixa de poder ser usada sem revalidação. */
