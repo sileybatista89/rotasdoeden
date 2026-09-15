@@ -367,6 +367,18 @@ export function applyFlightProtection(flightCost: number, rule: FlightProtection
 
 const DEFAULT_RULE: ComponentRule = { mode: "markup", value: 0 };
 
+/** Classifica a origem do custo escolhido para uma linha. */
+export function rateProvenance(rate: RateCandidate | null, referenceDate?: string): LineProvenance {
+  if (!rate) return "unavailable";
+  if (rate.status === "expired" || rate.status === "withdrawn") return "expired";
+  if (referenceDate && !isRateValidOn(rate, referenceDate)) return "expired";
+  if (rate.kind === "market_observed_price") return "market_observed";
+  if (rate.kind === "estimated_cost") return "estimated";
+  if (rate.status === "confirmed") return "confirmed";
+  return "pending_validation";
+}
+
+
 // ============ motor ============
 
 export function calculatePricing(req: PricingRequest): PricingResult {
