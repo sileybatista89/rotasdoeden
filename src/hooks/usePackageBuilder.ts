@@ -43,22 +43,26 @@ export interface BuilderConfig {
   selections: DaySelection[];
 }
 
-const DEFAULT_CONFIG: BuilderConfig = {
-  durationDays: 7,
-  adults: 2,
-  children: 0,
-  rooms: 1,
-  startDate: null,
-  selections: [],
-};
+/** Cada produto tem a sua própria viagem guardada no dispositivo. */
+export function builderTokenKey(productSlug: string) {
+  return productSlug === "rotas-essencial" ? TOKEN_KEY : `${TOKEN_KEY}_${productSlug}`;
+}
 
 /**
  * Guarda a configuração do visitante no servidor através de um token opaco.
  * O token vive apenas no dispositivo; as tabelas não são acessíveis diretamente.
  */
-export function useBuilderSession(productSlug: string) {
-  const [config, setConfig] = useState<BuilderConfig>(DEFAULT_CONFIG);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+export function useBuilderSession(productSlug: string, defaultDurationDays: number) {
+  const storageKey = builderTokenKey(productSlug);
+  const [config, setConfig] = useState<BuilderConfig>({
+    durationDays: defaultDurationDays,
+    adults: 2,
+    children: 0,
+    rooms: 1,
+    startDate: null,
+    selections: [],
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(storageKey));
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [restored, setRestored] = useState(false);
 
