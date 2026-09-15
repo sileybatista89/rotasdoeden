@@ -34,6 +34,25 @@ export function useBuilderProduct(slug: string) {
   });
 }
 
+export interface PublicBaseline {
+  currency: string | null;
+  price_per_person: number;
+  duration_days: number | null;
+  adults: number | null;
+  indicative: boolean;
+  computed_at: string;
+}
+
+/** "Desde €X" calculado no servidor pelo Pricing Engine. Nunca hardcoded. */
+export function useProductBaseline(slug: string) {
+  return useQuery({
+    queryKey: ["builder-baseline", slug],
+    queryFn: async () =>
+      ((await call({ action: "baseline", product_slug: slug })).baseline ?? null) as PublicBaseline | null,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 export interface BuilderConfig {
   durationDays: number;
   adults: number;
