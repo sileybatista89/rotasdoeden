@@ -47,50 +47,48 @@ function json(body: unknown, status = 200) {
 
 /** Leitura — e só leitura — dos dados reais que sustentam a resposta. */
 async function loadGrounding(db: SupabaseClient, quoteId: string | null): Promise<GroundingContext> {
-  const [products, versions, experiences, guides] = await Promise.all([
-    db.from("travel_products").select("id, name, summary, min_days, max_days, is_active"),
-    db.from("travel_product_versions").select("product_id").eq("status", "published"),
-    db.from("services").select("title, district").eq("status", "aprovado").eq("is_active", true).limit(20),
-    db.from("professional_profiles").select("display_name, specialty")
-      .eq("verification_status", "verified").limit(20),
+  const [products, experiences, guides] = await Promise.all([
+    db.from("travel_products")
+      .select("id, name, description, minimum_days, maximum_days, current_version_id")
+      .eq("status", "published").not("current_version_id", "is", null),
+    db.from("services").select("title, district_id")
+      .eq("moderation_status", "aprovado").eq("is_active", true).limit(20),
+    db.from("professional_profiles").select("company_name, headline")
+      .eq("verification_status", "verified").eq("suspended", false).limit(20),
   ]);
-
-  const publishedIds = new Set((versions.data ?? []).map((v: { product_id: string }) => v.product_id));
 
   let quote: GroundingContext["quote"] = null;
   if (quoteId) {
     const { data: q } = await db.from("travel_quotes")
-      .select("reference, status, current_version_id").eq("id", quoteId).maybeSingle();
+      .select("quote_number, status, current_version_id").eq("id", quoteId).maybeSingle();
     if (q?.current_version_id) {
       const { data: v } = await db.from("travel_quote_versions")
-        .select("total_price, currency").eq("id", q.current_version_id).maybeSingle();
+        .select("total_price, sale_currency").eq("id", q.current_version_id).maybeSingle();
       if (v) {
         quote = {
-          reference: String(q.reference),
+          reference: String(q.quote_number),
           status: String(q.status),
           total_price: Number(v.total_price),
-          currency: String(v.currency),
+          currency: String(v.sale_currency),
         };
       }
     }
   }
 
   return {
-    products: (products.data ?? [])
-      .filter((p: Record<string, unknown>) => p.is_active !== false && publishedIds.has(p.id as string))
-      .map((p: Record<string, unknown>) => ({
-        name: String(p.name),
-        summary: (p.summary as string) ?? null,
-        min_days: (p.min_days as number) ?? null,
-        max_days: (p.max_days as number) ?? null,
-      })),
+    products: (products.data ?? []).map((p: Record<string, unknown>) => ({
+      name: String(p.name),
+      summary: (p.description as string) ?? null,
+      min_days: (p.minimum_days as number) ?? null,
+      max_days: (p.maximum_days as number) ?? null,
+    })),
     experiences: (experiences.data ?? []).map((e: Record<string, unknown>) => ({
       title: String(e.title),
-      district: (e.district as string) ?? null,
+      district: null,
     })),
     guides: (guides.data ?? []).map((g: Record<string, unknown>) => ({
-      name: String(g.display_name ?? ""),
-      specialty: (g.specialty as string) ?? null,
+      name: String(g.company_name ?? ""),
+      specialty: (g.headline as string) ?? null,
     })).filter((g) => g.name),
     quote,
   };
