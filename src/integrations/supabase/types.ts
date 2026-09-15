@@ -2144,6 +2144,85 @@ export type Database = {
           },
         ]
       }
+      experience_catalog_items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          island: string
+          locality_id: string | null
+          name: string
+          package_component_id: string | null
+          service_id: string | null
+          short_description: string | null
+          slug: string
+          sort_order: number
+          typical_duration_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          island?: string
+          locality_id?: string | null
+          name: string
+          package_component_id?: string | null
+          service_id?: string | null
+          short_description?: string | null
+          slug: string
+          sort_order?: number
+          typical_duration_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          island?: string
+          locality_id?: string | null
+          name?: string
+          package_component_id?: string | null
+          service_id?: string | null
+          short_description?: string | null
+          slug?: string
+          sort_order?: number
+          typical_duration_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_catalog_items_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_catalog_items_package_component_id_fkey"
+            columns: ["package_component_id"]
+            isOneToOne: false
+            referencedRelation: "package_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_catalog_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flagged_messages: {
         Row: {
           action_taken: string | null
@@ -2782,6 +2861,100 @@ export type Database = {
             columns: ["quote_version_id"]
             isOneToOne: false
             referencedRelation: "travel_quote_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      package_builder_configs: {
+        Row: {
+          adults: number
+          children: number
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          duration_days: number
+          id: string
+          notes: string | null
+          product_id: string
+          product_version_id: string | null
+          quote_id: string | null
+          rooms: number
+          selections: Json
+          session_token_hash: string
+          start_date: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          adults?: number
+          children?: number
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          duration_days: number
+          id?: string
+          notes?: string | null
+          product_id: string
+          product_version_id?: string | null
+          quote_id?: string | null
+          rooms?: number
+          selections?: Json
+          session_token_hash: string
+          start_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          adults?: number
+          children?: number
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          duration_days?: number
+          id?: string
+          notes?: string | null
+          product_id?: string
+          product_version_id?: string | null
+          quote_id?: string | null
+          rooms?: number
+          selections?: Json
+          session_token_hash?: string
+          start_date?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_builder_configs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_builder_configs_product_version_id_fkey"
+            columns: ["product_version_id"]
+            isOneToOne: false
+            referencedRelation: "travel_product_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_builder_configs_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quotes"
             referencedColumns: ["id"]
           },
         ]
@@ -4497,6 +4670,7 @@ export type Database = {
         Returns: undefined
       }
       admin_save_accommodation: { Args: { _payload: Json }; Returns: Json }
+      admin_save_catalog_item: { Args: { _payload: Json }; Returns: Json }
       admin_save_component: { Args: { _payload: Json }; Returns: Json }
       admin_save_policy_version: { Args: { _payload: Json }; Returns: Json }
       admin_save_pricing_policy: { Args: { _payload: Json }; Returns: Json }
