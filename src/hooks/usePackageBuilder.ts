@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getVisitorId } from "@/lib/attribution";
-import type { CatalogItem, DaySelection } from "@/lib/packageBuilder";
+import type { BuilderProduct, CatalogItem, DaySelection } from "@/lib/packageBuilder";
 
 const TOKEN_KEY = "rde_builder_token";
 
