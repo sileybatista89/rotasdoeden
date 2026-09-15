@@ -39,7 +39,7 @@ import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
 import ParceirosPage from "./pages/ParceirosPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import PropostaPage from "./pages/PropostaPage.tsx";
-import RotasEssencialPage from "./pages/RotasEssencialPage.tsx";
+import PackageBuilderPage from "./pages/PackageBuilderPage.tsx";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
 import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
 import SupportConversationPage from "./pages/SupportConversationPage.tsx";
