@@ -31,7 +31,12 @@ const emptyRate = {
   occupancy_total: "",
   meal_plan: "unknown",
   cancellation_type: "unknown",
+  source_document_url: "",
+  total_observed_amount: "",
+  observed_nights: "",
+  notes: "",
 };
+
 
 export function ComponentsTab() {
   const components = useComponents();
@@ -44,6 +49,15 @@ export function ComponentsTab() {
   const rates = useComponentRates(openId);
   const [form, setForm] = useState({ name: "", component_type: "accommodation", supplier_id: "" });
   const [rateForm, setRateForm] = useState(emptyRate);
+
+  const observedTotal = Number(rateForm.total_observed_amount);
+  const observedNights = Number(rateForm.observed_nights);
+  const nightlyPreview =
+    observedTotal > 0 && observedNights >= 1
+      ? (Math.round((observedTotal / observedNights) * 100) / 100).toFixed(2)
+      : null;
+
+
 
   const addComponent = async () => {
     if (!form.name.trim()) return toast({ title: "Indica o nome do componente", variant: "destructive" });
@@ -78,6 +92,12 @@ export function ComponentsTab() {
       occupancy_total: rateForm.occupancy_total === "" ? null : Number(rateForm.occupancy_total),
     });
     if (problem) return toast({ title: problem, variant: "destructive" });
+    if ((rateForm.total_observed_amount === "") !== (rateForm.observed_nights === "")) {
+      return toast({ title: "Indica o total observado e o número de noites", variant: "destructive" });
+    }
+    if (rateForm.total_observed_amount !== "" && !(observedTotal > 0 && observedNights >= 1)) {
+      return toast({ title: "Observação de estadia inválida", variant: "destructive" });
+    }
 
     try {
       await saveRate.mutateAsync({
@@ -88,6 +108,7 @@ export function ComponentsTab() {
         unit: rateForm.unit,
         source_type: rateForm.source_type,
         source_reference: rateForm.source_reference || null,
+        source_document_url: rateForm.source_document_url || null,
         observed_at: new Date(rateForm.observed_at).toISOString(),
         valid_from: rateForm.valid_from || null,
         valid_until: rateForm.valid_until || null,
@@ -97,7 +118,11 @@ export function ComponentsTab() {
         occupancy_total: rateForm.occupancy_total || null,
         meal_plan: rateForm.meal_plan,
         cancellation_type: rateForm.cancellation_type,
+        total_observed_amount: rateForm.total_observed_amount || null,
+        observed_nights: rateForm.observed_nights || null,
+        notes: rateForm.notes || null,
       });
+
       setRateForm({ ...emptyRate, observed_at: new Date().toISOString().slice(0, 10) });
       toast({ title: "Tarifa registada com fonte e data" });
     } catch (e) {
@@ -228,11 +253,35 @@ export function ComponentsTab() {
                     <select className="h-10 rounded-md border border-input bg-background px-3 text-sm" value={rateForm.cancellation_type} onChange={(e) => setRateForm({ ...rateForm, cancellation_type: e.target.value })}>
                       {Object.entries(CANCELLATION_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
+                    <Input placeholder="URL da fonte" value={rateForm.source_document_url} onChange={(e) => setRateForm({ ...rateForm, source_document_url: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Total observado da estadia</Label>
+                      <Input placeholder="Ex.: 600" inputMode="decimal" value={rateForm.total_observed_amount} onChange={(e) => setRateForm({ ...rateForm, total_observed_amount: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Noites observadas</Label>
+                      <Input placeholder="Ex.: 3" inputMode="numeric" value={rateForm.observed_nights} onChange={(e) => setRateForm({ ...rateForm, observed_nights: e.target.value })} />
+                    </div>
+                    <div className="flex items-end">
+                      <p className="text-xs text-muted-foreground">
+                        {nightlyPreview
+                          ? `Equivale a ${nightlyPreview} ${rateForm.currency.toUpperCase()} por noite.`
+                          : "Opcional: usa isto quando o preço público é para várias noites."}
+                      </p>
+                    </div>
+                    <div className="col-span-2 sm:col-span-3">
+                      <Label className="text-[11px] text-muted-foreground">Notas internas</Label>
+                      <Input placeholder="Condições, datas exatas, quarto, etc." value={rateForm.notes} onChange={(e) => setRateForm({ ...rateForm, notes: e.target.value })} />
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Sem validade indicada, a tarifa fica marcada como validade desconhecida e não pode ser usada como custo confirmado.
+                    Sem validade indicada, a tarifa fica marcada como validade desconhecida: serve para proposta indicativa
+                    baseada em preço de mercado, mas nunca como tarifa confirmada por fornecedor.
                   </p>
                   <Button size="sm" onClick={addRate} disabled={saveRate.isPending}>Registar tarifa</Button>
+
                 </div>
               </div>
             )}

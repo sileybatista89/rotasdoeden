@@ -54,7 +54,7 @@ function pricedPackage() {
       id: "c1", name: "Hotel Praia", componentType: "accommodation",
       rates: [{
         id: "r1", kind: "negotiated_rotas_rate", status: "confirmed", price: 100, currency: "EUR",
-        unit: "per_night", sourceType: "contract", validFrom: "2026-01-01", validUntil: "2026-12-31",
+        unit: "per_night", sourceType: "contract", observedAt: "2026-10-01", validFrom: "2026-01-01", validUntil: "2026-12-31",
       }],
     }],
   });
@@ -327,7 +327,7 @@ describe("7G — testes críticos de dinheiro", () => {
       policy, durationDays: 8, nights: 7, adults: 2, referenceDate: "2026-11-02",
       components: [{
         id: "c1", name: "Hotel", componentType: "accommodation",
-        rates: [{ id: "r1", kind: "negotiated_rotas_rate", status: "confirmed", price: 100, currency: "EUR", unit: "per_night", sourceType: "contract", validUntil: "2026-12-31" }],
+        rates: [{ id: "r1", kind: "negotiated_rotas_rate", status: "confirmed", price: 100, currency: "EUR", unit: "per_night", sourceType: "contract", observedAt: "2026-10-01", validFrom: "2026-01-01", validUntil: "2026-12-31" }],
       }],
       flightCost: { amount: 800, currency: "EUR", confirmed: true },
     });

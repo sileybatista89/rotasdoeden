@@ -20,6 +20,22 @@ import { QUOTE_STATUS_LABEL, type QuoteStatus } from "@/lib/quotes";
 
 const ALL = "__all__";
 
+const COMMERCIAL_STATE_LABEL: Record<string, string> = {
+  confirmed_pricing: "Preços confirmados por fornecedor",
+  market_based_pricing: "Preços de mercado observados (indicativa)",
+  pending_validation: "Pendente de validação",
+};
+
+const PROVENANCE_LABEL: Record<string, string> = {
+  confirmed: "Confirmado por fornecedor",
+  market_observed: "Preço de mercado observado",
+  estimated: "Estimado",
+  expired: "Expirado",
+  unavailable: "Sem custo utilizável",
+  pending_validation: "Por validar",
+};
+
+
 function money(value: number | null | undefined, currency: string | null | undefined) {
   if (value == null) return "—";
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: currency || "EUR" }).format(Number(value));
@@ -263,7 +279,21 @@ export function QuotesPanel() {
                     <AlertTriangle size={12} /> Não confirmável
                   </Badge>
                 )}
+                {(() => {
+                  const state = (current as any)?.commercial_state as string | undefined;
+                  if (!state) return null;
+                  const tone = state === "confirmed_pricing"
+                    ? "bg-primary/10 text-primary border-primary/30"
+                    : "bg-secondary/20 text-foreground border-border";
+                  return <Badge variant="outline" className={tone}>{COMMERCIAL_STATE_LABEL[state] ?? state}</Badge>;
+                })()}
+                {(current as any)?.requires_validation && (
+                  <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">
+                    Exige reconfirmação antes de fechar
+                  </Badge>
+                )}
               </div>
+
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-xs text-muted-foreground">Preço ao cliente</p><p className="font-semibold">{money(current?.total_price, current?.sale_currency)}</p></div>
@@ -283,6 +313,20 @@ export function QuotesPanel() {
                 </div>
               )}
 
+              {((current as any)?.category_subtotals ?? []).length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Subtotais por categoria</p>
+                  <div className="space-y-1 text-xs">
+                    {((current as any).category_subtotals as any[]).map((c, idx) => (
+                      <div key={idx} className="flex justify-between gap-3 border border-border rounded-xl px-3 py-2">
+                        <span>{c.componentType} · {c.lines} linha(s)</span>
+                        <span>{money(c.sellPrice, current?.sale_currency)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <p className="text-sm font-medium mb-2">Linhas da cotação</p>
                 <div className="space-y-2">
@@ -293,11 +337,17 @@ export function QuotesPanel() {
                         <span className="font-medium text-foreground">{i.display_name}</span>
                         <span>{money(i.selling_price, i.currency)}</span>
                       </div>
+                      {(i as any).provenance && (
+                        <Badge variant="outline" className="mt-1">
+                          {PROVENANCE_LABEL[(i as any).provenance] ?? (i as any).provenance}
+                        </Badge>
+                      )}
                       <p className="text-muted-foreground mt-1">
                         {i.quantity} × {money(i.unit_cost, i.currency)} ({i.unit ?? "—"}) · custo {money(i.total_cost, i.currency)} · tarifa {i.rate_kind ?? "—"} · fonte {i.source_type ?? "—"} · válida até {i.rate_valid_until ?? "desconhecida"}
                       </p>
                       {i.cancellation_summary && <p className="text-muted-foreground mt-1">{i.cancellation_summary}</p>}
                     </div>
+
                   ))}
                 </div>
               </div>
