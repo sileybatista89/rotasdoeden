@@ -14,6 +14,7 @@
 import {
   calculatePricing,
   classifyRateEligibility,
+  isOccupancyCompatible,
   MARKET_OBSERVATION_MAX_AGE_DAYS,
   resolveQuantity,
   type CommercialState,
@@ -30,7 +31,10 @@ export interface BaselineConfig {
   enabled: boolean;
   adults: number;
   rooms: number;
+  /** Categorias sem as quais não há preço público. */
   required: PricingComponentType[];
+  /** Categorias que entram no preço só quando existem dados elegíveis. */
+  optional: PricingComponentType[];
 }
 
 const COMPONENT_TYPES: PricingComponentType[] = [
