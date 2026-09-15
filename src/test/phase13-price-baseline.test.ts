@@ -18,7 +18,7 @@ const policy: PricingPolicyVersion = {
   versionNumber: 1,
   status: "active",
   baseCurrency: "EUR",
-  marginMode: "target",
+  marginMode: "target_margin",
   minMarginPct: 10,
   targetMarginPct: 20,
   componentRules: {},
