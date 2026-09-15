@@ -188,9 +188,10 @@ export function addSelection(
   selections: DaySelection[],
   selection: DaySelection,
   durationDays: number,
+  maxPerDay: number = DEFAULT_MAX_SELECTIONS_PER_DAY,
 ): DaySelection[] {
   if (!configurableDays(durationDays).includes(selection.day)) return selections;
-  if (selectionsForDay(selections, selection.day).length >= MAX_SELECTIONS_PER_DAY) return selections;
+  if (selectionsForDay(selections, selection.day).length >= maxPerDay) return selections;
   return [...selections, selection];
 }
 
