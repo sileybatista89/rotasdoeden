@@ -259,3 +259,149 @@ export function canTransitionRate(from: RateStatus, to: RateStatus): boolean {
 export function formatRateAmount(price: number, currency: string, unit: RateUnit): string {
   return `${new Intl.NumberFormat("pt-PT", { style: "currency", currency }).format(price)} · ${RATE_UNIT_LABEL[unit].toLowerCase()}`;
 }
+
+/* ------------------------------------------------------------------ *
+ * Camada comercial — elegibilidade e prontidão                        *
+ * Só interpreta os dados já guardados. Não inventa preços nem fontes. *
+ * ------------------------------------------------------------------ */
+
+export type RateEligibility =
+  | "confirmada"
+  | "estimada"
+  | "expirada"
+  | "validade_desconhecida"
+  | "sem_fonte"
+  | "indisponivel";
+
+export const RATE_ELIGIBILITY_LABEL: Record<RateEligibility, string> = {
+  confirmada: "Confirmada e válida",
+  estimada: "Estimada",
+  expirada: "Expirada",
+  validade_desconhecida: "Validade desconhecida",
+  sem_fonte: "Sem fonte registada",
+  indisponivel: "Não utilizável",
+};
+
+export interface RateFacts {
+  rate_kind: RateKind;
+  status: RateStatus;
+  source_type?: SourceType | null;
+  source_reference?: string | null;
+  observed_at?: string | null;
+  valid_until?: string | null;
+  validity_unknown?: boolean;
+}
+
+/** Classifica uma tarifa sem nunca transformar incerteza em certeza comercial. */
+export function classifyRate(rate: RateFacts, today = new Date()): RateEligibility {
+  if (rate.status === "withdrawn") return "indisponivel";
+  if (isExpired(rate, today)) return "expirada";
+  if (!rate.source_type) return "sem_fonte";
+  if (isUsableAsCurrentCost(rate, today)) return "confirmada";
+  if (rate.validity_unknown) return "validade_desconhecida";
+  return "estimada";
+}
+
+/** Só a tarifa confirmada, válida, com fonte e data de observação alimenta o cálculo. */
+export function isRateEligibleForPricing(rate: RateFacts, today = new Date()): boolean {
+  if (!rate.observed_at) return false;
+  return classifyRate(rate, today) === "confirmada";
+}
+
+export interface ComponentFacts {
+  id: string;
+  name?: string;
+  component_type?: ComponentType;
+  status: SupplyStatus;
+  supplier_id?: string | null;
+  service_id?: string | null;
+}
+
+export type SupplyGap =
+  | "componente_sem_fornecedor"
+  | "componente_nao_aprovado"
+  | "componente_sem_tarifa"
+  | "componente_sem_tarifa_elegivel"
+  | "tarifa_expirada"
+  | "tarifa_sem_fonte"
+  | "servico_sem_fornecedor"
+  | "produto_sem_componentes";
+
+export const SUPPLY_GAP_LABEL: Record<SupplyGap, string> = {
+  componente_sem_fornecedor: "Componente sem fornecedor",
+  componente_nao_aprovado: "Componente por aprovar",
+  componente_sem_tarifa: "Componente sem tarifa",
+  componente_sem_tarifa_elegivel: "Componente sem tarifa válida",
+  tarifa_expirada: "Tarifa expirada",
+  tarifa_sem_fonte: "Tarifa sem fonte",
+  servico_sem_fornecedor: "Serviço sem fornecedor",
+  produto_sem_componentes: "Produto sem componentes",
+};
+
+export interface ComponentReadiness {
+  ready: boolean;
+  gaps: SupplyGap[];
+  eligibleRates: number;
+}
+
+/**
+ * Um componente só é comercialmente utilizável com fornecedor, aprovação
+ * e pelo menos uma tarifa elegível. Sem isto fica como inspiração.
+ */
+export function componentReadiness(
+  component: ComponentFacts,
+  rates: RateFacts[],
+  today = new Date(),
+): ComponentReadiness {
+  const gaps: SupplyGap[] = [];
+  if (!component.supplier_id) gaps.push("componente_sem_fornecedor");
+  if (!isApprovedForCommercialUse(component.status)) gaps.push("componente_nao_aprovado");
+
+  const eligible = rates.filter((r) => isRateEligibleForPricing(r, today));
+  if (rates.length === 0) gaps.push("componente_sem_tarifa");
+  else if (eligible.length === 0) gaps.push("componente_sem_tarifa_elegivel");
+  if (rates.some((r) => isExpired(r, today))) gaps.push("tarifa_expirada");
+  if (rates.some((r) => !r.source_type)) gaps.push("tarifa_sem_fonte");
+
+  const blocking: SupplyGap[] = [
+    "componente_sem_fornecedor",
+    "componente_nao_aprovado",
+    "componente_sem_tarifa",
+    "componente_sem_tarifa_elegivel",
+  ];
+  return { ready: !gaps.some((g) => blocking.includes(g)), gaps, eligibleRates: eligible.length };
+}
+
+/** O que o visitante vê: inspiração editorial ou oferta comercial confirmada. */
+export type CatalogCommercialState = "inspiracao" | "confirmado";
+
+export function catalogCommercialState(link: {
+  service_id?: string | null;
+  package_component_id?: string | null;
+  componentReady?: boolean;
+  serviceApproved?: boolean;
+}): CatalogCommercialState {
+  if (link.package_component_id && link.componentReady) return "confirmado";
+  if (link.service_id && link.serviceApproved) return "confirmado";
+  return "inspiracao";
+}
+
+export interface ProductReadiness {
+  quoteReady: boolean;
+  gaps: SupplyGap[];
+  readyComponents: number;
+  totalComponents: number;
+}
+
+/** Diz ao admin o que falta para um produto conseguir gerar uma proposta real. */
+export function productReadiness(componentStates: ComponentReadiness[]): ProductReadiness {
+  const ready = componentStates.filter((c) => c.ready).length;
+  const gaps = [...new Set(componentStates.flatMap((c) => c.gaps))];
+  if (componentStates.length === 0) gaps.unshift("produto_sem_componentes");
+  return {
+    quoteReady: componentStates.length > 0 && ready === componentStates.length,
+    gaps,
+    readyComponents: ready,
+    totalComponents: componentStates.length,
+  };
+}
