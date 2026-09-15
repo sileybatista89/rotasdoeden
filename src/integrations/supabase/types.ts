@@ -1281,6 +1281,7 @@ export type Database = {
           created_by: string | null
           currency: string
           id: string
+          is_lower_bound: boolean
           meal_plan: string
           notes: string | null
           observed_at: string
@@ -1316,6 +1317,7 @@ export type Database = {
           created_by?: string | null
           currency: string
           id?: string
+          is_lower_bound?: boolean
           meal_plan?: string
           notes?: string | null
           observed_at: string
@@ -1351,6 +1353,7 @@ export type Database = {
           created_by?: string | null
           currency?: string
           id?: string
+          is_lower_bound?: boolean
           meal_plan?: string
           notes?: string | null
           observed_at?: string
@@ -3455,6 +3458,96 @@ export type Database = {
           },
         ]
       }
+      product_price_baseline_versions: {
+        Row: {
+          adults: number | null
+          basis: string | null
+          blocked_reason: string | null
+          breakdown: Json
+          commercial_state: string | null
+          computed_at: string
+          created_at: string
+          currency: string | null
+          duration_days: number | null
+          expires_at: string | null
+          id: string
+          includes_flight: boolean
+          missing_components: Json
+          nights: number | null
+          policy_version_id: string | null
+          price_per_person: number | null
+          price_total: number | null
+          product_id: string
+          rooms: number | null
+          source_flags: Json
+          source_rate_ids: Json
+          status: string
+        }
+        Insert: {
+          adults?: number | null
+          basis?: string | null
+          blocked_reason?: string | null
+          breakdown?: Json
+          commercial_state?: string | null
+          computed_at?: string
+          created_at?: string
+          currency?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          includes_flight?: boolean
+          missing_components?: Json
+          nights?: number | null
+          policy_version_id?: string | null
+          price_per_person?: number | null
+          price_total?: number | null
+          product_id: string
+          rooms?: number | null
+          source_flags?: Json
+          source_rate_ids?: Json
+          status: string
+        }
+        Update: {
+          adults?: number | null
+          basis?: string | null
+          blocked_reason?: string | null
+          breakdown?: Json
+          commercial_state?: string | null
+          computed_at?: string
+          created_at?: string
+          currency?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          includes_flight?: boolean
+          missing_components?: Json
+          nights?: number | null
+          policy_version_id?: string | null
+          price_per_person?: number | null
+          price_total?: number | null
+          product_id?: string
+          rooms?: number | null
+          source_flags?: Json
+          source_rate_ids?: Json
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_baseline_versions_policy_version_id_fkey"
+            columns: ["policy_version_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_policy_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_price_baseline_versions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_price_baselines: {
         Row: {
           adults: number | null
@@ -3468,6 +3561,7 @@ export type Database = {
           duration_days: number | null
           expires_at: string | null
           id: string
+          includes_flight: boolean
           missing_components: Json
           nights: number | null
           policy_version_id: string | null
@@ -3475,6 +3569,7 @@ export type Database = {
           price_total: number | null
           product_id: string
           rooms: number | null
+          source_flags: Json
           source_rate_ids: Json
           status: string
           updated_at: string
@@ -3491,6 +3586,7 @@ export type Database = {
           duration_days?: number | null
           expires_at?: string | null
           id?: string
+          includes_flight?: boolean
           missing_components?: Json
           nights?: number | null
           policy_version_id?: string | null
@@ -3498,6 +3594,7 @@ export type Database = {
           price_total?: number | null
           product_id: string
           rooms?: number | null
+          source_flags?: Json
           source_rate_ids?: Json
           status?: string
           updated_at?: string
@@ -3514,6 +3611,7 @@ export type Database = {
           duration_days?: number | null
           expires_at?: string | null
           id?: string
+          includes_flight?: boolean
           missing_components?: Json
           nights?: number | null
           policy_version_id?: string | null
@@ -3521,6 +3619,7 @@ export type Database = {
           price_total?: number | null
           product_id?: string
           rooms?: number | null
+          source_flags?: Json
           source_rate_ids?: Json
           status?: string
           updated_at?: string
