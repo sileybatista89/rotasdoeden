@@ -305,6 +305,8 @@ export function computeBaseline(req: BaselineRequest): BaselineResult {
     policyVersionId: req.policy.id,
     breakdown,
     missing: [],
+    includedTypes,
+    includesFlight: includedTypes.includes("flight"),
     sourceRateIds: result.components.map((l) => l.rateId).filter(Boolean) as string[],
     expiresAt: null,
     warnings: result.warnings,
