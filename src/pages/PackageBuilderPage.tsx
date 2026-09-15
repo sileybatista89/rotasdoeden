@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { DayConfigurator } from "@/components/packages/DayConfigurator";
 import { TripSummary } from "@/components/packages/TripSummary";
-import { useBuilderProduct, useBuilderSession, useCatalogItems } from "@/hooks/usePackageBuilder";
+import { useBuilderProduct, useBuilderSession, useCatalogItems, useProductBaseline } from "@/hooks/usePackageBuilder";
 import {
   addSelection,
   buildDayPlan,
@@ -28,6 +28,7 @@ import {
 export default function PackageBuilderPage({ slug }: { slug: string }) {
   const product = useBuilderProduct(slug);
   const catalog = useCatalogItems();
+  const baseline = useProductBaseline(slug);
   const minimumDays = product.data?.minimum_days ?? 5;
   const { config, update, submit, status, restored } = useBuilderSession(slug, minimumDays);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", notes: "" });
@@ -135,6 +136,24 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
               </>
             )}
           </p>
+          {baseline.data && (
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-2xl font-display font-medium text-foreground">
+                Desde {new Intl.NumberFormat("pt-PT", {
+                  style: "currency",
+                  currency: baseline.data.currency ?? "EUR",
+                  maximumFractionDigits: 0,
+                }).format(baseline.data.price_per_person)}{" "}
+                <span className="text-base text-muted-foreground">por pessoa</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Valor de referência para {baseline.data.duration_days} dias com {baseline.data.adults} adultos.
+                {baseline.data.indicative
+                  ? " Preço indicativo baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."
+                  : " Confirmado na proposta antes de qualquer reserva."}
+              </p>
+            </div>
+          )}
         </header>
 
         {product.error && (

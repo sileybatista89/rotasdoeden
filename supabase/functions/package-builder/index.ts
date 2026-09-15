@@ -16,6 +16,16 @@ import {
   sanitizeSelections,
   validateBuilderConfig,
 } from "../_shared/package-builder.ts";
+import {
+  computeBaseline,
+  normalizeBaselineConfig,
+  publicBaseline,
+} from "../_shared/price-baseline.ts";
+import type {
+  PricingComponentInput,
+  PricingPolicyVersion,
+  RateCandidate,
+} from "../_shared/pricing-engine.ts";
 
 /** Os quatro produtos oficiais. Nenhum outro slug é servido publicamente. */
 const PUBLIC_PRODUCT_SLUGS = ["rotas-essencial", "rotas-explorar", "rotas-imersao", "rotas-a-medida"];
@@ -126,6 +136,118 @@ function publicConfig(row: Record<string, any>) {
   };
 }
 
+/** Idade máxima do baseline guardado antes de ser recalculado. */
+const BASELINE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function mapPolicy(row: Record<string, any>): PricingPolicyVersion {
+  return {
+    id: row.id,
+    policyId: row.policy_id,
+    versionNumber: row.version_number,
+    status: row.status,
+    baseCurrency: row.base_currency,
+    marginMode: row.margin_mode,
+    minMarginPct: Number(row.min_margin_pct),
+    targetMarginPct: Number(row.target_margin_pct),
+    componentRules: row.component_rules ?? {},
+    flightProtection: row.flight_protection ?? { method: "percentage", value: 0 },
+    fees: row.fees ?? [],
+    supplements: row.supplements ?? [],
+    operationalCosts: row.operational_costs ?? [],
+    roundingMode: row.rounding_mode,
+    validFrom: row.valid_from,
+    validUntil: row.valid_until,
+  };
+}
+
+/**
+ * Recalcula o "desde €X" do produto a partir dos dados reais e guarda a
+ * proveniência. Nunca inventa componentes nem preenche falhas com zero.
+ */
+async function recomputeBaseline(client: SupabaseClient, product: Record<string, any>) {
+  const config = normalizeBaselineConfig(product.builder_config);
+  if (!config) return null;
+
+  const { data: policyRow } = await client
+    .from("pricing_policy_versions").select("*").eq("status", "active").maybeSingle();
+
+  const { data: compRows } = await client
+    .from("package_components")
+    .select("id, name, component_type, supplier_id")
+    .eq("status", "approved")
+    .in("component_type", config.required);
+
+  const approved = (compRows ?? []).filter((c) => c.supplier_id);
+  let rates: Record<string, any>[] = [];
+  if (approved.length > 0) {
+    const { data } = await client
+      .from("component_rates").select("*").in("component_id", approved.map((c) => c.id));
+    rates = data ?? [];
+  }
+
+  const components: PricingComponentInput[] = approved.map((c) => ({
+    id: c.id,
+    name: c.name,
+    componentType: c.component_type,
+    rates: rates.filter((r) => r.component_id === c.id).map((r): RateCandidate => ({
+      id: r.id,
+      kind: r.rate_kind,
+      status: r.status,
+      price: Number(r.price),
+      currency: r.currency,
+      unit: r.unit,
+      quantity: Number(r.quantity ?? 1),
+      occupancyAdults: r.occupancy_adults,
+      occupancyChildren: r.occupancy_children,
+      occupancyTotal: r.occupancy_total,
+      validFrom: r.valid_from,
+      validUntil: r.valid_until,
+      validityUnknown: r.validity_unknown,
+      sourceType: r.source_type,
+      observedAt: r.observed_at,
+    })),
+  }));
+
+  const durationDays = product.minimum_days ?? 5;
+  const nights = product.minimum_nights ?? Math.max(durationDays - 1, 1);
+
+  const result = computeBaseline({
+    policy: policyRow ? mapPolicy(policyRow) : null,
+    config,
+    durationDays,
+    nights,
+    components,
+    referenceDate: new Date().toISOString().slice(0, 10),
+  });
+
+  const row = {
+    product_id: product.id,
+    status: result.status,
+    currency: result.currency,
+    price_per_person: result.pricePerPerson,
+    price_total: result.priceTotal,
+    duration_days: result.durationDays,
+    nights: result.nights,
+    adults: result.adults,
+    rooms: result.rooms,
+    basis: result.basis,
+    commercial_state: result.commercialState,
+    policy_version_id: result.policyVersionId,
+    breakdown: result.breakdown,
+    missing_components: result.missing,
+    source_rate_ids: result.sourceRateIds,
+    blocked_reason: result.blockedReason,
+    computed_at: new Date().toISOString(),
+    expires_at: result.expiresAt,
+  };
+
+  const { data } = await client
+    .from("product_price_baselines")
+    .upsert(row, { onConflict: "product_id" })
+    .select("*").maybeSingle();
+  return data ?? row;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -148,6 +270,39 @@ Deno.serve(async (req) => {
       .from("travel_products").select(PRODUCT_FIELDS).eq("slug", slug).maybeSingle();
     if (!product || product.status === "archived") return json({ error: "Produto inexistente." }, 404);
     return json({ product: normalizeBuilderProduct(product) });
+  }
+
+  // ------------------------------------------------------------ baseline ---
+  // "Desde €X": valor indicativo calculado pelo Pricing Engine. O visitante
+  // nunca recebe custo interno, margem, fornecedor ou proveniência interna.
+  if (action === "baseline") {
+    const slug = str(body.product_slug, 80) ?? "";
+    if (!PUBLIC_PRODUCT_SLUGS.includes(slug)) return json({ error: "Produto inexistente." }, 404);
+    const { data: product } = await client
+      .from("travel_products").select(PRODUCT_FIELDS).eq("slug", slug).maybeSingle();
+    if (!product || product.status === "archived") return json({ error: "Produto inexistente." }, 404);
+
+    const { data: stored } = await client
+      .from("product_price_baselines").select("*").eq("product_id", product.id).maybeSingle();
+
+    const expired = stored?.expires_at != null && Date.parse(stored.expires_at) < Date.now();
+    const old = !stored || Date.now() - Date.parse(stored.computed_at) > BASELINE_MAX_AGE_MS;
+    const fresh = expired || old ? await recomputeBaseline(client, product) : stored;
+    if (!fresh) return json({ baseline: null });
+
+    const row = fresh as Record<string, any>;
+    return json({
+      baseline: publicBaseline({
+        status: row.status,
+        currency: row.currency,
+        price_per_person: row.price_per_person == null ? null : Number(row.price_per_person),
+        commercial_state: row.commercial_state,
+        duration_days: row.duration_days,
+        adults: row.adults,
+        computed_at: row.computed_at,
+        expires_at: row.expires_at,
+      }),
+    });
   }
 
   // --------------------------------------------------------------- save ----
