@@ -443,13 +443,20 @@ export function calculatePricing(req: PricingRequest): PricingResult {
 
     if (sel.estimated) anyEstimated = true;
 
+    const provenance = rateProvenance(rate, req.referenceDate);
+    if (provenance === "market_observed") {
+      notes.push("Preço público observado no mercado — exige revalidação antes da confirmação.");
+    }
+
     lines.push({
       componentId: comp.id, name: comp.name, componentType: comp.componentType,
       rateId: rate.id, rateKind: rate.kind, unit: rate.unit, unitPrice: rate.price,
       quantity, currency: rate.currency, cost,
       ruleMode: rule.mode, rulePct: rule.marginIncluded ? 0 : rule.value,
-      markup: sellPrice - cost, sellPrice, estimated: sel.estimated, notes,
+      markup: sellPrice - cost, sellPrice, estimated: sel.estimated,
+      provenance, sourceType: rate.sourceType ?? null, notes,
     });
+
   }
 
   // 3. custo terrestre
