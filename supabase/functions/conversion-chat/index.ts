@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
   // -------------------------------------------------------------- message --
   if (action !== "message") return json({ error: `Ação desconhecida: ${action}` }, 400);
 
-  if (rateLimited(tokenHash)) return json({ error: "Demasiados pedidos. Tenta daqui a pouco." }, 429);
+  if (await rateLimited(client, conversation.id)) return json({ error: "Demasiados pedidos. Tenta daqui a pouco." }, 429);
   if (conversation.status !== "aberta") return json({ error: "Esta conversa já foi encerrada." }, 409);
   if (Number(conversation.message_count) >= CONVERSION_LIMITS.maxMessagesPerConversation) {
     return json({ error: "Conversa demasiado longa. Pede à equipa para continuar por email." }, 409);
