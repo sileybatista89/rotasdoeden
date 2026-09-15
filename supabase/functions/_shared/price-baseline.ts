@@ -224,6 +224,8 @@ function blocked(req: BaselineRequest, reason: string, missing: PricingComponent
     policyVersionId: req.policy?.id ?? null,
     breakdown: [],
     missing,
+    includedTypes: [],
+    includesFlight: false,
     sourceRateIds: [],
     expiresAt: null,
     warnings: [],
