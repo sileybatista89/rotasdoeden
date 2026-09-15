@@ -316,7 +316,10 @@ Deno.serve(async (req) => {
 
     const expired = stored?.expires_at != null && Date.parse(stored.expires_at) < Date.now();
     const old = !stored || Date.now() - Date.parse(stored.computed_at) > BASELINE_MAX_AGE_MS;
-    const fresh = expired || old ? await recomputeBaseline(client, product) : stored;
+    // Um bloqueio é sempre reavaliado: assim que a política ou os dados existirem,
+    // o preço passa a ser calculado sem esperar pelo ciclo de 24h.
+    const wasBlocked = stored?.status !== "published";
+    const fresh = expired || old || wasBlocked ? await recomputeBaseline(client, product) : stored;
     if (!fresh) return json({ baseline: null });
 
     const row = fresh as Record<string, any>;
