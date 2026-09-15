@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
       model: MODEL,
       system: CONVERSION_SYSTEM_PROMPT,
       prompt,
-      maxOutputTokens: 700,
+      maxOutputTokens: 1200,
       timeoutMs: 45_000,
     });
 
