@@ -56,7 +56,7 @@ function comp(id: string, type: string, rates: RateCandidate[]): PricingComponen
   return { id, name: id, componentType: type as PricingComponentInput["componentType"], rates };
 }
 
-const config: BaselineConfig = { enabled: true, adults: 2, rooms: 1, required: ["flight", "room"] };
+const config: BaselineConfig = { enabled: true, adults: 2, rooms: 1, required: ["flight", "room"], optional: [] };
 
 const components = [
   comp("voo", "flight", [rate({ id: "r-voo", price: 580, unit: "per_person" })]),
