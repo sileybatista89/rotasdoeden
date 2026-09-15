@@ -161,6 +161,24 @@ export function BaselinePanel() {
                 ))}
               </div>
             )}
+
+            {(history.data ?? []).filter((h: any) => h.product_id === b.product_id).length > 1 && (
+              <details className="text-xs text-muted-foreground">
+                <summary className="cursor-pointer">Histórico de cálculos</summary>
+                <ul className="mt-2 space-y-1">
+                  {(history.data ?? [])
+                    .filter((h: any) => h.product_id === b.product_id)
+                    .map((h: any) => (
+                      <li key={h.id}>
+                        {new Date(h.computed_at).toLocaleString("pt-PT")} ·{" "}
+                        {h.status === "published"
+                          ? `${money(Number(h.price_per_person), h.currency)} / pessoa${h.includes_flight ? " (com voo)" : " (base terrestre)"}`
+                          : `bloqueado — ${h.blocked_reason ?? "sem motivo registado"}`}
+                      </li>
+                    ))}
+                </ul>
+              </details>
+            )}
           </Card>
         );
       })}
