@@ -31,6 +31,38 @@ export type PricingRateKind =
 export type PricingRateStatus =
   | "observed" | "quoted" | "negotiated" | "confirmed" | "expired" | "withdrawn";
 
+/**
+ * Proveniência comercial de cada linha do cálculo.
+ * Nunca transforma incerteza em certeza: um preço observado no mercado
+ * continua a ser identificado como tal até existir tarifa de fornecedor.
+ */
+export type LineProvenance =
+  | "confirmed"
+  | "market_observed"
+  | "estimated"
+  | "expired"
+  | "unavailable"
+  | "pending_validation";
+
+export const LINE_PROVENANCE_LABEL: Record<LineProvenance, string> = {
+  confirmed: "Tarifa confirmada por fornecedor",
+  market_observed: "Preço público observado no mercado",
+  estimated: "Custo estimado",
+  expired: "Tarifa expirada",
+  unavailable: "Sem custo utilizável",
+  pending_validation: "Por validar com o fornecedor",
+};
+
+/** Base comercial da proposta inteira. */
+export type PricingBasis = "confirmed" | "market_based" | "insufficient";
+
+export const PRICING_BASIS_LABEL: Record<PricingBasis, string> = {
+  confirmed: "Proposta com tarifas confirmadas por fornecedor",
+  market_based: "Proposta baseada em preços de mercado observados",
+  insufficient: "Informação insuficiente para uma proposta responsável",
+};
+
+
 export interface ComponentRule {
   /** Como o componente entra no preço. */
   mode: MarginMode | "pass_through";
