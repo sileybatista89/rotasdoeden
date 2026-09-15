@@ -272,6 +272,26 @@ Deno.serve(async (req) => {
     return json({ product: normalizeBuilderProduct(product) });
   }
 
+  // ------------------------------------------------------------ baseline ---
+  // "Desde €X": valor indicativo calculado pelo Pricing Engine. O visitante
+  // nunca recebe custo interno, margem, fornecedor ou proveniência interna.
+  if (action === "baseline") {
+    const slug = str(body.product_slug, 80) ?? "";
+    if (!PUBLIC_PRODUCT_SLUGS.includes(slug)) return json({ error: "Produto inexistente." }, 404);
+    const { data: product } = await client
+      .from("travel_products").select(PRODUCT_FIELDS).eq("slug", slug).maybeSingle();
+    if (!product || product.status === "archived") return json({ error: "Produto inexistente." }, 404);
+
+    const { data: stored } = await client
+      .from("product_price_baselines").select("*").eq("product_id", product.id).maybeSingle();
+
+    const expired = stored?.expires_at != null && Date.parse(stored.expires_at) < Date.now();
+    const old = !stored || Date.now() - Date.parse(stored.computed_at) > BASELINE_MAX_AGE_MS;
+    const fresh = expired || old ? await recomputeBaseline(client, product) : stored;
+
+    return json({ baseline: fresh ? publicBaseline(fresh as any) : null });
+  }
+
   // --------------------------------------------------------------- save ----
   if (action === "save") {
     const productSlug = str(body.product_slug, 80) ?? "rotas-essencial";
