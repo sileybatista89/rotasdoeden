@@ -552,6 +552,36 @@ export function calculatePricing(req: PricingRequest): PricingResult {
     status = "confirmed";
   }
 
+
+  // 10. proveniência agregada e base comercial da proposta
+  const categoryMap = new Map<PricingComponentType, CategorySubtotal>();
+  for (const l of lines) {
+    const entry = categoryMap.get(l.componentType) ?? {
+      componentType: l.componentType, cost: 0, sellPrice: 0, lines: 0, provenances: [],
+    };
+    entry.cost += l.cost;
+    entry.sellPrice += l.sellPrice;
+    entry.lines += 1;
+    if (!entry.provenances.includes(l.provenance)) entry.provenances.push(l.provenance);
+    categoryMap.set(l.componentType, entry);
+  }
+  const categorySubtotals = [...categoryMap.values()];
+
+  const hasMarketObserved = lines.some((l) => l.provenance === "market_observed");
+  const softProvenance = lines.some((l) =>
+    l.provenance === "market_observed" || l.provenance === "estimated" || l.provenance === "pending_validation"
+  );
+  let basis: PricingBasis;
+  if (errors.length > 0) basis = "insufficient";
+  else if (softProvenance) basis = "market_based";
+  else basis = "confirmed";
+
+  if (hasMarketObserved && errors.length === 0) {
+    warnings.push(
+      "Proposta baseada em preços de mercado observados — exige revalidação junto do fornecedor antes de qualquer confirmação.",
+    );
+  }
+
   return {
     productId: req.productId ?? null,
     productVersionId: req.productVersionId ?? null,
@@ -573,9 +603,13 @@ export function calculatePricing(req: PricingRequest): PricingResult {
     grossMarginPct: margin,
     markupPct,
     status,
+    basis,
+    requiresValidation: basis === "market_based",
+    categorySubtotals,
     warnings,
     validationErrors: errors,
   };
+
 }
 
 function applyMarkupByPolicy(cost: number, policy: PricingPolicyVersion): number {
