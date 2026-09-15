@@ -4,9 +4,10 @@
  * Responsabilidades: servir o catálogo editorial, guardar a configuração do
  * visitante por token opaco e registar o pedido de proposta.
  *
- * Esta função NÃO calcula preços, não cria cotações, não reserva, não cobra,
- * não contacta fornecedores e não emite voos. O preço continua a ser produzido
- * exclusivamente pelo Quote Engine a partir do Pricing Engine, já existentes.
+ * Calcula apenas o preço de referência indicativo ("desde X") delegando no
+ * Pricing Engine existente. Não cria cotações, não reserva, não cobra, não
+ * contacta fornecedores e não emite voos: a proposta comercial continua a ser
+ * produzida exclusivamente pelo Quote Engine.
  */
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import {
