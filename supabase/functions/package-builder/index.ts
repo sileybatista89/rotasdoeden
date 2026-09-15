@@ -330,6 +330,7 @@ Deno.serve(async (req) => {
         adults: row.adults,
         computed_at: row.computed_at,
         expires_at: row.expires_at,
+        includes_flight: row.includes_flight,
       }),
     });
   }
