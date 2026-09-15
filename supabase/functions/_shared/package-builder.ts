@@ -176,7 +176,8 @@ export interface DaySelection {
 
 /** Horas úteis realistas de um dia de programa. Só usado para avisar, nunca para bloquear. */
 export const DAY_CAPACITY_HOURS = 8;
-export const MAX_SELECTIONS_PER_DAY = 4;
+/** Tecto absoluto de dias aceite pelo servidor, mesmo em pacotes à medida. */
+export const ABSOLUTE_MAX_DAYS = 60;
 
 export function selectionsForDay(selections: DaySelection[], day: number): DaySelection[] {
   return selections.filter((s) => s.day === day);
