@@ -412,11 +412,12 @@ export function calculatePricing(req: PricingRequest): PricingResult {
         componentId: comp.id, name: comp.name, componentType: comp.componentType,
         rateId: null, rateKind: null, unit: null, unitPrice: 0, quantity: 0, currency: null,
         cost: 0, ruleMode: rule.mode, rulePct: rule.value, markup: 0, sellPrice: 0,
-        estimated: true, notes,
+        estimated: true, provenance: "unavailable", sourceType: null, notes,
       });
       anyEstimated = true;
       continue;
     }
+
 
     const rate = sel.rate;
     if (rate.currency !== currency) {
