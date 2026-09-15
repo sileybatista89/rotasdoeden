@@ -112,26 +112,39 @@ Deno.serve(async (req) => {
     return json({ items: await publicCatalog(client) });
   }
 
+  // ------------------------------------------------------------- product ---
+  if (action === "product") {
+    const slug = str(body.product_slug, 80) ?? "";
+    if (!PUBLIC_PRODUCT_SLUGS.includes(slug)) return json({ error: "Produto inexistente." }, 404);
+    const { data: product } = await client
+      .from("travel_products").select(PRODUCT_FIELDS).eq("slug", slug).maybeSingle();
+    if (!product || product.status === "archived") return json({ error: "Produto inexistente." }, 404);
+    return json({ product: normalizeBuilderProduct(product) });
+  }
+
   // --------------------------------------------------------------- save ----
   if (action === "save") {
     const productSlug = str(body.product_slug, 80) ?? "rotas-essencial";
+    if (!PUBLIC_PRODUCT_SLUGS.includes(productSlug)) return json({ error: "Produto inexistente." }, 404);
     const { data: product } = await client
       .from("travel_products")
-      .select("id, minimum_days, maximum_days, status, current_version_id")
+      .select(PRODUCT_FIELDS)
       .eq("slug", productSlug).maybeSingle();
     if (!product) return json({ error: "Produto inexistente." }, 404);
     if (product.status === "archived") return json({ error: "Este produto já não está disponível." }, 409);
 
+    const rules = normalizeBuilderProduct(product);
     const selections = sanitizeSelections(body.selections);
-    const durationDays = int(body.duration_days, product.minimum_days);
+    const durationDays = int(body.duration_days, rules.minimum_days);
     const errors = validateBuilderConfig({
       durationDays,
-      minimumDays: product.minimum_days,
-      maximumDays: product.maximum_days,
+      minimumDays: rules.minimum_days,
+      maximumDays: rules.maximum_days,
       adults: int(body.adults, 2),
       children: int(body.children, 0),
       rooms: int(body.rooms, 1),
       selections,
+      maxSelectionsPerDay: rules.max_selections_per_day,
     });
     if (errors.length > 0) return json({ error: errors.join(" ") }, 400);
 
