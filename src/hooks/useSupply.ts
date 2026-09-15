@@ -217,3 +217,29 @@ export const useSetRateStatus = rpcMutation<{ rateId: string; status: RateStatus
   "admin_set_rate_status",
   (v) => ({ _rate_id: v.rateId, _status: v.status, _note: v.note ?? null }),
 );
+
+export interface SupplyReadiness {
+  suppliers: { total: number; approved: number; inactive: number };
+  services: { total: number; approved_active: number; without_commercial_link: number };
+  accommodations: { total: number; rooms: number };
+  components: {
+    total: number; ready: number; without_supplier: number;
+    not_approved: number; without_rate: number; without_eligible_rate: number;
+  };
+  rates: { total: number; eligible: number; expired: number; without_source: number; unknown_validity: number };
+  catalog: { total: number; linked_component: number; linked_service: number; editorial_only: number };
+  products: { slug: string; name: string; status: string; has_version: boolean; linked_components: number }[];
+  generated_at: string;
+}
+
+/** Indicadores do que falta para o inventário poder gerar propostas reais. */
+export function useSupplyReadiness() {
+  return useQuery({
+    queryKey: ["supply-readiness"],
+    queryFn: async () => {
+      const { data, error } = await anyDb.rpc("supply_readiness");
+      if (error) throw new Error(error.message);
+      return data as unknown as SupplyReadiness;
+    },
+  });
+}
