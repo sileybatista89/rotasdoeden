@@ -288,8 +288,21 @@ Deno.serve(async (req) => {
     const expired = stored?.expires_at != null && Date.parse(stored.expires_at) < Date.now();
     const old = !stored || Date.now() - Date.parse(stored.computed_at) > BASELINE_MAX_AGE_MS;
     const fresh = expired || old ? await recomputeBaseline(client, product) : stored;
+    if (!fresh) return json({ baseline: null });
 
-    return json({ baseline: fresh ? publicBaseline(fresh as any) : null });
+    const row = fresh as Record<string, any>;
+    return json({
+      baseline: publicBaseline({
+        status: row.status,
+        currency: row.currency,
+        price_per_person: row.price_per_person == null ? null : Number(row.price_per_person),
+        commercial_state: row.commercial_state,
+        duration_days: row.duration_days,
+        adults: row.adults,
+        computed_at: row.computed_at,
+        expires_at: row.expires_at,
+      }),
+    });
   }
 
   // --------------------------------------------------------------- save ----
