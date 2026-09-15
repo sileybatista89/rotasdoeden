@@ -191,6 +191,11 @@ describe("Fase 6 — resposta do modelo", () => {
     expect(decision.lead).toBeNull();
   });
 
+  it("nunca reencaminha texto cru do modelo quando não há JSON", () => {
+    const decision = parseAgentOutput("Return the JSON object. Max 6 sentences.", "duvida");
+    expect(decision.reply).toBe(NO_DATA_FALLBACK);
+  });
+
   it("nunca devolve resposta vazia", () => {
     expect(parseAgentOutput('{"reply":"   "}', "inspiracao").reply).toBe(NO_DATA_FALLBACK);
     expect(parseAgentOutput("", "inspiracao").reply).toBe(NO_DATA_FALLBACK);
