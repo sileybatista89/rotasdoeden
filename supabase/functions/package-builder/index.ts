@@ -255,10 +255,12 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     rooms: result.rooms,
     basis: result.basis,
     commercial_state: result.commercialState,
+    includes_flight: result.includesFlight,
     policy_version_id: result.policyVersionId,
     breakdown: result.breakdown,
     missing_components: result.missing,
     source_rate_ids: result.sourceRateIds,
+    source_flags: sourceFlags,
     blocked_reason: result.blockedReason,
     computed_at: new Date().toISOString(),
     expires_at: result.expiresAt,
@@ -268,6 +270,10 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     .from("product_price_baselines")
     .upsert(row, { onConflict: "product_id" })
     .select("*").maybeSingle();
+
+  // Histórico: cada cálculo fica registado em vez de destruir o anterior.
+  await client.from("product_price_baseline_versions").insert(row);
+
   return data ?? row;
 }
 
