@@ -25,6 +25,15 @@ export function useCatalogItems() {
   });
 }
 
+/** Regras do produto vindas do servidor (travel_products.builder_config). */
+export function useBuilderProduct(slug: string) {
+  return useQuery({
+    queryKey: ["builder-product", slug],
+    queryFn: async () => (await call({ action: "product", product_slug: slug })).product as BuilderProduct,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export interface BuilderConfig {
   durationDays: number;
   adults: number;
