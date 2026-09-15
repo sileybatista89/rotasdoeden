@@ -190,6 +190,10 @@ export interface BaselineResult {
   /** Detalhe interno: só para o admin. Nunca sai para o site público. */
   breakdown: BaselineLine[];
   missing: PricingComponentType[];
+  /** Categorias efetivamente incluídas no cálculo (obrigatórias + opcionais com dados). */
+  includedTypes: PricingComponentType[];
+  /** true quando o voo entrou no cálculo. Caso contrário o valor é base terrestre. */
+  includesFlight: boolean;
   sourceRateIds: string[];
   expiresAt: string | null;
   warnings: string[];
