@@ -4033,6 +4033,7 @@ export type Database = {
       }
       travel_products: {
         Row: {
+          builder_config: Json
           created_at: string
           created_by: string | null
           current_version_id: string | null
@@ -4050,6 +4051,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          builder_config?: Json
           created_at?: string
           created_by?: string | null
           current_version_id?: string | null
@@ -4067,6 +4069,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          builder_config?: Json
           created_at?: string
           created_by?: string | null
           current_version_id?: string | null
