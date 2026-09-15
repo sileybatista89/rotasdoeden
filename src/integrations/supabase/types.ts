@@ -1284,6 +1284,8 @@ export type Database = {
           meal_plan: string
           notes: string | null
           observed_at: string
+          observed_nightly_amount: number | null
+          observed_nights: number | null
           occupancy_adults: number | null
           occupancy_children: number | null
           occupancy_total: number | null
@@ -1299,6 +1301,7 @@ export type Database = {
           source_type: string
           status: string
           supplier_id: string | null
+          total_observed_amount: number | null
           unit: string
           updated_at: string
           valid_from: string | null
@@ -1316,6 +1319,8 @@ export type Database = {
           meal_plan?: string
           notes?: string | null
           observed_at: string
+          observed_nightly_amount?: number | null
+          observed_nights?: number | null
           occupancy_adults?: number | null
           occupancy_children?: number | null
           occupancy_total?: number | null
@@ -1331,6 +1336,7 @@ export type Database = {
           source_type: string
           status?: string
           supplier_id?: string | null
+          total_observed_amount?: number | null
           unit: string
           updated_at?: string
           valid_from?: string | null
@@ -1348,6 +1354,8 @@ export type Database = {
           meal_plan?: string
           notes?: string | null
           observed_at?: string
+          observed_nightly_amount?: number | null
+          observed_nights?: number | null
           occupancy_adults?: number | null
           occupancy_children?: number | null
           occupancy_total?: number | null
@@ -1363,6 +1371,7 @@ export type Database = {
           source_type?: string
           status?: string
           supplier_id?: string | null
+          total_observed_amount?: number | null
           unit?: string
           updated_at?: string
           valid_from?: string | null
@@ -4357,6 +4366,7 @@ export type Database = {
           blocking_reasons: Json
           category_subtotals: Json
           change_reason: string | null
+          commercial_state: string
           confirmable: boolean
           cost_currency: string | null
           created_at: string
@@ -4396,6 +4406,7 @@ export type Database = {
           blocking_reasons?: Json
           category_subtotals?: Json
           change_reason?: string | null
+          commercial_state?: string
           confirmable?: boolean
           cost_currency?: string | null
           created_at?: string
@@ -4435,6 +4446,7 @@ export type Database = {
           blocking_reasons?: Json
           category_subtotals?: Json
           change_reason?: string | null
+          commercial_state?: string
           confirmable?: boolean
           cost_currency?: string | null
           created_at?: string

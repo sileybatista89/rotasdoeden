@@ -62,6 +62,26 @@ export const PRICING_BASIS_LABEL: Record<PricingBasis, string> = {
   insufficient: "Informação insuficiente para uma proposta responsável",
 };
 
+/** Estado comercial explícito transportado para a cotação. */
+export type CommercialState =
+  | "confirmed_pricing"
+  | "market_based_pricing"
+  | "pending_validation";
+
+export const COMMERCIAL_STATE_LABEL: Record<CommercialState, string> = {
+  confirmed_pricing: "Preços confirmados por fornecedor",
+  market_based_pricing: "Preços de mercado observados (indicativa)",
+  pending_validation: "Pendente de validação — dados insuficientes",
+};
+
+export function commercialStateFromBasis(basis: PricingBasis): CommercialState {
+  if (basis === "confirmed") return "confirmed_pricing";
+  if (basis === "market_based") return "market_based_pricing";
+  return "pending_validation";
+}
+
+
+
 
 export interface ComponentRule {
   /** Como o componente entra no preço. */
@@ -216,6 +236,8 @@ export interface PricingResult {
   status: PricingStatus;
   /** Base comercial: tarifas confirmadas, preços de mercado ou insuficiente. */
   basis: PricingBasis;
+  /** Estado comercial inequívoco transportado para a cotação. */
+  commercialState: CommercialState;
   /** true quando a proposta precisa de revalidação antes de confirmar. */
   requiresValidation: boolean;
   categorySubtotals: CategorySubtotal[];
@@ -298,6 +320,61 @@ export interface RateSelection {
   notes: string[];
 }
 
+/** Elegibilidade comercial de uma tarifa. */
+export type RateEligibility = "confirmed_bookable" | "indicative" | "ineligible";
+
+export interface RateEligibilityResult {
+  eligibility: RateEligibility;
+  reason: string | null;
+}
+
+/** Idade máxima aceite para uma observação de mercado (dias). */
+export const MARKET_OBSERVATION_MAX_AGE_DAYS = 180;
+
+function daysBetween(a: string, b: string): number | null {
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  if (Number.isNaN(ta) || Number.isNaN(tb)) return null;
+  return Math.round((tb - ta) / 86_400_000);
+}
+
+/**
+ * Regra de elegibilidade única para todo o motor.
+ * - tarifa de fornecedor confirmada, com fonte, observação e validade conhecida → reservável;
+ * - preço público observado, com fonte e data de observação → serve para proposta indicativa;
+ * - expirada, sem fonte, sem data de observação ou com validade em falta quando é
+ *   obrigatória → fora do cálculo. Nunca entra no total.
+ */
+export function classifyRateEligibility(rate: RateCandidate, referenceDate: string): RateEligibilityResult {
+  const no = (reason: string): RateEligibilityResult => ({ eligibility: "ineligible", reason });
+
+  if (rate.status === "withdrawn") return no(`Tarifa ${rate.id} retirada.`);
+  if (rate.status === "expired") return no(`Tarifa ${rate.id} expirada.`);
+  if (!rate.sourceType) return no(`Tarifa ${rate.id} sem fonte registada.`);
+  if (!rate.observedAt) return no(`Tarifa ${rate.id} sem data de observação.`);
+  if (!(rate.price > 0)) return no(`Tarifa ${rate.id} com valor inválido.`);
+  if (rate.validFrom && rate.validUntil && rate.validUntil < rate.validFrom) {
+    return no(`Tarifa ${rate.id} com validade incoerente.`);
+  }
+  if (rate.validUntil && referenceDate > rate.validUntil) return no(`Tarifa ${rate.id} fora de validade.`);
+  if (rate.validFrom && referenceDate < rate.validFrom) return no(`Tarifa ${rate.id} ainda não é válida.`);
+
+  if (rate.kind === "market_observed_price") {
+    const age = daysBetween(rate.observedAt, referenceDate);
+    if (age != null && age > MARKET_OBSERVATION_MAX_AGE_DAYS) {
+      return no(`Observação de mercado da tarifa ${rate.id} demasiado antiga.`);
+    }
+    return { eligibility: "indicative", reason: null };
+  }
+
+  // Tarifas de fornecedor/estimativas exigem validade conhecida.
+  if (rate.validityUnknown) return no(`Tarifa ${rate.id} sem validade conhecida.`);
+  if (rate.kind === "estimated_cost" || rate.status !== "confirmed") {
+    return { eligibility: "indicative", reason: null };
+  }
+  return { eligibility: "confirmed_bookable", reason: null };
+}
+
 export function selectRate(
   rates: RateCandidate[],
   referenceDate: string,
@@ -305,12 +382,9 @@ export function selectRate(
 ): RateSelection {
   const notes: string[] = [];
   const usable = rates.filter((r) => {
-    if (r.status === "withdrawn") { notes.push(`Tarifa ${r.id} retirada — ignorada.`); return false; }
-    if (r.status === "expired") { notes.push(`Tarifa ${r.id} expirada — ignorada.`); return false; }
-    if (!r.sourceType) { notes.push(`Tarifa ${r.id} sem fonte — ignorada.`); return false; }
-    if (!isRateValidOn(r, referenceDate)) { notes.push(`Tarifa ${r.id} fora de validade — ignorada.`); return false; }
+    const { eligibility, reason } = classifyRateEligibility(r, referenceDate);
+    if (eligibility === "ineligible") { notes.push(`${reason} Ignorada.`); return false; }
     if (!isOccupancyCompatible(r, guests)) { notes.push(`Tarifa ${r.id} não corresponde à ocupação pedida.`); return false; }
-    if (!(r.price > 0)) { notes.push(`Tarifa ${r.id} com valor inválido — ignorada.`); return false; }
     return true;
   });
 
@@ -329,9 +403,10 @@ export function selectRate(
   if (chosen.kind === "negotiated_rotas_rate" && observed) {
     notes.push(`Tarifa negociada Rotas (${chosen.price}) usada em vez do preço público observado (${observed.price}).`);
   }
-  const estimated = chosen.kind === "estimated_cost" || chosen.status !== "confirmed";
+  const estimated = classifyRateEligibility(chosen, referenceDate).eligibility !== "confirmed_bookable";
   return { rate: chosen, estimated, notes };
 }
+
 
 export function resolveQuantity(
   unit: PricingRateUnit,
@@ -370,13 +445,40 @@ const DEFAULT_RULE: ComponentRule = { mode: "markup", value: 0 };
 /** Classifica a origem do custo escolhido para uma linha. */
 export function rateProvenance(rate: RateCandidate | null, referenceDate?: string): LineProvenance {
   if (!rate) return "unavailable";
-  if (rate.status === "expired" || rate.status === "withdrawn") return "expired";
-  if (referenceDate && !isRateValidOn(rate, referenceDate)) return "expired";
+  const ref = referenceDate ?? new Date().toISOString().slice(0, 10);
+  const { eligibility } = classifyRateEligibility(rate, ref);
+  if (eligibility === "ineligible") {
+    return rate.status === "expired" || rate.status === "withdrawn" || (rate.validUntil && ref > rate.validUntil)
+      ? "expired"
+      : "unavailable";
+  }
   if (rate.kind === "market_observed_price") return "market_observed";
   if (rate.kind === "estimated_cost") return "estimated";
-  if (rate.status === "confirmed") return "confirmed";
+  if (eligibility === "confirmed_bookable") return "confirmed";
   return "pending_validation";
 }
+
+/**
+ * Normaliza uma observação de mercado sem perder o valor original.
+ * Nunca converte moeda: a moeda observada é preservada tal como foi registada.
+ */
+export function normalizeMarketObservation(input: {
+  totalObservedAmount: number;
+  observedNights: number;
+  currency: string;
+}): { nightlyAmount: number; totalAmount: number; currency: string; nights: number } {
+  const nights = Math.max(Math.trunc(input.observedNights) || 0, 0);
+  if (!(input.totalObservedAmount > 0) || nights < 1) {
+    throw new Error("Observação de mercado inválida: é preciso total e número de noites.");
+  }
+  return {
+    nightlyAmount: Math.round((input.totalObservedAmount / nights) * 100) / 100,
+    totalAmount: input.totalObservedAmount,
+    currency: input.currency.toUpperCase(),
+    nights,
+  };
+}
+
 
 
 // ============ motor ============
@@ -604,6 +706,7 @@ export function calculatePricing(req: PricingRequest): PricingResult {
     markupPct,
     status,
     basis,
+    commercialState: commercialStateFromBasis(basis),
     requiresValidation: basis === "market_based",
     categorySubtotals,
     warnings,
