@@ -12,9 +12,16 @@ import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import {
   BUILDER_LIMITS,
   isValidContactEmail,
+  normalizeBuilderProduct,
   sanitizeSelections,
   validateBuilderConfig,
 } from "../_shared/package-builder.ts";
+
+/** Os quatro produtos oficiais. Nenhum outro slug é servido publicamente. */
+const PUBLIC_PRODUCT_SLUGS = ["rotas-essencial", "rotas-explorar", "rotas-imersao", "rotas-a-medida"];
+
+const PRODUCT_FIELDS =
+  "id, slug, name, description, product_type, minimum_days, maximum_days, minimum_nights, maximum_nights, status, current_version_id, builder_config";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
