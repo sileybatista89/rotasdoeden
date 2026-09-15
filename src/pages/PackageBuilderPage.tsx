@@ -136,6 +136,24 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
               </>
             )}
           </p>
+          {baseline.data && (
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-2xl font-display font-medium text-foreground">
+                Desde {new Intl.NumberFormat("pt-PT", {
+                  style: "currency",
+                  currency: baseline.data.currency ?? "EUR",
+                  maximumFractionDigits: 0,
+                }).format(baseline.data.price_per_person)}{" "}
+                <span className="text-base text-muted-foreground">por pessoa</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Valor de referência para {baseline.data.duration_days} dias com {baseline.data.adults} adultos.
+                {baseline.data.indicative
+                  ? " Preço indicativo baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."
+                  : " Confirmado na proposta antes de qualquer reserva."}
+              </p>
+            </div>
+          )}
         </header>
 
         {product.error && (
