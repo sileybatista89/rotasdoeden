@@ -178,8 +178,20 @@ export interface PricedComponentLine {
   markup: number;
   sellPrice: number;
   estimated: boolean;
+  /** Origem e estado do custo desta linha. */
+  provenance: LineProvenance;
+  sourceType: string | null;
   notes: string[];
 }
+
+export interface CategorySubtotal {
+  componentType: PricingComponentType;
+  cost: number;
+  sellPrice: number;
+  lines: number;
+  provenances: LineProvenance[];
+}
+
 
 export interface PricingResult {
   productId: string | null;
@@ -202,9 +214,15 @@ export interface PricingResult {
   grossMarginPct: number | null;
   markupPct: number | null;
   status: PricingStatus;
+  /** Base comercial: tarifas confirmadas, preços de mercado ou insuficiente. */
+  basis: PricingBasis;
+  /** true quando a proposta precisa de revalidação antes de confirmar. */
+  requiresValidation: boolean;
+  categorySubtotals: CategorySubtotal[];
   warnings: string[];
   validationErrors: string[];
 }
+
 
 // ============ matemática explícita ============
 
