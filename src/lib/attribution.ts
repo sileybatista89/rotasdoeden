@@ -22,7 +22,12 @@ export type TrafficEventType =
   | "service_view"
   | "guide_view"
   | "booking_started"
-  | "contact_started";
+  | "contact_started"
+  | "chat_opened"
+  | "chat_intent_detected"
+  | "lead_created"
+  | "quote_link_opened"
+  | "quote_accepted";
 
 export function hasAnalyticsConsent(): boolean {
   try {
