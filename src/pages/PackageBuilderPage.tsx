@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { DayConfigurator } from "@/components/packages/DayConfigurator";
 import { TripSummary } from "@/components/packages/TripSummary";
-import { useBuilderProduct, useBuilderSession, useCatalogItems } from "@/hooks/usePackageBuilder";
+import { useBuilderProduct, useBuilderSession, useCatalogItems, useProductBaseline } from "@/hooks/usePackageBuilder";
 import {
   addSelection,
   buildDayPlan,
@@ -28,6 +28,7 @@ import {
 export default function PackageBuilderPage({ slug }: { slug: string }) {
   const product = useBuilderProduct(slug);
   const catalog = useCatalogItems();
+  const baseline = useProductBaseline(slug);
   const minimumDays = product.data?.minimum_days ?? 5;
   const { config, update, submit, status, restored } = useBuilderSession(slug, minimumDays);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", notes: "" });
