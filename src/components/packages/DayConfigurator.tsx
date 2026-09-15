@@ -75,7 +75,7 @@ export function DayConfigurator({
           <Badge>Dia {slot.day}</Badge>
           <p className="font-medium text-foreground">{slot.title}</p>
         </div>
-        <p className="text-xs text-muted-foreground">{chosen.length} de {MAX_SELECTIONS_PER_DAY} escolhas</p>
+        <p className="text-xs text-muted-foreground">{chosen.length} de {maxPerDay} escolhas</p>
       </div>
 
       {chosen.length > 0 && (
