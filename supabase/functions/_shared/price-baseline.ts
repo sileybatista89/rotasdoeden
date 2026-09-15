@@ -64,11 +64,16 @@ export function normalizeBaselineConfig(raw: unknown): BaselineConfig | null {
     ? (baseline.required.filter((t) => COMPONENT_TYPES.includes(t as PricingComponentType)) as PricingComponentType[])
     : [];
   if (required.length === 0) return null;
+  const optionalRaw = Array.isArray(baseline.optional)
+    ? (baseline.optional.filter((t) => COMPONENT_TYPES.includes(t as PricingComponentType)) as PricingComponentType[])
+    : [];
+  const optional = optionalRaw.filter((t) => !required.includes(t));
   const adults = Number(baseline.adults);
   const rooms = Number(baseline.rooms);
   return {
     enabled: true,
     required,
+    optional,
     adults: Number.isFinite(adults) && adults >= 1 ? Math.trunc(adults) : 2,
     rooms: Number.isFinite(rooms) && rooms >= 1 ? Math.trunc(rooms) : 1,
   };
