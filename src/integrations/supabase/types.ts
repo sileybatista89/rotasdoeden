@@ -4888,6 +4888,7 @@ export type Database = {
         }
         Returns: string
       }
+      supply_readiness: { Args: never; Returns: Json }
       supply_stats: { Args: never; Returns: Json }
       travel_product_stats: { Args: never; Returns: Json }
     }
