@@ -223,6 +223,26 @@ async function recomputeBaseline(client: SupabaseClient, product: Record<string,
     referenceDate: new Date().toISOString().slice(0, 10),
   });
 
+  // Avisos internos sobre as origens usadas: limite inferior de intervalo e
+  // observações que expiram em breve. Só para o admin, nunca para o visitante.
+  const soon = Date.now() + 30 * 86_400_000;
+  const sourceFlags = rates
+    .filter((r) => result.sourceRateIds.includes(r.id))
+    .map((r) => {
+      const expiry = r.valid_until
+        ? Date.parse(`${r.valid_until}T23:59:59Z`)
+        : r.observed_at
+        ? Date.parse(r.observed_at) + 180 * 86_400_000
+        : null;
+      return {
+        rate_id: r.id,
+        component_id: r.component_id,
+        lower_bound: r.is_lower_bound === true,
+        expires_at: expiry == null || Number.isNaN(expiry) ? null : new Date(expiry).toISOString(),
+        expiring_soon: expiry != null && !Number.isNaN(expiry) && expiry <= soon,
+      };
+    });
+
   const row = {
     product_id: product.id,
     status: result.status,
