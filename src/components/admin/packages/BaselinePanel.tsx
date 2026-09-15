@@ -26,6 +26,20 @@ export function BaselinePanel() {
     },
   });
 
+  /** Histórico: cada recálculo fica guardado, o anterior não se perde. */
+  const history = useQuery({
+    queryKey: ["admin-price-baseline-versions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_price_baseline_versions")
+        .select("id, product_id, status, price_per_person, currency, includes_flight, blocked_reason, computed_at")
+        .order("computed_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const recompute = useMutation({
     mutationFn: async (slug: string) => {
       const { data, error } = await supabase.functions.invoke("package-builder", {
