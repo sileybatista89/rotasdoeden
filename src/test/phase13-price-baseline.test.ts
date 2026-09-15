@@ -19,8 +19,8 @@ const policy: PricingPolicyVersion = {
   status: "active",
   baseCurrency: "EUR",
   marginMode: "target_margin",
-  minMarginPct: 10,
-  targetMarginPct: 20,
+  minMarginPct: 0,
+  targetMarginPct: 0,
   componentRules: {},
   flightProtection: { method: "percentage", value: 0 },
   fees: [],
@@ -79,8 +79,16 @@ describe("Fase 13 — preço de referência 'desde €X'", () => {
     expect(r.pricePerPerson).toBeGreaterThan(0);
     expect(r.commercialState).toBe("market_based_pricing");
     expect(r.sourceRateIds).toContain("r-voo");
-    // custo real = 580*2 + 200*4 = 1960; com margem alvo o preço é superior.
-    expect(r.priceTotal!).toBeGreaterThan(1960);
+    // preços de mercado entram como retalho (pass-through): 580*2 + 200*4 = 1960.
+    expect(r.priceTotal).toBe(1960);
+    expect(r.pricePerPerson).toBe(980);
+  });
+
+  it("bloqueia quando a margem mínima da política não é atingida", () => {
+    const r = computeBaseline({ ...base, policy: { ...policy, minMarginPct: 15 } });
+    expect(r.status).toBe("blocked");
+    expect(r.pricePerPerson).toBeNull();
+    expect(r.blockedReason).toMatch(/margem/i);
   });
 
   it("não publica preço sem política de preços ativa", () => {
