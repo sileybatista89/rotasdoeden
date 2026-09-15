@@ -83,7 +83,7 @@ export function useBuilderSession(productSlug: string, defaultDurationDays: numb
           selections: c.selections ?? [],
         });
       } catch {
-        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(storageKey);
         if (active) setToken(null);
       } finally {
         if (active) setRestored(true);
@@ -109,7 +109,7 @@ export function useBuilderSession(productSlug: string, defaultDurationDays: numb
         selections: next.selections,
       });
       if (data.session_token && data.session_token !== token) {
-        localStorage.setItem(TOKEN_KEY, data.session_token);
+        localStorage.setItem(storageKey, data.session_token);
         setToken(data.session_token);
       }
       setStatus("saved");
@@ -130,7 +130,7 @@ export function useBuilderSession(productSlug: string, defaultDurationDays: numb
     let current = token;
     if (!current) {
       await persist(config);
-      current = localStorage.getItem(TOKEN_KEY);
+      current = localStorage.getItem(storageKey);
     }
     if (!current) throw new Error("Não foi possível guardar a viagem. Tente de novo.");
     return call({
