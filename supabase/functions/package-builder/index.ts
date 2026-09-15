@@ -75,10 +75,38 @@ async function publicCatalog(client: SupabaseClient) {
     bookableServices = new Set((services ?? []).map((s) => s.id as string));
   }
 
+  // Um componente só conta como oferta real com fornecedor, aprovação e tarifa
+  // confirmada e válida. Caso contrário o local continua a ser inspiração.
+  const componentIds = [...new Set(rows.map((r) => r.package_component_id).filter(Boolean))] as string[];
+  let readyComponents = new Set<string>();
+  if (componentIds.length > 0) {
+    const { data: components } = await client
+      .from("package_components").select("id, supplier_id")
+      .in("id", componentIds).eq("status", "approved");
+    const approved = (components ?? []).filter((c) => c.supplier_id).map((c) => c.id as string);
+    if (approved.length > 0) {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: rates } = await client
+        .from("component_rates")
+        .select("component_id, valid_until")
+        .in("component_id", approved)
+        .eq("status", "confirmed")
+        .eq("validity_unknown", false)
+        .neq("rate_kind", "market_observed_price")
+        .not("source_type", "is", null)
+        .not("observed_at", "is", null)
+        .or(`valid_until.is.null,valid_until.gte.${today}`);
+      readyComponents = new Set((rates ?? []).map((r) => r.component_id as string));
+    }
+  }
+
   return rows.map((r) => ({
     ...r,
     // Um ponto editorial sem serviço/componente real fica como inspiração.
     service_id: r.service_id && bookableServices.has(r.service_id) ? r.service_id : null,
+    package_component_id: r.package_component_id && readyComponents.has(r.package_component_id)
+      ? r.package_component_id
+      : null,
   }));
 }
 
