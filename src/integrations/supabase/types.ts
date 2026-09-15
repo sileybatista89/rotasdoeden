@@ -1678,6 +1678,195 @@ export type Database = {
           },
         ]
       }
+      conversion_conversations: {
+        Row: {
+          attribution: Json
+          created_at: string
+          estimated_cost: number
+          id: string
+          intent: string
+          language: string
+          last_message_at: string | null
+          message_count: number
+          session_token_hash: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          attribution?: Json
+          created_at?: string
+          estimated_cost?: number
+          id?: string
+          intent?: string
+          language?: string
+          last_message_at?: string | null
+          message_count?: number
+          session_token_hash: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          attribution?: Json
+          created_at?: string
+          estimated_cost?: number
+          id?: string
+          intent?: string
+          language?: string
+          last_message_at?: string | null
+          message_count?: number
+          session_token_hash?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      conversion_leads: {
+        Row: {
+          attribution: Json
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          conversation_id: string | null
+          created_at: string
+          duration_days: number | null
+          id: string
+          intent: string
+          interests: string[]
+          notes: string | null
+          origin_city: string | null
+          product_id: string | null
+          quote_id: string | null
+          status: string
+          travel_end: string | null
+          travel_start: string | null
+          travelers_adults: number
+          travelers_children: number
+          updated_at: string
+        }
+        Insert: {
+          attribution?: Json
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_days?: number | null
+          id?: string
+          intent?: string
+          interests?: string[]
+          notes?: string | null
+          origin_city?: string | null
+          product_id?: string | null
+          quote_id?: string | null
+          status?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          travelers_adults?: number
+          travelers_children?: number
+          updated_at?: string
+        }
+        Update: {
+          attribution?: Json
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_days?: number | null
+          id?: string
+          intent?: string
+          interests?: string[]
+          notes?: string | null
+          origin_city?: string | null
+          product_id?: string | null
+          quote_id?: string | null
+          status?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          travelers_adults?: number
+          travelers_children?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversion_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_leads_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "travel_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_leads_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "travel_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversion_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          estimated_cost: number
+          grounded: boolean
+          id: string
+          input_tokens: number
+          intent: string | null
+          output_tokens: number
+          role: string
+          tools_used: Json
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          estimated_cost?: number
+          grounded?: boolean
+          id?: string
+          input_tokens?: number
+          intent?: string | null
+          output_tokens?: number
+          role: string
+          tools_used?: Json
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          estimated_cost?: number
+          grounded?: boolean
+          id?: string
+          input_tokens?: number
+          intent?: string | null
+          output_tokens?: number
+          role?: string
+          tools_used?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversion_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_cache: {
         Row: {
           cache_key: string

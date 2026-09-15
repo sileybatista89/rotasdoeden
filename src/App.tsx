@@ -43,6 +43,7 @@ import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
 import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
 import SupportConversationPage from "./pages/SupportConversationPage.tsx";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ChatLauncher } from "@/components/conversion/ChatLauncher";
 
 const queryClient = new QueryClient();
 const AdminPage = lazy(() => import("./pages/AdminPage.tsx"));
@@ -122,6 +123,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          <ChatLauncher />
           <CookieConsent />
         </AuthProvider>
         </LanguageProvider>

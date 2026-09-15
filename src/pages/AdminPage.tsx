@@ -20,6 +20,7 @@ import { SuppliersPanel } from "@/components/admin/suppliers/SuppliersPanel";
 import { PricingPanel } from "@/components/admin/pricing/PricingPanel";
 import { FlightsPanel } from "@/components/admin/flights/FlightsPanel";
 import { QuotesPanel } from "@/components/admin/quotes/QuotesPanel";
+import { ConversionPanel } from "@/components/admin/conversion/ConversionPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -307,6 +308,8 @@ export default function AdminPage() {
             <QuotesPanel />
           </>
         )}
+
+        {section === "assistente" && <ConversionPanel />}
 
         {section === "territorio" && (
           <>
