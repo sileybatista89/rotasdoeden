@@ -179,7 +179,6 @@ Deno.serve(async (req) => {
     intent,
     message_count: Number(conversation.message_count) + 2,
     last_message_at: new Date().toISOString(),
-    estimated_cost: undefined,
   }).eq("id", conversation.id);
 
   // O lead só é gravado quando a intenção o justifica e o contacto é válido.
