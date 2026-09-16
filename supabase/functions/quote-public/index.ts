@@ -147,16 +147,16 @@ Deno.serve(async (req) => {
 
       if (!evaluation.ok) {
         await admin.from("admin_audit_log").insert({
-          admin_id: null, action: "quote_acceptance_failed", entity_type: "travel_quote", entity_id: quote.id,
-          details: { code: evaluation.code, reason: evaluation.reason, version: version.version_number },
+          admin_id: null, action: "quote_acceptance_failed", entity_type: "travel_quote", entity_id: quoteRow.id,
+          details: { code: evaluation.code, reason: evaluation.reason, version: versionRow.version_number },
         });
         return json({ accepted: false, code: evaluation.code, error: evaluation.reason }, 409);
       }
 
       if (evaluation.alreadyAccepted) {
         return json({
-          accepted: true, already_accepted: true, accepted_at: quote.accepted_at,
-          quote: sanitizeQuoteForCustomer({ quote, version, items: items ?? [], productName }),
+          accepted: true, already_accepted: true, accepted_at: quoteRow.accepted_at,
+          quote: sanitizeQuoteForCustomer({ quote: quoteRow, version: versionRow, items: itemRows, productName }),
         });
       }
 
@@ -166,14 +166,14 @@ Deno.serve(async (req) => {
       let update = admin.from("travel_quotes").update({
         status: "accepted",
         accepted_at: acceptedAt,
-        accepted_version_id: version.id,
+        accepted_version_id: versionRow.id,
         accepted_channel: "public_token",
         requires_reacceptance: false,
         // Contexto mínimo: sem PII adicional, sem documentos de passageiros.
-        acceptance_context: { channel: "public_token", version_number: version.version_number, user_agent_present: Boolean(req.headers.get("user-agent")) },
-      }).eq("id", quote.id);
+        acceptance_context: { channel: "public_token", version_number: versionRow.version_number, user_agent_present: Boolean(req.headers.get("user-agent")) },
+      }).eq("id", quoteRow.id);
 
-      update = quote.requires_reacceptance
+      update = quoteRow.requires_reacceptance
         ? update.eq("requires_reacceptance", true)
         : update.is("accepted_at", null);
 
@@ -183,26 +183,27 @@ Deno.serve(async (req) => {
       if (updateError) return json({ accepted: false, code: "acceptance_failed", error: "Não foi possível registar a aceitação." }, 500);
       if (!updated) {
         // Outro pedido aceitou primeiro: resultado idempotente, não um erro.
-        const { data: fresh } = await admin.from("travel_quotes").select("*").eq("id", quote.id).maybeSingle();
+        const { data: fresh } = await admin.from("travel_quotes").select("*").eq("id", quoteRow.id).maybeSingle();
         return json({
           accepted: true, already_accepted: true, accepted_at: fresh?.accepted_at ?? null,
-          quote: sanitizeQuoteForCustomer({ quote: fresh ?? quote, version, items: items ?? [], productName }),
+          quote: sanitizeQuoteForCustomer({ quote: fresh ?? quoteRow, version: versionRow, items: itemRows, productName }),
         });
       }
 
       await admin.from("admin_audit_log").insert({
-        admin_id: null, action: "quote_accepted", entity_type: "travel_quote", entity_id: quote.id,
+        admin_id: null, action: "quote_accepted", entity_type: "travel_quote", entity_id: quoteRow.id,
         details: {
-          quote_number: quote.quote_number, version: version.version_number,
-          price: Number(version.total_price), currency: version.sale_currency,
-          channel: "public_token", accepted_at: acceptedAt,
+          quote_number: quoteRow.quote_number, version: versionRow.version_number,
+          price: Number(versionRow.total_price), currency: versionRow.sale_currency,
+          channel: "public_token", accepted_at: acceptedAt, revalidated: true,
         },
       });
 
       return json({
         accepted: true,
         accepted_at: acceptedAt,
-        quote: sanitizeQuoteForCustomer({ quote: updated, version, items: items ?? [], productName }),
+        revalidated: true,
+        quote: sanitizeQuoteForCustomer({ quote: updated, version: versionRow, items: itemRows, productName }),
         next_steps: [
           "A Rotas do Éden vai confirmar a disponibilidade antes de qualquer pagamento.",
           "Receberá depois as instruções para concluir a reserva.",
