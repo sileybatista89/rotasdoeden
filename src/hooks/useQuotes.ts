@@ -25,6 +25,67 @@ export interface QuoteRow {
   requires_reacceptance?: boolean;
   package_booking_id?: string | null;
   last_revalidated_at?: string | null;
+  public_token_expires_at?: string | null;
+}
+
+/** Fases visíveis do ciclo comercial, derivadas do estado já guardado. */
+export type QuoteStage =
+  | "criada"
+  | "enviada"
+  | "aguarda_revalidacao"
+  | "aceite"
+  | "pronta_pagamento"
+  | "encerrada";
+
+export const QUOTE_STAGE_LABEL: Record<QuoteStage, string> = {
+  criada: "Criada",
+  enviada: "Enviada ao cliente",
+  aguarda_revalidacao: "A aguardar revalidação",
+  aceite: "Aceite",
+  pronta_pagamento: "Pronta para pagamento",
+  encerrada: "Encerrada",
+};
+
+export function quoteStage(q: QuoteRow): QuoteStage {
+  if (["cancelled", "expired", "superseded"].includes(q.status)) return "encerrada";
+  if (q.requires_reacceptance) return "aguarda_revalidacao";
+  if (q.package_booking_id) return "pronta_pagamento";
+  if (q.accepted_at) return "aceite";
+  if (q.public_token_expires_at) return "enviada";
+  return "criada";
+}
+
+export interface BuilderRequestRow {
+  id: string;
+  product_id: string | null;
+  duration_days: number;
+  adults: number;
+  children: number;
+  rooms: number;
+  start_date: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  status: string;
+  quote_id: string | null;
+  submitted_at: string | null;
+  created_at: string;
+}
+
+/** Pedidos vindos do configurador público, com a proposta gerada quando existe. */
+export function useBuilderRequests(limit = 25) {
+  return useQuery({
+    queryKey: ["builder-requests", limit],
+    queryFn: async () => {
+      const { data, error } = await anyDb
+        .from("package_builder_configs")
+        .select("id,product_id,duration_days,adults,children,rooms,start_date,contact_name,contact_email,status,quote_id,submitted_at,created_at")
+        .neq("status", "rascunho")
+        .order("submitted_at", { ascending: false })
+        .limit(limit);
+      if (error) throw new Error(error.message);
+      return (data ?? []) as BuilderRequestRow[];
+    },
+  });
 }
 
 export interface QuoteVersionRow {

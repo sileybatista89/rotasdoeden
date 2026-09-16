@@ -11,10 +11,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useToast } from "@/hooks/use-toast";
 import { useTravelProducts } from "@/hooks/useTravelProducts";
 import {
+  useBuilderRequests,
   useCreatePackageBooking, useIssueQuoteToken, usePackageBookingForQuote, useQuoteDetail,
   useQuoteRevalidations, useQuoteStats, useQuotes, useRepriceQuote, useRevalidateQuote,
-  useSetQuoteStatus, REVALIDATION_OUTCOME_LABEL,
-  type QuoteFilters,
+  useSetQuoteStatus, REVALIDATION_OUTCOME_LABEL, QUOTE_STAGE_LABEL, quoteStage,
+  type QuoteFilters, type QuoteRow,
 } from "@/hooks/useQuotes";
 import { QUOTE_STATUS_LABEL, type QuoteStatus } from "@/lib/quotes";
 
@@ -55,6 +56,24 @@ function StatusBadge({ status }: { status: QuoteStatus }) {
   return <Badge variant="outline" className={tone}>{QUOTE_STATUS_LABEL[status] ?? status}</Badge>;
 }
 
+/** Fase do ciclo comercial: criada, enviada, aceite, revalidação, pagamento. */
+function StageBadge({ quote }: { quote: QuoteRow }) {
+  const stage = quoteStage(quote);
+  const tone =
+    stage === "pronta_pagamento" ? "bg-primary/10 text-primary border-primary/30"
+    : stage === "aguarda_revalidacao" ? "bg-destructive/10 text-destructive border-destructive/30"
+    : stage === "encerrada" ? "bg-muted text-muted-foreground border-border"
+    : "bg-secondary/15 text-foreground border-border";
+  return <Badge variant="outline" className={tone}>{QUOTE_STAGE_LABEL[stage]}</Badge>;
+}
+
+const BUILDER_STATUS_LABEL: Record<string, string> = {
+  submetido: "Pedido recebido",
+  em_analise: "Em análise",
+  cotado: "Proposta gerada",
+  arquivado: "Arquivado",
+};
+
 export function QuotesPanel() {
   const { toast } = useToast();
   const [filters, setFilters] = useState<QuoteFilters>({});
@@ -71,6 +90,7 @@ export function QuotesPanel() {
   const createBooking = useCreatePackageBooking();
   const revalidations = useQuoteRevalidations(openId);
   const booking = usePackageBookingForQuote(openId);
+  const builderRequests = useBuilderRequests();
 
   async function onRevalidate(quoteId: string) {
     try {
@@ -226,7 +246,7 @@ export function QuotesPanel() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
-                  {["Número", "Produto", "Preço", "Estado", "Criação", "Validade", "Versão", ""].map((h) => (
+                  {["Número", "Produto", "Preço", "Estado", "Fase", "Criação", "Validade", "Versão", ""].map((h) => (
                     <th key={h} className="text-left font-medium px-4 py-3 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -241,11 +261,60 @@ export function QuotesPanel() {
                     </td>
 
                     <td className="px-4 py-3"><StatusBadge status={q.status} /></td>
+                    <td className="px-4 py-3"><StageBadge quote={q} /></td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.created_at)}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.expires_at)}</td>
                     <td className="px-4 py-3">v{q.version_count}</td>
                     <td className="px-4 py-3 text-right">
                       <Button size="sm" variant="outline" onClick={() => setOpenId(q.id)}>Ver</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pedidos vindos do configurador público */}
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h3 className="font-display font-semibold text-foreground mb-1">Pedidos do configurador</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Configurações enviadas pelos visitantes. Quando existe política ativa e componentes reais, a proposta é gerada automaticamente.
+        </p>
+        {(builderRequests.data ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">Ainda não há pedidos enviados.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  {["Cliente", "Produto", "Viagem", "Estado", "Enviado", ""].map((h) => (
+                    <th key={h} className="text-left font-medium px-4 py-3 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(builderRequests.data ?? []).map((r) => (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-4 py-3">
+                      <span className="block">{r.contact_name ?? ","}</span>
+                      <span className="text-xs text-muted-foreground">{r.contact_email ?? ","}</span>
+                    </td>
+                    <td className="px-4 py-3">{r.product_id ? productName.get(r.product_id) ?? "," : ","}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
+                      {r.duration_days} dias · {r.adults} adultos{r.children ? ` · ${r.children} crianças` : ""}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline">{BUILDER_STATUS_LABEL[r.status] ?? r.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(r.submitted_at ?? r.created_at)}</td>
+                    <td className="px-4 py-3 text-right">
+                      {r.quote_id ? (
+                        <Button size="sm" variant="outline" onClick={() => setOpenId(r.quote_id!)}>Ver proposta</Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">A preparar</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -421,12 +490,18 @@ export function QuotesPanel() {
               )}
 
               {booking.data && (
-                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm">
+                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm space-y-2">
                   <p className="font-medium">Reserva de pacote {booking.data.booking_number}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     Estado {booking.data.booking_status} · pagamento {booking.data.payment_status} · operações {booking.data.operations_status}
                     {" · "}{money(booking.data.confirmed_price, booking.data.currency)}
                   </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="outline" disabled>Preparar pagamento</Button>
+                    <span className="text-xs text-muted-foreground">
+                      Pagamento por ativar. A reserva fica a aguardar pagamento até haver autorização para cobranças reais.
+                    </span>
+                  </div>
                 </div>
               )}
 

@@ -76,32 +76,87 @@ Deno.serve(async (req) => {
 
     // ============ ACCEPT ============
     if (action === "accept") {
+      // Revalidação obrigatória antes de aceitar: preço e disponibilidade são
+      // sempre reconfirmados pelo Quote Engine, nunca reutilizados às cegas.
+      let quoteRow = quote;
+      let versionRow = version;
+      let itemRows = items ?? [];
+
+      if (!quote.accepted_at || quote.requires_reacceptance) {
+        const revalidation = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/quote-engine`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "revalidate", quote_id: quote.id }),
+        }).then((r) => r.json()).catch(() => null);
+
+        if (!revalidation) {
+          return json({ accepted: false, code: "revalidation_failed", error: "Não foi possível confirmar a proposta agora. Tente novamente dentro de instantes." }, 503);
+        }
+
+        if (revalidation.outcome === "blocked") {
+          return json({
+            accepted: false,
+            code: "revalidation_blocked",
+            error: "Esta proposta precisa de ser revista pela nossa equipa antes de ser aceite. Entramos em contacto consigo.",
+          }, 409);
+        }
+
+        if (revalidation.changed) {
+          // Nasceu uma nova versão. Recarregamos sempre o que o cliente vê.
+          const { data: freshQuote } = await admin.from("travel_quotes").select("*").eq("id", quote.id).maybeSingle();
+          const { data: freshVersion } = await admin.from("travel_quote_versions").select("*")
+            .eq("id", freshQuote?.current_version_id).maybeSingle();
+          const { data: freshItems } = await admin.from("travel_quote_items").select("*")
+            .eq("quote_version_id", freshVersion?.id).order("line_order");
+          if (freshQuote && freshVersion) {
+            quoteRow = freshQuote;
+            versionRow = freshVersion;
+            itemRows = freshItems ?? [];
+          }
+
+          if (revalidation.requires_reacceptance) {
+            return json({
+              accepted: false,
+              code: "quote_updated",
+              error: "O preço desta viagem foi atualizado. Reveja a proposta atualizada e confirme de novo.",
+              updated: true,
+              previous_price: revalidation.revalidation?.previous_price ?? null,
+              new_price: revalidation.revalidation?.new_price ?? null,
+              quote: sanitizeQuoteForCustomer({ quote: quoteRow, version: versionRow, items: itemRows, productName }),
+            }, 409);
+          }
+        }
+      }
+
       let productVersionStatus: string | null = null;
-      if (quote.product_version_id) {
+      if (quoteRow.product_version_id) {
         const { data: pv } = await admin.from("travel_product_versions").select("status")
-          .eq("id", quote.product_version_id).maybeSingle();
+          .eq("id", quoteRow.product_version_id).maybeSingle();
         productVersionStatus = pv?.status ?? null;
       }
 
       const evaluation = evaluateAcceptance({
-        quote,
-        version,
-        expectedVersionNumber: Number.isFinite(Number(body.version_number)) ? Number(body.version_number) : null,
+        quote: quoteRow,
+        version: versionRow,
+        expectedVersionNumber: null,
         productVersionStatus,
       });
 
       if (!evaluation.ok) {
         await admin.from("admin_audit_log").insert({
-          admin_id: null, action: "quote_acceptance_failed", entity_type: "travel_quote", entity_id: quote.id,
-          details: { code: evaluation.code, reason: evaluation.reason, version: version.version_number },
+          admin_id: null, action: "quote_acceptance_failed", entity_type: "travel_quote", entity_id: quoteRow.id,
+          details: { code: evaluation.code, reason: evaluation.reason, version: versionRow.version_number },
         });
         return json({ accepted: false, code: evaluation.code, error: evaluation.reason }, 409);
       }
 
       if (evaluation.alreadyAccepted) {
         return json({
-          accepted: true, already_accepted: true, accepted_at: quote.accepted_at,
-          quote: sanitizeQuoteForCustomer({ quote, version, items: items ?? [], productName }),
+          accepted: true, already_accepted: true, accepted_at: quoteRow.accepted_at,
+          quote: sanitizeQuoteForCustomer({ quote: quoteRow, version: versionRow, items: itemRows, productName }),
         });
       }
 
@@ -111,14 +166,14 @@ Deno.serve(async (req) => {
       let update = admin.from("travel_quotes").update({
         status: "accepted",
         accepted_at: acceptedAt,
-        accepted_version_id: version.id,
+        accepted_version_id: versionRow.id,
         accepted_channel: "public_token",
         requires_reacceptance: false,
         // Contexto mínimo: sem PII adicional, sem documentos de passageiros.
-        acceptance_context: { channel: "public_token", version_number: version.version_number, user_agent_present: Boolean(req.headers.get("user-agent")) },
-      }).eq("id", quote.id);
+        acceptance_context: { channel: "public_token", version_number: versionRow.version_number, user_agent_present: Boolean(req.headers.get("user-agent")) },
+      }).eq("id", quoteRow.id);
 
-      update = quote.requires_reacceptance
+      update = quoteRow.requires_reacceptance
         ? update.eq("requires_reacceptance", true)
         : update.is("accepted_at", null);
 
@@ -128,26 +183,27 @@ Deno.serve(async (req) => {
       if (updateError) return json({ accepted: false, code: "acceptance_failed", error: "Não foi possível registar a aceitação." }, 500);
       if (!updated) {
         // Outro pedido aceitou primeiro: resultado idempotente, não um erro.
-        const { data: fresh } = await admin.from("travel_quotes").select("*").eq("id", quote.id).maybeSingle();
+        const { data: fresh } = await admin.from("travel_quotes").select("*").eq("id", quoteRow.id).maybeSingle();
         return json({
           accepted: true, already_accepted: true, accepted_at: fresh?.accepted_at ?? null,
-          quote: sanitizeQuoteForCustomer({ quote: fresh ?? quote, version, items: items ?? [], productName }),
+          quote: sanitizeQuoteForCustomer({ quote: fresh ?? quoteRow, version: versionRow, items: itemRows, productName }),
         });
       }
 
       await admin.from("admin_audit_log").insert({
-        admin_id: null, action: "quote_accepted", entity_type: "travel_quote", entity_id: quote.id,
+        admin_id: null, action: "quote_accepted", entity_type: "travel_quote", entity_id: quoteRow.id,
         details: {
-          quote_number: quote.quote_number, version: version.version_number,
-          price: Number(version.total_price), currency: version.sale_currency,
-          channel: "public_token", accepted_at: acceptedAt,
+          quote_number: quoteRow.quote_number, version: versionRow.version_number,
+          price: Number(versionRow.total_price), currency: versionRow.sale_currency,
+          channel: "public_token", accepted_at: acceptedAt, revalidated: true,
         },
       });
 
       return json({
         accepted: true,
         accepted_at: acceptedAt,
-        quote: sanitizeQuoteForCustomer({ quote: updated, version, items: items ?? [], productName }),
+        revalidated: true,
+        quote: sanitizeQuoteForCustomer({ quote: updated, version: versionRow, items: itemRows, productName }),
         next_steps: [
           "A Rotas do Éden vai confirmar a disponibilidade antes de qualquer pagamento.",
           "Receberá depois as instruções para concluir a reserva.",

@@ -136,14 +136,24 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
-    const { data: userData } = await userClient.auth.getUser();
-    const user = userData?.user;
-    if (!user) return json({ error: "Unauthorized" }, 401);
-
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
-    if (!isAdmin) return json({ error: "Forbidden" }, 403);
+
+    // Duas origens permitidas: um administrador autenticado, ou uma chamada
+    // interna entre funções (configurador e proposta pública) feita com a
+    // chave de serviço. Nunca um visitante.
+    const bearer = authHeader.slice("Bearer ".length).trim();
+    const internal = bearer === serviceKey;
+    let actorId: string | null = null;
+
+    if (!internal) {
+      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+      const { data: userData } = await userClient.auth.getUser();
+      const user = userData?.user;
+      if (!user) return json({ error: "Unauthorized" }, 401);
+      const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+      if (!isAdmin) return json({ error: "Forbidden" }, 403);
+      actorId = user.id;
+    }
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
@@ -250,7 +260,7 @@ Deno.serve(async (req) => {
         result: result as unknown as Record<string, unknown>,
         warnings: result.warnings,
         validation_errors: result.validationErrors,
-        created_by: user.id,
+        created_by: actorId,
       }).select("id").single();
 
       const usedRateIds = new Set(result.components.map((c) => c.rateId).filter(Boolean) as string[]);
@@ -288,7 +298,7 @@ Deno.serve(async (req) => {
         idempotency_key: body.force === true ? `${idempotencyKey}_${Date.now()}` : idempotencyKey,
         expires_at: validity.validUntil,
         version_count: 1,
-        created_by: user.id,
+        created_by: actorId,
       }).select("*").single();
       if (quoteError) return json({ error: quoteError.message }, 500);
 
@@ -322,7 +332,7 @@ Deno.serve(async (req) => {
         warnings: result.warnings,
 
         change_reason: "Cotação inicial",
-        created_by: user.id,
+        created_by: actorId,
       }).select("*").single();
       if (versionError) return json({ error: versionError.message }, 500);
 
@@ -363,7 +373,7 @@ Deno.serve(async (req) => {
 
       await admin.from("travel_quotes").update({ current_version_id: version.id }).eq("id", quote.id);
       await admin.from("admin_audit_log").insert({
-        admin_id: user.id, action: "quote_created", entity_type: "travel_quote", entity_id: quote.id,
+        admin_id: actorId, action: "quote_created", entity_type: "travel_quote", entity_id: quote.id,
         details: { quote_number: quote.quote_number, version: 1, price: result.finalPrice, status: result.status },
       });
 
@@ -446,7 +456,7 @@ Deno.serve(async (req) => {
 
       if (!comparison.changed && !policyChanged && body.force !== true) {
         await admin.from("admin_audit_log").insert({
-          admin_id: user.id, action: "quote_repriced_unchanged", entity_type: "travel_quote", entity_id: quote.id,
+          admin_id: actorId, action: "quote_repriced_unchanged", entity_type: "travel_quote", entity_id: quote.id,
           details: { price: result.finalPrice, flight: flightNote },
         });
         return json({ changed: false, message: "Sem alteração.", comparison, flight: flightNote });
@@ -471,7 +481,7 @@ Deno.serve(async (req) => {
         result: result as unknown as Record<string, unknown>,
         warnings: result.warnings,
         validation_errors: result.validationErrors,
-        created_by: user.id,
+        created_by: actorId,
       }).select("id").single();
 
       const usedRateIds = new Set(result.components.map((c) => c.rateId).filter(Boolean) as string[]);
@@ -532,7 +542,7 @@ Deno.serve(async (req) => {
         previous_version_id: current.id,
         previous_price: Number(current.total_price),
         price_difference: comparison.difference,
-        created_by: user.id,
+        created_by: actorId,
       }).select("*").single();
       if (nvError) return json({ error: nvError.message }, 500);
 
@@ -582,7 +592,7 @@ Deno.serve(async (req) => {
       }).eq("id", quote.id);
 
       await admin.from("admin_audit_log").insert({
-        admin_id: user.id, action: "quote_new_version", entity_type: "travel_quote", entity_id: quote.id,
+        admin_id: actorId, action: "quote_new_version", entity_type: "travel_quote", entity_id: quote.id,
         details: {
           version: newVersion.version_number,
           previous_price: comparison.previousPrice,
@@ -611,11 +621,11 @@ Deno.serve(async (req) => {
 
       const recordRevalidation = async (row: Record<string, unknown>) => {
         const { data } = await admin.from("quote_revalidations").insert({
-          quote_id: quote.id, quote_version_id: current.id, created_by: user.id, ...row,
+          quote_id: quote.id, quote_version_id: current.id, created_by: actorId, ...row,
         }).select("*").single();
         await admin.from("travel_quotes").update({ last_revalidated_at: new Date().toISOString() }).eq("id", quote.id);
         await admin.from("admin_audit_log").insert({
-          admin_id: user.id, action: `quote_revalidation_${row.outcome}`, entity_type: "travel_quote", entity_id: quote.id,
+          admin_id: actorId, action: `quote_revalidation_${row.outcome}`, entity_type: "travel_quote", entity_id: quote.id,
           details: { version: current.version_number, ...row },
         });
         return data;
@@ -733,7 +743,7 @@ Deno.serve(async (req) => {
         result: result as unknown as Record<string, unknown>,
         warnings: result.warnings,
         validation_errors: result.validationErrors,
-        created_by: user.id,
+        created_by: actorId,
       }).select("id").single();
 
       const baseRow = {
@@ -792,7 +802,7 @@ Deno.serve(async (req) => {
         previous_version_id: current.id,
         previous_price: Number(current.total_price),
         price_difference: decision.difference,
-        created_by: user.id,
+        created_by: actorId,
       }).select("*").single();
       if (nvError) return json({ error: nvError.message }, 500);
 
@@ -891,7 +901,7 @@ Deno.serve(async (req) => {
       await admin.from("travel_quotes")
         .update({ public_token_hash: hash, public_token_expires_at: expires }).eq("id", quoteId);
       await admin.from("admin_audit_log").insert({
-        admin_id: user.id, action: "quote_token_issued", entity_type: "travel_quote", entity_id: quoteId,
+        admin_id: actorId, action: "quote_token_issued", entity_type: "travel_quote", entity_id: quoteId,
         details: { expires_at: expires },
       });
       // O token só é devolvido uma vez: na base de dados fica apenas o resumo criptográfico.
