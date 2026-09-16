@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -56,9 +55,9 @@ export function DayConfigurator({
 
   if (!slot.configurable) {
     return (
-      <Card className="p-5 bg-muted/40">
+      <Card className="rounded-sm bg-muted/40 p-5 shadow-none">
         <div className="flex items-center gap-3">
-          <Badge variant="outline">Dia {slot.day}</Badge>
+          <span className="w-12 shrink-0 text-xs uppercase text-primary">Dia {slot.day}</span>
           <div>
             <p className="font-medium text-foreground">{slot.title}</p>
             <p className="text-sm text-muted-foreground">{slot.description}</p>
@@ -69,10 +68,10 @@ export function DayConfigurator({
   }
 
   return (
-    <Card className="p-5 space-y-4">
+    <Card className="space-y-5 rounded-sm p-5 shadow-none md:p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Badge>Dia {slot.day}</Badge>
+          <span className="text-xs uppercase text-primary">Dia {slot.day}</span>
           <p className="font-medium text-foreground">{slot.title}</p>
         </div>
         <p className="text-xs text-muted-foreground">{chosen.length} de {maxPerDay} escolhas</p>
@@ -84,7 +83,7 @@ export function DayConfigurator({
             const item = byId.get(s.item_id);
             return (
               <li key={`${s.item_id}-${index}`}>
-                <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm">
+                <span className="inline-flex items-center gap-2 border-b border-border bg-background px-2 py-1.5 text-sm">
                   {item?.name ?? s.item_slug}
                   {item && !isBookable(item) && (
                     <span className="text-[11px] uppercase tracking-wide text-muted-foreground">inspiração</span>
@@ -131,7 +130,7 @@ export function DayConfigurator({
                   type="button"
                   disabled={full}
                   onClick={() => onAdd(item)}
-                  className="w-full text-left rounded-xl border border-border p-3 hover:border-primary disabled:opacity-50 transition-colors"
+                  className="w-full border-l-2 border-border bg-background p-4 text-left transition-colors hover:border-primary hover:bg-accent/35 disabled:opacity-50"
                 >
                   <span className="flex items-start justify-between gap-2">
                     <span>

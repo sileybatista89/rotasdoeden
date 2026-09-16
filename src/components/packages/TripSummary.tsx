@@ -1,10 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { BuilderSummary } from "@/lib/packageBuilder";
 
 export function TripSummary({ summary }: { summary: BuilderSummary }) {
   return (
-    <Card className="p-5 space-y-4">
+    <Card className="space-y-5 rounded-sm p-6 shadow-none">
       <div>
         <h2 className="font-display text-xl font-medium text-foreground">Resumo da sua viagem</h2>
         <p className="text-sm text-muted-foreground">
@@ -24,10 +23,8 @@ export function TripSummary({ summary }: { summary: BuilderSummary }) {
             ) : (
               <ul className="mt-1 flex flex-wrap gap-1.5">
                 {d.items.map((i, index) => (
-                  <li key={`${i.id}-${index}`}>
-                    <Badge variant={i.bookable ? "default" : "outline"}>
-                      {i.name}{i.bookable ? "" : " · inspiração"}
-                    </Badge>
+                  <li key={`${i.id}-${index}`} className="border-b border-border pb-1 text-xs text-foreground">
+                    {i.name}<span className="text-muted-foreground">{i.bookable ? "" : " · inspiração"}</span>
                   </li>
                 ))}
               </ul>
