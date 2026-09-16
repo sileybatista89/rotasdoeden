@@ -28,6 +28,7 @@ export function isConversionIntent(value: unknown): value is ConversionIntent {
 /** Primeira mensagem, fixa, nunca gerada por IA. */
 export const AI_DISCLOSURE =
   "Olá. Sou o assistente virtual da Rotas do Éden. " +
+  "Sou uma inteligência artificial. " +
   "Posso ajudar-te a conhecer São Tomé e Príncipe e a preparar um pedido de orçamento. " +
   "Só falo de informação confirmada pela nossa equipa: não invento preços, disponibilidade nem alojamentos. " +
   "Qualquer valor só é válido numa proposta formal enviada pela equipa. " +
