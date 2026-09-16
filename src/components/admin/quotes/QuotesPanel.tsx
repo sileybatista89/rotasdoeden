@@ -490,12 +490,18 @@ export function QuotesPanel() {
               )}
 
               {booking.data && (
-                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm">
+                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm space-y-2">
                   <p className="font-medium">Reserva de pacote {booking.data.booking_number}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     Estado {booking.data.booking_status} · pagamento {booking.data.payment_status} · operações {booking.data.operations_status}
                     {" · "}{money(booking.data.confirmed_price, booking.data.currency)}
                   </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="outline" disabled>Preparar pagamento</Button>
+                    <span className="text-xs text-muted-foreground">
+                      Pagamento por ativar. A reserva fica a aguardar pagamento até haver autorização para cobranças reais.
+                    </span>
+                  </div>
                 </div>
               )}
 
