@@ -75,13 +75,15 @@ export default function ExperiencesPage() {
       />
       <Navbar />
       <main className="flex-1">
-        <section className="border-b border-border py-12 md:py-16">
-          <div className="container max-w-4xl">
+        <section className="border-b border-border py-16 md:py-24">
+          <div className="container grid gap-8 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-8">
             <span className="eyebrow mb-4">São Tomé e Príncipe</span>
-            <h1 className="font-display text-4xl md:text-5xl font-medium text-foreground mb-4">
-              Experiências em São Tomé e Príncipe
+            <h1 className="mt-5 font-display text-5xl font-normal leading-none text-foreground md:text-7xl">
+              Experiências que começam no lugar.
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
+            </div>
+            <p className="max-w-lg text-base font-light leading-8 text-muted-foreground lg:col-span-4">
               Descubra as ilhas através da natureza, da cultura e do conhecimento local. As ofertas publicadas por parceiros
               verificados aparecem separadamente quando estão disponíveis.
             </p>
@@ -91,9 +93,9 @@ export default function ExperiencesPage() {
         <EditorialCategories />
 
         <section className="border-y border-border bg-card" aria-labelledby="available-experiences-title">
-          <div className="container pt-12 md:pt-16 pb-7">
+          <div className="container pb-7 pt-12 md:pt-16">
             <span className="eyebrow mb-3">Parceiros locais</span>
-            <h2 id="available-experiences-title" className="font-display text-3xl md:text-4xl font-medium text-foreground mb-3">
+            <h2 id="available-experiences-title" className="display-md mb-3 text-foreground">
               Experiências disponíveis
             </h2>
             <p className="text-muted-foreground max-w-2xl">
@@ -127,7 +129,7 @@ export default function ExperiencesPage() {
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-80 rounded-2xl" />
+                  <Skeleton key={i} className="h-80 rounded-sm" />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
@@ -159,7 +161,7 @@ export default function ExperiencesPage() {
                   <Link
                     key={s.id}
                     to={`/experiences/${s.id}`}
-                    className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all hover:-translate-y-1"
+                    className="group overflow-hidden border-t border-border bg-card transition-colors hover:border-primary"
                   >
                     <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                       {s.images?.[0] ? (
@@ -170,14 +172,14 @@ export default function ExperiencesPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+                        <div className="h-full w-full bg-muted" />
                       )}
-                      <span className="absolute top-3 left-3 text-xs font-semibold bg-card/95 backdrop-blur px-2.5 py-1 rounded-full">
+                      <span className="absolute left-3 top-3 bg-card/95 px-2.5 py-1 text-xs font-medium">
                         {categoryLabels[s.category] ?? s.category}
                       </span>
                     </div>
                     <div className="p-5">
-                      <h3 className="font-display font-semibold text-lg text-foreground mb-1 line-clamp-1">{s.title}</h3>
+                      <h3 className="mb-1 line-clamp-1 font-display text-2xl font-normal text-foreground">{s.title}</h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{s.description}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
                         <span className="flex items-center gap-1"><Clock size={12} /> {s.duration_hours}h</span>

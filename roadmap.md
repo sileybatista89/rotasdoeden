@@ -50,12 +50,12 @@
 - [ ] Conversion agent (plano da Fase 6 por aprovar)
 
 ## Reformulação visual pública — Editorial boutique
-- [ ] Consolidar paleta floresta/coral e tipografia Instrument Serif + Work Sans
-- [ ] Redesenhar navegação, homepage e rodapé com hierarquia Destino → Pacotes → Experiências → Guias
-- [ ] Dar protagonismo aos quatro pacotes e manter o preço dinâmico do Rotas Essencial
-- [ ] Redesenhar páginas públicas de destino, experiências e guias
-- [ ] Redesenhar visualmente o configurador partilhado sem alterar a lógica
-- [ ] Verificar páginas públicas em desktop e mobile, typecheck e build
+- [x] Consolidar paleta floresta/coral e tipografia Instrument Serif + Work Sans
+- [x] Redesenhar navegação, homepage e rodapé com hierarquia Destino → Pacotes → Experiências → Guias
+- [x] Dar protagonismo aos quatro pacotes e manter o preço dinâmico do Rotas Essencial
+- [x] Redesenhar páginas públicas de destino, experiências e guias
+- [x] Redesenhar visualmente o configurador partilhado sem alterar a lógica
+- [x] Verificar páginas públicas em desktop e mobile, typecheck e build
 
 
 ## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)

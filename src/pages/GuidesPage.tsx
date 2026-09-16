@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, Sparkles, IdCard, Wallet, Users } from "lucide-react";
+import { ArrowRight, ShieldCheck, FileCheck, MessageSquare, Eye, IdCard, Wallet, Users } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -54,15 +54,13 @@ export default function GuidesPage() {
       <main className="flex-1">
         {hasPublished && <ProfessionalDirectory />}
         {/* Hero */}
-        {hasPublished === false && <section className="bg-gradient-to-br from-primary/10 via-accent/30 to-background py-16 md:py-20">
-          <div className="container max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full mb-5">
-              <Sparkles size={12} /> Novos parceiros em adesão
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
+        {hasPublished === false && <section className="border-b border-border bg-accent/30 py-16 md:py-24">
+          <div className="container max-w-4xl">
+            <span className="eyebrow">Guias locais</span>
+            <h1 className="mt-6 font-display text-5xl font-normal leading-none text-foreground md:text-7xl">
               Os primeiros guias parceiros estão em adesão
             </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="mt-6 max-w-2xl text-base font-light leading-8 text-muted-foreground md:text-lg">
               Por princípio, a Rotas do Éden não publica guias antes de os verificar pessoalmente.
               Estamos a selecionar os primeiros guias locais — preferimos arrancar com qualidade
               comprovada a preencher esta página com perfis sem garantias.
@@ -71,19 +69,17 @@ export default function GuidesPage() {
         </section>}
 
         {/* Why we wait */}
-        <section className="py-16 md:py-20">
+        <section className="section-space">
           <div className="container">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-3">Porquê esperamos por guias verificados</h2>
+            <div className="mb-12 max-w-2xl">
+              <h2 className="display-md mb-3 text-foreground">Porquê esperamos por guias verificados</h2>
               <p className="text-muted-foreground">Quatro pilares que distinguem a Rotas do Éden de directórios genéricos.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {pillars.map((p) => (
-                <div key={p.title} className="bg-card border border-border rounded-2xl p-6">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                    <p.icon size={20} className="text-primary" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground mb-1.5">{p.title}</h3>
+                <div key={p.title} className="border-t border-border py-6">
+                  <p.icon size={20} className="mb-5 text-primary" />
+                  <h3 className="mb-1.5 font-display text-xl font-normal text-foreground">{p.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{p.text}</p>
                 </div>
               ))}
@@ -92,7 +88,7 @@ export default function GuidesPage() {
         </section>
 
         {/* Benefits */}
-        <section className="py-16 bg-muted/30 border-y border-border">
+        <section className="border-y border-border bg-muted/30 py-16">
           <div className="container">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="font-display text-3xl font-bold text-foreground mb-3">Benefícios para guias parceiros</h2>
@@ -100,8 +96,8 @@ export default function GuidesPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
               {benefits.map((b) => (
-                <div key={b.title} className="bg-card border border-border rounded-2xl p-6 flex gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div key={b.title} className="flex gap-4 border-t border-border py-6">
+                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-border">
                     <b.icon size={20} className="text-primary" />
                   </div>
                   <div>
@@ -123,7 +119,7 @@ export default function GuidesPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
               {steps.map((s) => (
-                <div key={s.n} className="bg-card border border-border rounded-2xl p-6">
+                <div key={s.n} className="border-t border-border p-6">
                   <span className="font-display text-3xl font-bold text-primary/40">{s.n}</span>
                   <h3 className="font-display font-semibold text-foreground mt-2 mb-1">{s.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
@@ -149,7 +145,7 @@ export default function GuidesPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 bg-primary">
+        <section className="section-space bg-forest">
           <div className="container text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
               És guia turístico em São Tomé e Príncipe?
@@ -157,7 +153,7 @@ export default function GuidesPage() {
             <p className="text-primary-foreground/80 max-w-lg mx-auto mb-8 text-lg">
               Junta-te à primeira geração de guias verificados da Rotas do Éden.
             </p>
-            <Button asChild variant="sand" size="lg" className="rounded-full px-8">
+            <Button asChild variant="sand" size="lg" className="px-8">
               <Link to="/guia-parceiro">
                 Tornar-me Guia Parceiro <ArrowRight size={18} />
               </Link>
