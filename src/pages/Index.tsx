@@ -22,10 +22,10 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <DescobreStpSection />
         <PackagesShowcase />
-        <SustentabilidadeSection />
         <HowItWorks />
+        <DescobreStpSection />
+        <SustentabilidadeSection />
         <GuidesComingSoon />
         <TrustBlock />
         <GuideCTA />

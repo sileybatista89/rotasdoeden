@@ -59,9 +59,9 @@
 - [x] Preservar apenas fotografias turísticas fornecidas pelo proprietário e eliminar travessões decorativos públicos
 
 ## Homepage e entrada para os pacotes
-- [ ] Apresentar os quatro pacotes imediatamente após a abertura da homepage
-- [ ] Criar uma escolha simples entre viagem completa e exploração do destino
-- [ ] Simplificar o preço público e orientar as quatro etapas do configurador
+- [x] Apresentar os quatro pacotes imediatamente após a abertura da homepage
+- [x] Criar uma escolha simples entre viagem completa e exploração do destino
+- [x] Simplificar o preço público e orientar as quatro etapas do configurador
 - [ ] Verificar computador, telemóvel, tipos e build de produção
 
 

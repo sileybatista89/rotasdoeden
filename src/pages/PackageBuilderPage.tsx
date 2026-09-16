@@ -159,14 +159,9 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                 }).format(baseline.data.price_per_person)}{" "}
                     <span className="text-base text-muted-foreground"> / pessoa</span>
                   </p>
-                  <p className="mt-2 max-w-lg text-xs leading-5 text-muted-foreground">
-                {baseline.data.includes_flight
-                  ? "Preço indicativo, voo incluído."
-                  : "Preço indicativo, base terrestre, voo não incluído."}{" "}
-                Referência para {baseline.data.duration_days} dias com {baseline.data.adults} adultos.
-                {baseline.data.indicative
-                  ? " Baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."
-                  : " Confirmado na proposta antes de qualquer reserva."}
+                  <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
+                    {durationLabel} · personalizável. O valor final é confirmado antes da reserva.
+                    {!baseline.data.includes_flight && " Base terrestre, voo não incluído."}
                   </p>
                 </div>
               )}
@@ -189,7 +184,20 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
           </Card>
         )}
 
-        <section aria-labelledby="duracao-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
+        <nav aria-label="Etapas para preparar a viagem" className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4">
+          {[
+            ["01", "Viajantes", "#viajantes"],
+            ["02", "Dias", "#dias"],
+            ["03", "Resumo", "#resumo"],
+            ["04", "Proposta", "#proposta"],
+          ].map(([number, label, href]) => (
+            <a key={number} href={href} className="bg-background px-4 py-4 text-sm text-foreground hover:bg-accent/35">
+              <span className="mr-2 text-xs text-secondary">{number}</span>{label}
+            </a>
+          ))}
+        </nav>
+
+        <section id="viajantes" aria-labelledby="duracao-title" className="scroll-mt-28 grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
           <div className="lg:col-span-3">
             <p className="text-xs text-secondary">01</p>
             <h2 id="duracao-title" className="mt-2 font-display text-3xl font-normal text-foreground">Duração e viajantes</h2>
@@ -224,10 +232,13 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                 onChange={(e) => update((p) => ({ ...p, startDate: e.target.value || null }))} />
             </div>
           </div>
+           <Button asChild variant="outline" className="w-full sm:w-auto">
+             <a href="#dias">Continuar para os dias <ArrowDown size={14} /></a>
+           </Button>
           </div>
         </section>
 
-        <section aria-labelledby="dias-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
+        <section id="dias" aria-labelledby="dias-title" className="scroll-mt-28 grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
           <div className="lg:col-span-3">
             <p className="text-xs text-secondary">02</p>
             <h2 id="dias-title" className="mt-2 font-display text-3xl font-normal text-foreground">Os seus dias</h2>
@@ -263,17 +274,20 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
           <p className="text-xs text-muted-foreground">
             {status === "saving" ? "A guardar…" : status === "saved" ? "Escolhas guardadas neste dispositivo." : ""}
           </p>
+          <Button asChild className="mt-4 w-full sm:w-auto">
+            <a href="#resumo">Ver o resumo da viagem <ArrowDown size={14} /></a>
+          </Button>
           </div>
         </section>
 
-        <section aria-labelledby="resumo-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-2">
-          <div className="space-y-3">
+        <section aria-label="Resumo e pedido de proposta" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-2">
+          <div id="resumo" className="scroll-mt-28 space-y-3">
             <p className="text-xs text-secondary">03</p>
             <h2 id="resumo-title" className="font-display text-3xl font-normal text-foreground">A sua viagem</h2>
             <TripSummary summary={summary} />
           </div>
 
-          <div className="space-y-3">
+          <div id="proposta" className="scroll-mt-28 space-y-3">
             <p className="text-xs text-secondary">04</p>
             <h2 className="font-display text-3xl font-normal text-foreground">Receber uma proposta</h2>
             <Card className="space-y-4 rounded-sm p-6 shadow-none">
@@ -299,7 +313,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                     <Label htmlFor="notas">Notas (opcional)</Label>
                     <Textarea id="notas" rows={3} value={contact.notes} onChange={(e) => setContact({ ...contact, notes: e.target.value })} />
                   </div>
-                  <Button onClick={send} disabled={sending}>Enviar pedido de proposta</Button>
+                  <Button className="w-full sm:w-auto" onClick={send} disabled={sending}>Enviar pedido de proposta</Button>
                   <p className="text-xs text-muted-foreground">
                     Enviar o pedido não reserva nem cobra nada. Recebe uma proposta com preços confirmados antes de
                     decidir.
