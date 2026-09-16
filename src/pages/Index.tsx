@@ -2,16 +2,13 @@ import { SEO } from "@/components/SEO";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
-import { StatsSection } from "@/components/home/StatsSection";
 import { GuidesComingSoon } from "@/components/home/GuidesComingSoon";
 import { TrustBlock } from "@/components/home/TrustBlock";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { GuideCTA } from "@/components/home/GuideCTA";
 import { DescobreStpSection } from "@/components/home/DescobreStpSection";
-import { UniformeSection } from "@/components/home/UniformeSection";
 import { SustentabilidadeSection } from "@/components/home/SustentabilidadeSection";
-import { ParceirosCarousel } from "@/components/home/ParceirosCarousel";
-import { UnescoSection } from "@/components/home/UnescoSection";
+import { PackagesShowcase } from "@/components/home/PackagesShowcase";
 
 
 const Index = () => {
@@ -25,16 +22,12 @@ const Index = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <StatsSection />
         <DescobreStpSection />
+        <PackagesShowcase />
+        <SustentabilidadeSection />
+        <HowItWorks />
         <GuidesComingSoon />
         <TrustBlock />
-        <UniformeSection />
-        <SustentabilidadeSection />
-        <UnescoSection />
-        <HowItWorks />
-
-        <ParceirosCarousel />
         <GuideCTA />
       </main>
       <Footer />

@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Cormorant Garamond', 'Times New Roman', 'serif'],
-        body: ['Karla', 'system-ui', 'sans-serif'],
+        display: ['Instrument Serif', 'Georgia', 'serif'],
+        body: ['Work Sans', 'system-ui', 'sans-serif'],
       },
 
       colors: {
@@ -74,6 +74,8 @@ export default {
           ink: "hsl(var(--eden-ink))",
           paper: "hsl(var(--eden-paper))",
         },
+        forest: "hsl(var(--forest))",
+        coral: "hsl(var(--coral))",
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

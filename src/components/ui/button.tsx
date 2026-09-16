@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-[0.82rem] font-semibold uppercase tracking-[0.12em] ring-offset-background transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-[0.76rem] font-medium uppercase tracking-[0.12em] ring-offset-background transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -14,7 +14,7 @@ const buttonVariants = cva(
         outline:
           "border border-foreground/25 bg-transparent text-foreground hover:bg-foreground hover:text-background hover:border-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/85",
-        ghost: "rounded-full normal-case tracking-normal font-medium hover:bg-accent hover:text-accent-foreground",
+        ghost: "normal-case tracking-normal font-medium hover:bg-accent hover:text-accent-foreground",
         link: "normal-case tracking-normal text-primary underline-offset-4 hover:underline",
         hero: "bg-eden-ink text-primary-foreground hover:bg-primary shadow-soft",
         sand: "bg-secondary text-secondary-foreground hover:bg-eden-ink hover:text-primary-foreground",
