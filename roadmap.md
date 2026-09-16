@@ -49,6 +49,14 @@
 - [ ] Resultados/aprendizagem e, só com autorização, canal externo (etapas 9-10)
 - [ ] Conversion agent (plano da Fase 6 por aprovar)
 
+## Reformulação visual pública — Editorial boutique
+- [ ] Consolidar paleta floresta/coral e tipografia Instrument Serif + Work Sans
+- [ ] Redesenhar navegação, homepage e rodapé com hierarquia Destino → Pacotes → Experiências → Guias
+- [ ] Dar protagonismo aos quatro pacotes e manter o preço dinâmico do Rotas Essencial
+- [ ] Redesenhar páginas públicas de destino, experiências e guias
+- [ ] Redesenhar visualmente o configurador partilhado sem alterar a lógica
+- [ ] Verificar páginas públicas em desktop e mobile, typecheck e build
+
 
 ## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)
 - [x] package_bookings, package_booking_items, booking_flight, supplier_confirmations, payment_events

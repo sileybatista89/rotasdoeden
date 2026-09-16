@@ -1,24 +1,23 @@
-import { Search, CreditCard, Compass } from "lucide-react";
-import { useT } from "@/i18n/LanguageProvider";
+import { Search, SlidersHorizontal, Compass, Luggage } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 
 export function HowItWorks() {
-  const { t } = useT();
   const steps = [
-    { icon: Search, title: t("how.s1.title"), description: t("how.s1.text") },
-    { icon: CreditCard, title: t("how.s2.title"), description: t("how.s2.text") },
-    { icon: Compass, title: t("how.s3.title"), description: t("how.s3.text") },
+    { icon: Search, title: "Descobrir", description: "Conheça as ilhas, os seus ritmos e as possibilidades de cada rota." },
+    { icon: Compass, title: "Escolher", description: "Comece pelo pacote que melhor acompanha o seu tempo de viagem." },
+    { icon: SlidersHorizontal, title: "Personalizar", description: "Ajuste os dias, os viajantes e as experiências que quer viver." },
+    { icon: Luggage, title: "Viajar", description: "Receba uma proposta confirmada antes de tomar qualquer decisão." },
   ];
 
   return (
-    <section id="como-funciona" className="py-20 md:py-32 bg-accent/40">
+    <section id="como-funciona" className="section-space bg-background">
       <div className="container">
         <Reveal className="max-w-2xl mb-14 md:mb-20">
-          <span className="eyebrow mb-6">{t("how.title")}</span>
-          <p className="lead mt-6">{t("how.subtitle")}</p>
+          <span className="eyebrow mb-6">Da ideia à viagem</span>
+          <h2 className="display-md mt-5">Quatro passos. Sem ruído.</h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 md:gap-10">
           {steps.map((step, i) => (
             <Reveal key={i} delay={i * 110} className="border-t border-foreground/15 pt-7">
               <step.icon size={22} className="text-primary mb-6" strokeWidth={1.5} />
