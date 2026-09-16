@@ -90,6 +90,7 @@ export function QuotesPanel() {
   const createBooking = useCreatePackageBooking();
   const revalidations = useQuoteRevalidations(openId);
   const booking = usePackageBookingForQuote(openId);
+  const builderRequests = useBuilderRequests();
 
   async function onRevalidate(quoteId: string) {
     try {
