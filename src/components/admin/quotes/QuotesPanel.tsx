@@ -246,7 +246,7 @@ export function QuotesPanel() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
-                  {["Número", "Produto", "Preço", "Estado", "Criação", "Validade", "Versão", ""].map((h) => (
+                  {["Número", "Produto", "Preço", "Estado", "Fase", "Criação", "Validade", "Versão", ""].map((h) => (
                     <th key={h} className="text-left font-medium px-4 py-3 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -261,11 +261,60 @@ export function QuotesPanel() {
                     </td>
 
                     <td className="px-4 py-3"><StatusBadge status={q.status} /></td>
+                    <td className="px-4 py-3"><StageBadge quote={q} /></td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.created_at)}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(q.expires_at)}</td>
                     <td className="px-4 py-3">v{q.version_count}</td>
                     <td className="px-4 py-3 text-right">
                       <Button size="sm" variant="outline" onClick={() => setOpenId(q.id)}>Ver</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pedidos vindos do configurador público */}
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h3 className="font-display font-semibold text-foreground mb-1">Pedidos do configurador</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Configurações enviadas pelos visitantes. Quando existe política ativa e componentes reais, a proposta é gerada automaticamente.
+        </p>
+        {(builderRequests.data ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">Ainda não há pedidos enviados.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  {["Cliente", "Produto", "Viagem", "Estado", "Enviado", ""].map((h) => (
+                    <th key={h} className="text-left font-medium px-4 py-3 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(builderRequests.data ?? []).map((r) => (
+                  <tr key={r.id} className="border-t border-border">
+                    <td className="px-4 py-3">
+                      <span className="block">{r.contact_name ?? ","}</span>
+                      <span className="text-xs text-muted-foreground">{r.contact_email ?? ","}</span>
+                    </td>
+                    <td className="px-4 py-3">{r.product_id ? productName.get(r.product_id) ?? "," : ","}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
+                      {r.duration_days} dias · {r.adults} adultos{r.children ? ` · ${r.children} crianças` : ""}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline">{BUILDER_STATUS_LABEL[r.status] ?? r.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{dt(r.submitted_at ?? r.created_at)}</td>
+                    <td className="px-4 py-3 text-right">
+                      {r.quote_id ? (
+                        <Button size="sm" variant="outline" onClick={() => setOpenId(r.quote_id!)}>Ver proposta</Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">A preparar</span>
+                      )}
                     </td>
                   </tr>
                 ))}
