@@ -81,7 +81,7 @@ export function PackagesShowcase() {
                     {index === 0 && baseline.data && (
                       <div className="mt-4">
                         <p className="font-display text-2xl text-coral">
-                          Desde {new Intl.NumberFormat("pt-PT", {
+                          Desde {new Intl.NumberFormat("de-DE", {
                           style: "currency",
                           currency: baseline.data.currency ?? "EUR",
                           maximumFractionDigits: 0,

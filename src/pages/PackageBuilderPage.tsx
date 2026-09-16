@@ -152,7 +152,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
               {baseline.data && (
                 <div className="mt-8 border-l-2 border-secondary pl-5">
                   <p className="font-display text-3xl font-normal text-foreground md:text-4xl">
-                Desde {new Intl.NumberFormat("pt-PT", {
+                Desde {new Intl.NumberFormat("de-DE", {
                   style: "currency",
                   currency: baseline.data.currency ?? "EUR",
                   maximumFractionDigits: 0,

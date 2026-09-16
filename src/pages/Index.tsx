@@ -15,8 +15,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Rotas do Éden, Guias turísticos em São Tomé e Príncipe"
-        description="Marketplace de guias turísticos verificados em São Tomé e Príncipe. Reserve trilhas, mergulho, gastronomia e cultura com confiança."
+        title="Rotas do Éden | Viagens a São Tomé e Príncipe"
+        description="Organize uma viagem completa e personalizável a São Tomé e Príncipe com pacotes, experiências e conhecimento local."
         path="/"
       />
       <Navbar />

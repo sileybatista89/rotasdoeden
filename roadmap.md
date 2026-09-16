@@ -62,7 +62,7 @@
 - [x] Apresentar os quatro pacotes imediatamente após a abertura da homepage
 - [x] Criar uma escolha simples entre viagem completa e exploração do destino
 - [x] Simplificar o preço público e orientar as quatro etapas do configurador
-- [ ] Verificar computador, telemóvel, tipos e build de produção
+- [x] Verificar computador, telemóvel, tipos e build de produção
 
 
 ## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)
