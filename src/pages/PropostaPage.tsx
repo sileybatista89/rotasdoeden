@@ -75,6 +75,19 @@ export default function PropostaPage() {
     });
     setBusy(false);
     if (error || data?.accepted !== true) {
+      // O preço é sempre reconfirmado antes de aceitar. Se mudou, mostramos a
+      // proposta atualizada e o cliente decide de novo.
+      if (data?.code === "quote_updated" && data?.quote) {
+        setQuote(data.quote);
+        const before = typeof data.previous_price === "number" ? money(data.previous_price, data.quote.currency) : null;
+        const after = typeof data.new_price === "number" ? money(data.new_price, data.quote.currency) : null;
+        setMessage(
+          before && after
+            ? `O valor desta viagem foi atualizado de ${before} para ${after}. Reveja a proposta atualizada e confirme se pretende avançar.`
+            : "Esta proposta foi atualizada. Reveja os valores e confirme se pretende avançar.",
+        );
+        return;
+      }
       setMessage(data?.error ?? "Não foi possível registar a aceitação.");
       return;
     }
