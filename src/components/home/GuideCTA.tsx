@@ -7,7 +7,7 @@ import { Reveal } from "@/components/ui/reveal";
 export function GuideCTA() {
   const { t } = useT();
   return (
-    <section className="py-24 md:py-32 bg-eden-ink">
+    <section className="section-space bg-forest">
       <div className="container">
         <Reveal className="max-w-3xl">
           <span className="eyebrow eyebrow-center mb-6 text-secondary">Rotas do Éden</span>

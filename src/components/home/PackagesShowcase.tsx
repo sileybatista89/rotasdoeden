@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useProductBaseline } from "@/hooks/usePackageBuilder";
 import { Reveal } from "@/components/ui/reveal";
-import essencialImage from "@/assets/real/principe-beach.jpg.asset.json";
-import explorarImage from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
-import imersaoImage from "@/assets/real/roca-casa-grande.jpg.asset.json";
-import medidaImage from "@/assets/real/costa-mar-real.jpeg.asset.json";
+import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
+import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
+import imersaoImage from "@/assets/optimized/roca-card.webp";
+import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
 
 const packages = [
   {
@@ -13,28 +13,28 @@ const packages = [
     name: "Rotas Essencial",
     duration: "5–7 dias",
     description: "A primeira leitura das ilhas: natureza, costa, património e tempo para respirar.",
-    image: essencialImage.url,
+    image: essencialImage,
   },
   {
     slug: "rotas-explorar",
     name: "Rotas Explorar",
     duration: "8–10 dias",
     description: "Mais caminhos, mais encontros e espaço para conhecer São Tomé para lá do evidente.",
-    image: explorarImage.url,
+    image: explorarImage,
   },
   {
     slug: "rotas-imersao",
     name: "Rotas Imersão",
     duration: "14–15 dias",
     description: "Uma viagem longa e pausada, entre floresta, roças, comunidades e oceano.",
-    image: imersaoImage.url,
+    image: imersaoImage,
   },
   {
     slug: "rotas-a-medida",
     name: "Rotas à Medida",
     duration: "A partir de 5 dias",
     description: "Uma rota construída à volta do seu ritmo, das suas datas e da forma como gosta de viajar.",
-    image: medidaImage.url,
+    image: medidaImage,
   },
 ];
 

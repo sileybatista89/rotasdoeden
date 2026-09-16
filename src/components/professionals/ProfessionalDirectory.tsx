@@ -80,8 +80,9 @@ export function ProfessionalDirectory() {
   return (
     <section className="py-14 md:py-20 border-b border-border">
       <div className="container">
-        <div className="max-w-2xl mb-8">
-          <h2 className="font-display text-3xl font-bold text-foreground mb-2">Profissionais verificados</h2>
+        <div className="mb-8 max-w-2xl">
+          <span className="eyebrow">Conhecimento local</span>
+          <h2 className="display-md mb-2 mt-5 text-foreground">Profissionais verificados</h2>
           <p className="text-muted-foreground">
             Guias, operadores e agências com identidade e experiência confirmadas pela nossa equipa.
           </p>
@@ -131,7 +132,7 @@ export function ProfessionalDirectory() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
               <Link key={p.id} to={`/guides/${p.user_id}`}
-                className="group bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                className="group overflow-hidden border-t border-border bg-card transition-colors hover:border-primary">
                 <div className="h-44 bg-muted overflow-hidden flex items-center justify-center">
                   {(p.profile_photo_url || avatars[p.user_id]) ? (
                     <img src={(p.profile_photo_url || avatars[p.user_id]) as string} alt={names[p.user_id] ?? "Profissional verificado"}

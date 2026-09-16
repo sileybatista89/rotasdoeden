@@ -20,6 +20,18 @@ import {
   summarizeBuilder,
   type CatalogItem,
 } from "@/lib/packageBuilder";
+import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
+import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
+import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
+import imersaoImage from "@/assets/optimized/roca-card.webp";
+import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
+
+const packageImages: Record<string, string> = {
+  "rotas-essencial": essencialImage,
+  "rotas-explorar": explorarImage,
+  "rotas-imersao": imersaoImage,
+  "rotas-a-medida": medidaImage,
+};
 
 /**
  * Página única do configurador. Todo o comportamento (duração, limites, dias,
@@ -119,34 +131,35 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
       />
       <Navbar />
 
-      <main className="container py-10 md:py-14 space-y-10">
-        <header className="max-w-2xl space-y-3">
-          <span className="eyebrow">
-            {rules?.product_type === "custom_package" ? "Viagem à medida" : "Pacote"}
-          </span>
-          <h1 className="font-display text-3xl md:text-4xl font-medium text-foreground">
-            {rules?.name ?? <Skeleton className="h-9 w-64" />}
-          </h1>
-          <p className="text-muted-foreground leading-relaxed">
-            {rules?.description}{" "}
-            {rules && (
-              <>
-                Uma viagem {durationLabel}, sem itinerário rígido: a chegada e o regresso ficam tratados e os dias no
-                meio são seus para montar. Pode repetir o mesmo tipo de programa em dias diferentes.
-              </>
-            )}
-          </p>
-          {baseline.data && (
-            <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-2xl font-display font-medium text-foreground">
+      <main>
+        <header className="border-b border-border bg-card">
+          <div className="container grid gap-10 py-10 md:grid-cols-12 md:items-center md:py-16">
+            <div className="md:col-span-7 lg:col-span-6">
+              <span className="eyebrow">
+                {rules?.product_type === "custom_package" ? "Viagem à medida" : "Viagens Rotas do Éden"}
+              </span>
+              <h1 className="mt-6 font-display text-5xl font-normal leading-none text-foreground md:text-7xl">
+                {rules?.name ?? <Skeleton className="h-16 w-64" />}
+              </h1>
+              <p className="mt-6 max-w-xl text-base font-light leading-8 text-muted-foreground">
+                {rules?.description}{" "}
+                {rules && <>Uma viagem {durationLabel}, construída dia a dia à volta do seu ritmo.</>}
+              </p>
+              <div className="mt-8 flex flex-wrap gap-8 border-t border-border pt-6 text-sm">
+                <span className="inline-flex items-center gap-2"><CalendarDays size={16} className="text-primary" /> {durationLabel}</span>
+                <span className="inline-flex items-center gap-2"><UsersRound size={16} className="text-primary" /> Ajustável aos viajantes</span>
+              </div>
+              {baseline.data && (
+                <div className="mt-8 border-l-2 border-secondary pl-5">
+                  <p className="font-display text-3xl font-normal text-foreground md:text-4xl">
                 Desde {new Intl.NumberFormat("pt-PT", {
                   style: "currency",
                   currency: baseline.data.currency ?? "EUR",
                   maximumFractionDigits: 0,
                 }).format(baseline.data.price_per_person)}{" "}
-                <span className="text-base text-muted-foreground">por pessoa</span>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
+                    <span className="text-base text-muted-foreground"> / pessoa</span>
+                  </p>
+                  <p className="mt-2 max-w-lg text-xs leading-5 text-muted-foreground">
                 {baseline.data.includes_flight
                   ? "Preço indicativo, voo incluído."
                   : "Preço indicativo — base terrestre, voo não incluído."}{" "}
@@ -154,10 +167,20 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                 {baseline.data.indicative
                   ? " Baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."
                   : " Confirmado na proposta antes de qualquer reserva."}
-              </p>
+                  </p>
+                </div>
+              )}
+              <a href="#planear" className="mt-8 inline-flex items-center gap-2 text-xs uppercase text-primary">Planear esta rota <ArrowDown size={14} /></a>
             </div>
-          )}
+            <div className="md:col-span-5 lg:col-span-5 lg:col-start-8">
+              <div className="aspect-[4/5] overflow-hidden bg-muted">
+                {packageImages[slug] && <img src={packageImages[slug]} alt={rules?.name ?? "Viagem Rotas do Éden"} className="h-full w-full object-cover" />}
+              </div>
+            </div>
+          </div>
         </header>
+
+        <div id="planear" className="container space-y-14 py-14 md:py-20">
 
         {product.error && (
           <Card className="p-5 space-y-3">
@@ -166,8 +189,12 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
           </Card>
         )}
 
-        <section aria-labelledby="duracao-title" className="space-y-3">
-          <h2 id="duracao-title" className="font-display text-2xl font-medium text-foreground">1. Duração e viajantes</h2>
+        <section aria-labelledby="duracao-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
+          <div className="lg:col-span-3">
+            <p className="text-xs text-secondary">01</p>
+            <h2 id="duracao-title" className="mt-2 font-display text-3xl font-normal text-foreground">Duração e viajantes</h2>
+          </div>
+          <div className="space-y-6 lg:col-span-8 lg:col-start-5">
           <div className="flex flex-wrap gap-2">
             {durations.map((d) => (
               <Button key={d} variant={config.durationDays === d ? "default" : "outline"} onClick={() => setDuration(d)}>
@@ -175,7 +202,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
               </Button>
             ))}
           </div>
-          <div className="grid gap-3 sm:grid-cols-4 max-w-2xl">
+          <div className="grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="adultos">Adultos</Label>
               <Input id="adultos" inputMode="numeric" value={config.adults}
@@ -197,10 +224,16 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                 onChange={(e) => update((p) => ({ ...p, startDate: e.target.value || null }))} />
             </div>
           </div>
+          </div>
         </section>
 
-        <section aria-labelledby="dias-title" className="space-y-3">
-          <h2 id="dias-title" className="font-display text-2xl font-medium text-foreground">2. Os seus dias</h2>
+        <section aria-labelledby="dias-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-12">
+          <div className="lg:col-span-3">
+            <p className="text-xs text-secondary">02</p>
+            <h2 id="dias-title" className="mt-2 font-display text-3xl font-normal text-foreground">Os seus dias</h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">Escolha o que quer viver. Pode repetir programas em dias diferentes.</p>
+          </div>
+          <div className="space-y-3 lg:col-span-8 lg:col-start-5">
           {(catalog.isLoading || product.isLoading || !restored) && (
             <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full" />)}</div>
           )}
@@ -230,17 +263,20 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
           <p className="text-xs text-muted-foreground">
             {status === "saving" ? "A guardar…" : status === "saved" ? "Escolhas guardadas neste dispositivo." : ""}
           </p>
+          </div>
         </section>
 
-        <section aria-labelledby="resumo-title" className="grid gap-6 lg:grid-cols-2">
+        <section aria-labelledby="resumo-title" className="grid gap-8 border-t border-border pt-8 lg:grid-cols-2">
           <div className="space-y-3">
-            <h2 id="resumo-title" className="font-display text-2xl font-medium text-foreground">3. Resumo</h2>
+            <p className="text-xs text-secondary">03</p>
+            <h2 id="resumo-title" className="font-display text-3xl font-normal text-foreground">A sua viagem</h2>
             <TripSummary summary={summary} />
           </div>
 
           <div className="space-y-3">
-            <h2 className="font-display text-2xl font-medium text-foreground">4. Pedir proposta</h2>
-            <Card className="p-5 space-y-3">
+            <p className="text-xs text-secondary">04</p>
+            <h2 className="font-display text-3xl font-normal text-foreground">Receber uma proposta</h2>
+            <Card className="space-y-4 rounded-sm p-6 shadow-none">
               {sent ? (
                 <p className="text-sm text-muted-foreground">
                   Pedido registado. A equipa confirma disponibilidade e preços e envia a proposta por email.
@@ -273,6 +309,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
             </Card>
           </div>
         </section>
+        </div>
       </main>
 
       <Footer />

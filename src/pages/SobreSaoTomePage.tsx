@@ -29,13 +29,13 @@ export default function SobreSaoTomePage() {
       <header className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
           <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
-          <div className="absolute inset-0 bg-gradient-to-br from-foreground/80 via-foreground/55 to-foreground/40" />
+          <div className="absolute inset-0 bg-foreground/55" />
         </div>
-        <div className="container relative py-16 md:py-24">
+        <div className="container relative py-24 md:py-36">
           <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
             {t("sobre.eyebrow")}
           </span>
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-primary-foreground max-w-3xl leading-tight drop-shadow-lg">
+          <h1 className="max-w-3xl font-display text-5xl font-normal leading-none text-primary-foreground md:text-7xl">
             {t("sobre.title")}
           </h1>
           <p className="text-primary-foreground/90 text-base md:text-lg max-w-2xl mt-5 leading-relaxed drop-shadow">
@@ -50,10 +50,7 @@ export default function SobreSaoTomePage() {
           {facts.map((f) => {
             const Icon = f.icon;
             return (
-              <div
-                key={f.label}
-                className="bg-card border border-border rounded-xl p-5 transition-all hover:border-primary/40 hover:shadow-md"
-              >
+              <div key={f.label} className="border-t border-border py-5">
                 <Icon size={18} className="text-primary mb-2" />
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">{f.label}</p>
                 <p className="text-sm font-medium text-foreground leading-snug">{f.value}</p>
@@ -62,7 +59,7 @@ export default function SobreSaoTomePage() {
           })}
         </section>
 
-        <div className="grid md:grid-cols-[1fr_280px] gap-12">
+        <div className="grid gap-16 md:grid-cols-[1fr_280px]">
           <article className="prose prose-stone max-w-none">
             <section className="mb-12">
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-4">{t("sobre.history.title")}</h2>
@@ -93,8 +90,8 @@ export default function SobreSaoTomePage() {
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-4">{t("sobre.tips.title")}</h2>
 
               {/* Taxa turística destaque */}
-              <div className="bg-secondary/10 border-2 border-secondary/40 rounded-2xl p-5 mb-5 flex gap-4">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-secondary/25 flex items-center justify-center text-secondary-foreground">
+              <div className="mb-5 flex gap-4 border-l-2 border-secondary bg-secondary/10 p-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center text-secondary-foreground">
                   <AlertTriangle size={20} className="text-secondary" />
                 </div>
                 <div>
@@ -114,18 +111,18 @@ export default function SobreSaoTomePage() {
           </article>
 
           <aside className="md:sticky md:top-24 h-fit">
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+            <div className="border-t-2 border-primary bg-primary/5 p-6">
               <h3 className="font-display text-lg font-semibold text-foreground mb-2">{t("sobre.sidebar.title")}</h3>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{t("sobre.sidebar.text")}</p>
               <Link
                 to="/experiences"
-                className="block text-center bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
+                className="block bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 {t("sobre.sidebar.cta1")}
               </Link>
               <Link
                 to="/guides"
-                className="block text-center mt-2 border border-border rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-muted transition-colors"
+                className="mt-2 block border border-border px-4 py-2.5 text-center text-sm font-medium transition-colors hover:bg-muted"
               >
                 {t("sobre.sidebar.cta2")}
               </Link>
@@ -158,7 +155,7 @@ export default function SobreSaoTomePage() {
             {["Hotéis", "Operadores", "Restaurantes", "Empresas locais"].map((label) => (
               <div
                 key={label}
-                className="border border-dashed border-border rounded-xl px-4 py-6 text-center text-sm text-muted-foreground bg-card/40"
+                className="border-t border-border bg-card/40 px-4 py-6 text-center text-sm text-muted-foreground"
               >
                 {label}
                 <span className="block text-[10px] uppercase tracking-wider mt-1 text-primary/70">rede parceira</span>
