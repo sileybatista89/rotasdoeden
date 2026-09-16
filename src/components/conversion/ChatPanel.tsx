@@ -62,9 +62,13 @@ export function ChatPanel({ open, onClose }: Props) {
             {m.content
               .replace(
                 "Olá! Sou o assistente virtual da Rotas do Éden, uma inteligência artificial, não um guia humano.",
-                "Olá. Sou o assistente virtual da Rotas do Éden.",
+                "Olá. Sou o assistente virtual da Rotas do Éden. Sou uma inteligência artificial.",
               )
-              .replace(/[,-]/g, ",")}
+              .replace(
+                "Olá. Sou o assistente virtual da Rotas do Éden. Posso ajudar-te",
+                "Olá. Sou o assistente virtual da Rotas do Éden. Sou uma inteligência artificial. Posso ajudar-te",
+              )
+              .replace(/[\u2013\u2014]/g, ",")}
           </div>
         ))}
         {sending && (

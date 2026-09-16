@@ -56,6 +56,7 @@
 - [x] Redesenhar páginas públicas de destino, experiências e guias
 - [x] Redesenhar visualmente o configurador partilhado sem alterar a lógica
 - [x] Verificar páginas públicas em desktop e mobile, typecheck e build
+- [x] Preservar apenas fotografias turísticas fornecidas pelo proprietário e eliminar travessões decorativos públicos
 
 
 ## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)
