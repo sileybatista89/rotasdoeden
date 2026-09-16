@@ -432,10 +432,16 @@ Deno.serve(async (req) => {
     }).eq("id", existing.id).select("*").single();
     if (error) return json({ error: "Não foi possível enviar o pedido." }, 400);
 
-    // O preço não é calculado aqui: a equipa produz a proposta com o Quote Engine.
+    // O preço nunca é calculado aqui: pedimos a proposta ao Quote Engine, que
+    // continua a ser o único responsável por preços, validade e proveniência.
+    const generated = await requestQuoteForConfig(client, data);
+
     return json({
-      config: publicConfig(data),
-      message: "Pedido registado. A equipa prepara a proposta com preços confirmados e envia por email.",
+      config: publicConfig(generated.config ?? data),
+      quote_generated: generated.ok,
+      message: generated.ok
+        ? "Pedido registado e proposta em preparação. Enviamos a proposta por email para confirmar consigo."
+        : "Pedido registado. A equipa prepara a proposta com preços confirmados e envia por email.",
     });
   }
 
