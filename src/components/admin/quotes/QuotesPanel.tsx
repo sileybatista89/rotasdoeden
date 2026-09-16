@@ -56,6 +56,24 @@ function StatusBadge({ status }: { status: QuoteStatus }) {
   return <Badge variant="outline" className={tone}>{QUOTE_STATUS_LABEL[status] ?? status}</Badge>;
 }
 
+/** Fase do ciclo comercial: criada, enviada, aceite, revalidação, pagamento. */
+function StageBadge({ quote }: { quote: QuoteRow }) {
+  const stage = quoteStage(quote);
+  const tone =
+    stage === "pronta_pagamento" ? "bg-primary/10 text-primary border-primary/30"
+    : stage === "aguarda_revalidacao" ? "bg-destructive/10 text-destructive border-destructive/30"
+    : stage === "encerrada" ? "bg-muted text-muted-foreground border-border"
+    : "bg-secondary/15 text-foreground border-border";
+  return <Badge variant="outline" className={tone}>{QUOTE_STAGE_LABEL[stage]}</Badge>;
+}
+
+const BUILDER_STATUS_LABEL: Record<string, string> = {
+  submetido: "Pedido recebido",
+  em_analise: "Em análise",
+  cotado: "Proposta gerada",
+  arquivado: "Arquivado",
+};
+
 export function QuotesPanel() {
   const { toast } = useToast();
   const [filters, setFilters] = useState<QuoteFilters>({});
