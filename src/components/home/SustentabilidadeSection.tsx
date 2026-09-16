@@ -1,6 +1,6 @@
 import { Leaf, Globe2, Bird, TreePine, Waves, ShieldCheck } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
-import obo from "@/assets/real/costa-floresta.jpg.asset.json";
+import obo from "@/assets/optimized/trilho-floresta-hero.webp";
 
 
 const pillars = [
@@ -28,14 +28,14 @@ const pillars = [
 
 export function SustentabilidadeSection() {
   return (
-    <section className="py-20 md:py-32 bg-accent/40">
+    <section className="section-space bg-accent/40">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Visual */}
           <Reveal className="relative order-2 lg:order-1 lg:col-span-5">
-            <div className="aspect-[4/5] overflow-hidden rounded-md bg-muted">
+            <div className="aspect-[4/5] overflow-hidden bg-muted">
               <img
-                src={obo.url}
+                src={obo}
                 alt="Floresta tropical de São Tomé — vegetação endémica do Parque Natural Obô"
                 loading="lazy"
                 decoding="async"

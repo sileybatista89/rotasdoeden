@@ -21,12 +21,12 @@ import {
   type CatalogItem,
 } from "@/lib/packageBuilder";
 import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
-import essencialImage from "@/assets/real/principe-beach.jpg.asset.json";
-import explorarImage from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
-import imersaoImage from "@/assets/real/roca-casa-grande.jpg.asset.json";
-import medidaImage from "@/assets/real/costa-mar-real.jpeg.asset.json";
+import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
+import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
+import imersaoImage from "@/assets/optimized/roca-card.webp";
+import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
 
-const packageImages: Record<string, { url: string }> = {
+const packageImages: Record<string, string> = {
   "rotas-essencial": essencialImage,
   "rotas-explorar": explorarImage,
   "rotas-imersao": imersaoImage,
@@ -174,7 +174,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
             </div>
             <div className="md:col-span-5 lg:col-span-5 lg:col-start-8">
               <div className="aspect-[4/5] overflow-hidden bg-muted">
-                {packageImages[slug] && <img src={packageImages[slug].url} alt={rules?.name ?? "Viagem Rotas do Éden"} className="h-full w-full object-cover" />}
+                {packageImages[slug] && <img src={packageImages[slug]} alt={rules?.name ?? "Viagem Rotas do Éden"} className="h-full w-full object-cover" />}
               </div>
             </div>
           </div>
