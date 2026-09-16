@@ -1,5 +1,5 @@
 /**
- * Fase 11 — reexporta o modelo de alojamento partilhado.
+ * Fase 11, reexporta o modelo de alojamento partilhado.
  * A fonte única vive em supabase/functions/_shared/ para que servidor e admin
  * usem exatamente as mesmas regras de normalização, expiry e proveniência.
  */

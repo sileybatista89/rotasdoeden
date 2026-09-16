@@ -72,7 +72,7 @@ export function ProfessionalDirectory() {
 
   if (loading) return null;
 
-  // Page-level empty state already explains the situation — avoid duplicating it here.
+  // Page-level empty state already explains the situation, avoid duplicating it here.
   if (pros.length === 0) return null;
 
 

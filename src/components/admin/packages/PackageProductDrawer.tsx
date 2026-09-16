@@ -109,7 +109,7 @@ export function PackageProductDrawer({ product, onClose }: Props) {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Publicar aqui é apenas estado interno — nada aparece no site público nesta fase.
+              Publicar aqui é apenas estado interno, nada aparece no site público nesta fase.
             </p>
           </section>
 
@@ -151,7 +151,7 @@ export function PackageProductDrawer({ product, onClose }: Props) {
             </ul>
 
             <div className="rounded-xl border border-dashed border-border p-3 space-y-2">
-              <Label htmlFor="version-days">Nova versão — duração em dias</Label>
+              <Label htmlFor="version-days">Nova versão, duração em dias</Label>
               <Input
                 id="version-days"
                 inputMode="numeric"

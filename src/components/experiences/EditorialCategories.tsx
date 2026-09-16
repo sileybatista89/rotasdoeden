@@ -1,9 +1,9 @@
-import costaMar from "@/assets/stp/biodiversidade.jpg";
-import passeioGruta from "@/assets/stp/passeio-barco.jpg";
-import praiaBanana from "@/assets/praias/praia-banana.jpg";
-import picoCaoGrande from "@/assets/optimized/pico-cao-grande-card.webp";
-import cacau from "@/assets/optimized/cacau-card.webp";
-import roca from "@/assets/optimized/roca-card.webp";
+import costaMar from "@/assets/real/costa-mar-real.jpeg";
+import passeioGruta from "@/assets/real/passeio-gruta-real.jpeg";
+import praiaBanana from "@/assets/real/praia-banana-hd.jpg";
+import picoCaoGrande from "@/assets/real/pico-cao-grande-real.jpg";
+import cacau from "@/assets/real/cacau-real.jpg";
+import roca from "@/assets/real/roca-casa-grande.jpg";
 
 const CATEGORIES = [
   {

@@ -1,5 +1,5 @@
 /**
- * Fase 7B — regras puras dos produtos de pacote.
+ * Fase 7B, regras puras dos produtos de pacote.
  * Sem preços, custos, fornecedores ou voos: só identidade e duração.
  */
 
@@ -73,7 +73,7 @@ export function defaultNights(days: number): number {
 export function formatDuration(range: DurationRange): string {
   if (range.maximum_days === null) return `${range.minimum_days}+ dias`;
   if (range.maximum_days === range.minimum_days) return `${range.minimum_days} dias`;
-  return `${range.minimum_days}–${range.maximum_days} dias`;
+  return `${range.minimum_days}-${range.maximum_days} dias`;
 }
 
 /** Transições permitidas. Publicar é sempre um ato humano após revisão. */

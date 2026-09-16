@@ -26,7 +26,7 @@ import {
   sanitizeBookingForCustomer,
 } from "@/lib/packageBookings";
 
-describe("Fase 7I — estados separados", () => {
+describe("Fase 7I, estados separados", () => {
   it("mantém quatro eixos de estado independentes", () => {
     expect(BOOKING_STATUSES).not.toEqual(FLIGHT_STATUSES);
     expect(PAYMENT_STATUSES).not.toEqual(OPERATIONS_STATUSES);
@@ -61,7 +61,7 @@ describe("Fase 7I — estados separados", () => {
   });
 });
 
-describe("Fase 7I — segurança de dados", () => {
+describe("Fase 7I, segurança de dados", () => {
   it("rejeita preços e estados enviados pelo cliente", () => {
     expect(rejectForbiddenBookingInput({ quote_id: "q1" })).toEqual([]);
     expect(rejectForbiddenBookingInput({ confirmed_price: 10, markup: 2 })).toEqual(
@@ -76,7 +76,7 @@ describe("Fase 7I — segurança de dados", () => {
   });
 });
 
-describe("Fase 7I — fotografia da cotação", () => {
+describe("Fase 7I, fotografia da cotação", () => {
   const quoteItems = [
     {
       id: "qi-1", line_order: 0, component_id: "c1", rate_id: "r1", supplier_id: "s1",
@@ -115,7 +115,7 @@ describe("Fase 7I — fotografia da cotação", () => {
 });
 
 // ===== Fase 7I passos 2-4: aceitação, revalidação e criação =====
-describe("Fase 7I — aceitação da cotação", () => {
+describe("Fase 7I, aceitação da cotação", () => {
   const base = {
     quote: { status: "sent", current_version_id: "v1", accepted_at: null, accepted_version_id: null, requires_reacceptance: false, public_token_expires_at: "2999-01-01T00:00:00Z" },
     version: { id: "v1", version_number: 3, status: "calculated", valid_until: "2999-01-01T00:00:00Z", confirmable: true },
@@ -160,7 +160,7 @@ describe("Fase 7I — aceitação da cotação", () => {
   });
 });
 
-describe("Fase 7I — revalidação final", () => {
+describe("Fase 7I, revalidação final", () => {
   const ok = { previousPrice: 1000, newPrice: 1000, pricingStatus: "confirmed" as const, policyActive: true, blockingReasons: [] };
 
   it("sem alteração permite criar reserva", () => {
@@ -205,7 +205,7 @@ describe("Fase 7I — revalidação final", () => {
   });
 });
 
-describe("Fase 7I — criação da reserva", () => {
+describe("Fase 7I, criação da reserva", () => {
   it("a chave de idempotência depende da versão aceite", () => {
     expect(packageBookingIdempotencyKey("abc")).toBe("pb_abc");
     expect(packageBookingIdempotencyKey("abc")).toBe(packageBookingIdempotencyKey("abc"));

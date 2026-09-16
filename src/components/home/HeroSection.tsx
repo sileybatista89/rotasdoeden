@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/optimized/praia-jale-hero.webp";
+import heroImage from "@/assets/real/enseada-principe.jpg";
 
 export function HeroSection() {
   return (

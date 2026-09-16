@@ -56,7 +56,7 @@ export function BookingsTable() {
       const ids = Array.from(new Set(list.flatMap((b) => [b.guide_id, b.tourist_id])));
       if (ids.length) {
         const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", ids);
-        setNames(Object.fromEntries((profs ?? []).map((p) => [p.id, p.full_name ?? "—"])));
+        setNames(Object.fromEntries((profs ?? []).map((p) => [p.id, p.full_name ?? ","])));
       }
       setLoading(false);
     })();
@@ -102,10 +102,10 @@ export function BookingsTable() {
           <TableBody>
             {filtered.map((b) => (
               <TableRow key={b.id}>
-                <TableCell className="font-medium text-foreground">{names[b.guide_id] ?? "—"}</TableCell>
+                <TableCell className="font-medium text-foreground">{names[b.guide_id] ?? ","}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{b.service_title}</TableCell>
                 <TableCell className="hidden sm:table-cell text-sm">
-                  {names[b.tourist_id] ?? "—"}
+                  {names[b.tourist_id] ?? ","}
                   <span className="block text-xs text-muted-foreground">{b.num_people} pessoa(s)</span>
                 </TableCell>
                 <TableCell className="text-sm">{new Date(b.date).toLocaleDateString("pt-PT")}</TableCell>

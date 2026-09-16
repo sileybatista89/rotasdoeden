@@ -146,7 +146,7 @@ export default function MyServicesPage() {
                     <p className="text-xs text-destructive mt-1">Alterações pedidas: {svc.moderation_notes}</p>
                   )}
                   {svc.moderation_status === "pending" && (
-                    <p className="text-xs text-muted-foreground mt-1">Em revisão pela equipa — fica público após aprovação.</p>
+                    <p className="text-xs text-muted-foreground mt-1">Em revisão pela equipa, fica público após aprovação.</p>
                   )}
 
                   <p className="text-sm text-muted-foreground mt-1">

@@ -60,7 +60,7 @@ function pricedPackage() {
   });
 }
 
-describe("7G — critérios do cliente", () => {
+describe("7G, critérios do cliente", () => {
   it("guarda apenas critérios de viagem", () => {
     const c = sanitizeCriteria({ ...baseCriteria, passport: "X123", phone: "+239...", price: 999 });
     expect(Object.keys(c)).not.toContain("passport");
@@ -78,7 +78,7 @@ describe("7G — critérios do cliente", () => {
   });
 });
 
-describe("7G — validade limitada pelo elemento mais curto", () => {
+describe("7G, validade limitada pelo elemento mais curto", () => {
   it("o voo limita quando expira primeiro", () => {
     const r = resolveQuoteValidity({
       operatorValidUntil: future(30), flightExpiresAt: future(2), rateValidUntil: ["2026-12-31"],
@@ -105,7 +105,7 @@ describe("7G — validade limitada pelo elemento mais curto", () => {
   });
 });
 
-describe("7G — confirmabilidade", () => {
+describe("7G, confirmabilidade", () => {
   const ok = {
     pricingStatus: "confirmed" as const, validationErrors: [], policyActive: true,
     rates: [{ validUntil: "2030-01-01", status: "confirmed" }], validUntil: future(5),
@@ -154,7 +154,7 @@ describe("7G — confirmabilidade", () => {
   });
 });
 
-describe("7G — estados", () => {
+describe("7G, estados", () => {
   it("todas as etiquetas existem", () => {
     expect(Object.keys(QUOTE_STATUS_LABEL)).toHaveLength(8);
   });
@@ -172,7 +172,7 @@ describe("7G — estados", () => {
   });
 });
 
-describe("7G — comparação de preço e versionamento", () => {
+describe("7G, comparação de preço e versionamento", () => {
   it("deteta subida e calcula diferença", () => {
     const c = comparePrices(800, 850);
     expect(c.changed).toBe(true);
@@ -190,7 +190,7 @@ describe("7G — comparação de preço e versionamento", () => {
   });
 });
 
-describe("7G — idempotência", () => {
+describe("7G, idempotência", () => {
   it("mesmos critérios geram a mesma chave", () => {
     const a = quoteIdempotencyKey({ productVersionId: "pv", criteria: sanitizeCriteria(baseCriteria), componentIds: ["b", "a"], policyVersionId: "x" });
     const b = quoteIdempotencyKey({ productVersionId: "pv", criteria: sanitizeCriteria(baseCriteria), componentIds: ["a", "b"], policyVersionId: "x" });
@@ -210,7 +210,7 @@ describe("7G — idempotência", () => {
   });
 });
 
-describe("7G — token público", () => {
+describe("7G, token público", () => {
   it("token é opaco, com 64 hex e não repetível", () => {
     const a = generatePublicToken();
     const b = generatePublicToken();
@@ -228,7 +228,7 @@ describe("7G — token público", () => {
   });
 });
 
-describe("7G — payload do cliente é sanitizado", () => {
+describe("7G, payload do cliente é sanitizado", () => {
   const quote = {
     quote_number: "Q-000001", status: "sent", sale_currency: "EUR",
     created_at: "2026-09-10T00:00:00Z", expires_at: future(3), notes: "nota interna",
@@ -269,7 +269,7 @@ describe("7G — payload do cliente é sanitizado", () => {
   });
 });
 
-describe("7G — o cliente não pode enviar dinheiro", () => {
+describe("7G, o cliente não pode enviar dinheiro", () => {
   it("rejeita preço, margem, markup, custo e política", () => {
     for (const field of ["price", "final_price", "margin", "markup", "policy_version_id", "supplier_cost", "cost"]) {
       expect(rejectForbiddenClientInput({ [field]: 1 })).toContain(field);
@@ -281,7 +281,7 @@ describe("7G — o cliente não pode enviar dinheiro", () => {
   });
 });
 
-describe("7G — testes críticos de dinheiro", () => {
+describe("7G, testes críticos de dinheiro", () => {
   const result = pricedPackage();
 
   it("o preço ao cliente é diferente do custo", () => {

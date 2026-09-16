@@ -93,13 +93,13 @@ export function UsersTable() {
           <TableBody>
             {rows.map((r) => (
               <TableRow key={r.id}>
-                <TableCell className="font-medium">{r.full_name || "—"}</TableCell>
+                <TableCell className="font-medium">{r.full_name || ","}</TableCell>
                 <TableCell>
                   <Select
                     value={r.role}
                     onValueChange={(v) => {
                       if (v === r.role) return;
-                      setPendingRole({ id: r.id, name: r.full_name || "—", from: r.role, to: v as Role });
+                      setPendingRole({ id: r.id, name: r.full_name || ",", from: r.role, to: v as Role });
                     }}
                   >
                     <SelectTrigger className="h-8 w-[120px] text-xs">

@@ -2,30 +2,30 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useProductBaseline } from "@/hooks/usePackageBuilder";
 import { Reveal } from "@/components/ui/reveal";
-import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
-import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
-import imersaoImage from "@/assets/optimized/roca-card.webp";
-import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
+import essencialImage from "@/assets/real/praia-sul-hd.jpg";
+import explorarImage from "@/assets/real/pico-cao-grande-real.jpg";
+import imersaoImage from "@/assets/real/roca-casa-grande.jpg";
+import medidaImage from "@/assets/real/costa-floresta.jpg";
 
 const packages = [
   {
     slug: "rotas-essencial",
     name: "Rotas Essencial",
-    duration: "5–7 dias",
+    duration: "5-7 dias",
     description: "A primeira leitura das ilhas: natureza, costa, património e tempo para respirar.",
     image: essencialImage,
   },
   {
     slug: "rotas-explorar",
     name: "Rotas Explorar",
-    duration: "8–10 dias",
+    duration: "8-10 dias",
     description: "Mais caminhos, mais encontros e espaço para conhecer São Tomé para lá do evidente.",
     image: explorarImage,
   },
   {
     slug: "rotas-imersao",
     name: "Rotas Imersão",
-    duration: "14–15 dias",
+    duration: "14-15 dias",
     description: "Uma viagem longa e pausada, entre floresta, roças, comunidades e oceano.",
     image: imersaoImage,
   },

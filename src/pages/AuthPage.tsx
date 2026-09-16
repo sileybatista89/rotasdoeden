@@ -91,7 +91,7 @@ export default function AuthPage() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Conta criada — verifica o teu email para confirmar.");
+    toast.success("Conta criada, verifica o teu email para confirmar.");
     setTab("login");
     setLoginEmail(email);
   }

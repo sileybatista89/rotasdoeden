@@ -67,7 +67,7 @@ export function StaysTab() {
               <div className="text-sm">
                 <p className="font-medium text-foreground">{o.accommodation_name ?? "Alojamento"}</p>
                 <p className="text-muted-foreground">
-                  {o.check_in ?? "—"} → {o.check_out ?? "—"} · {o.nights ?? "—"} noites ·{" "}
+                  {o.check_in ?? ","} → {o.check_out ?? ","} · {o.nights ?? ","} noites ·{" "}
                   {o.total_amount != null ? `${o.total_amount} ${o.total_currency ?? ""}` : "sem custo"} ·{" "}
                   {STAYS_CANCELLATION_LABEL[o.cancellation_type ?? "unknown"] ?? "Desconhecido"}
                 </p>

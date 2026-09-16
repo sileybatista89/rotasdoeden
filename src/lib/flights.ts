@@ -1,5 +1,5 @@
 /**
- * Fase 7E — reexporta o modelo de voos partilhado.
+ * Fase 7E, reexporta o modelo de voos partilhado.
  * A fonte única vive em supabase/functions/_shared/ para que servidor e admin
  * usem exatamente as mesmas regras de validação, expiry e normalização.
  */

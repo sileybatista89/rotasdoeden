@@ -34,7 +34,7 @@ function component(overrides: Partial<PricingComponentInput> = {}): PricingCompo
 
 const BASE = { durationDays: 7, nights: 6, adults: 2, children: 0, rooms: 1, referenceDate: "2026-06-01" };
 
-describe("Fase 11 — proveniência de cada linha", () => {
+describe("Fase 11, proveniência de cada linha", () => {
   it("preço de mercado observado nunca é classificado como confirmado", () => {
     const marketRate = rate({ kind: "market_observed_price", status: "observed", sourceType: "official_website" });
     expect(rateProvenance(marketRate, "2026-06-01")).toBe("market_observed");
@@ -55,7 +55,7 @@ describe("Fase 11 — proveniência de cada linha", () => {
   });
 });
 
-describe("Fase 11 — base comercial da proposta", () => {
+describe("Fase 11, base comercial da proposta", () => {
   it("proposta só com tarifas de fornecedor é confirmada", () => {
     const res = calculatePricing({ policy: policy(), components: [component()], ...BASE });
     expect(res.basis).toBe("confirmed");
@@ -114,7 +114,7 @@ describe("Fase 11 — base comercial da proposta", () => {
   });
 });
 
-describe("Fase 11 — confirmabilidade e revalidação", () => {
+describe("Fase 11, confirmabilidade e revalidação", () => {
   const base = { validationErrors: [], policyActive: true, rates: [], now: new Date("2026-06-01T00:00:00Z") };
 
   it("proposta de mercado não é bloqueada mas exige validação explícita", () => {
@@ -148,7 +148,7 @@ describe("Fase 11 — confirmabilidade e revalidação", () => {
   });
 });
 
-describe("Fase 11 — nada de custo de fornecedor para o visitante", () => {
+describe("Fase 11, nada de custo de fornecedor para o visitante", () => {
   it("a versão do cliente não expõe custos nem proveniência interna", () => {
     const publicQuote = sanitizeQuoteForCustomer({
       quote: { id: "q1", quote_number: "Q-1", status: "sent", sale_currency: "EUR", expires_at: null },
@@ -169,7 +169,7 @@ describe("Fase 11 — nada de custo de fornecedor para o visitante", () => {
   });
 });
 
-describe("Fase 11 — Duffel Stays sem reserva live", () => {
+describe("Fase 11, Duffel Stays sem reserva live", () => {
   it("sem credencial e sem flag o fornecedor está desativado", () => {
     const p = new DuffelStaysProvider({ apiKey: null });
     expect(p.isConfigured()).toBe(false);

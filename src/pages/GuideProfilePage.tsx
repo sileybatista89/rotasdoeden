@@ -90,7 +90,7 @@ export default function GuideProfilePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title={`${title} — profissional verificado | Rotas do Éden`}
+        title={`${title}, profissional verificado | Rotas do Éden`}
         description={pro.headline ?? `Perfil verificado de ${title} em ${location}, São Tomé e Príncipe.`}
         path={`/guides/${pro.user_id}`}
       />

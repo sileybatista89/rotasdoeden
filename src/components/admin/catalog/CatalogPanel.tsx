@@ -212,7 +212,7 @@ export function CatalogPanel() {
                       {c.children > 0 ? ` + ${c.children} crianças` : ""}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {c.contact_email ?? "—"} · {c.start_date ?? "sem data"} ·{" "}
+                      {c.contact_email ?? ","} · {c.start_date ?? "sem data"} ·{" "}
                       {new Date(c.created_at).toLocaleDateString("pt-PT")}
                     </p>
                   </div>
@@ -231,7 +231,7 @@ export function CatalogPanel() {
                     const chosen = (c.selections ?? []).filter((s) => s.day === d.day);
                     return (
                       <li key={d.day}>
-                        Dia {d.day}: {chosen.length === 0 ? "—" : chosen.map((s) => itemNameById.get(s.item_id) ?? s.item_slug).join(", ")}
+                        Dia {d.day}: {chosen.length === 0 ? "," : chosen.map((s) => itemNameById.get(s.item_id) ?? s.item_slug).join(", ")}
                       </li>
                     );
                   })}

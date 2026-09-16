@@ -199,7 +199,7 @@ export function useIssueQuoteToken() {
   });
 }
 
-// ===== Fase 7I — aceitação, revalidação e reserva de pacote =====
+// ===== Fase 7I, aceitação, revalidação e reserva de pacote =====
 
 export interface QuoteAcceptanceFields {
   accepted_at: string | null;

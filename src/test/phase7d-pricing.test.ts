@@ -32,7 +32,7 @@ const BASE = {
   durationDays: 7, nights: 6, adults: 2, children: 0, rooms: 1, referenceDate: "2026-06-01",
 };
 
-describe("Fase 7D — matemática de markup e margem", () => {
+describe("Fase 7D, matemática de markup e margem", () => {
   it("markup 20% sobre 100 dá 120", () => {
     expect(applyMarkup(100, 20)).toBe(120);
   });
@@ -64,7 +64,7 @@ describe("Fase 7D — matemática de markup e margem", () => {
   });
 });
 
-describe("Fase 7D — arredondamento", () => {
+describe("Fase 7D, arredondamento", () => {
   it("arredonda apenas no fim conforme o modo", () => {
     expect(roundFinal(142.857, "none")).toBe(142.86);
     expect(roundFinal(142.857, "nearest_1")).toBe(143);
@@ -86,7 +86,7 @@ describe("Fase 7D — arredondamento", () => {
   });
 });
 
-describe("Fase 7D — unidades e quantidades", () => {
+describe("Fase 7D, unidades e quantidades", () => {
   it("resolve a quantidade de acordo com a unidade", () => {
     const ctx = { durationDays: 7, nights: 6, adults: 2, children: 1, rooms: 2 };
     expect(resolveQuantity("per_person", ctx)).toBe(3);
@@ -110,7 +110,7 @@ describe("Fase 7D — unidades e quantidades", () => {
   });
 });
 
-describe("Fase 7D — seleção de custos", () => {
+describe("Fase 7D, seleção de custos", () => {
   it("a tarifa negociada Rotas tem prioridade sobre o preço público observado", () => {
     const sel = selectRate(
       [
@@ -158,7 +158,7 @@ describe("Fase 7D — seleção de custos", () => {
   });
 });
 
-describe("Fase 7D — estados do cálculo", () => {
+describe("Fase 7D, estados do cálculo", () => {
   it("custo estimado produz cálculo ESTIMATED", () => {
     const res = calculatePricing({
       policy: policy(), components: [component({ rates: [rate({ kind: "estimated_cost", status: "quoted" })] })], ...BASE,
@@ -206,7 +206,7 @@ describe("Fase 7D — estados do cálculo", () => {
   });
 });
 
-describe("Fase 7D — taxas, suplementos e dupla marcação", () => {
+describe("Fase 7D, taxas, suplementos e dupla marcação", () => {
   it("taxa fixa e percentual são aplicadas", () => {
     const res = calculatePricing({
       policy: policy({ fees: [{ label: "Taxa fixa", kind: "fixed", amount: 20 }, { label: "Taxa %", kind: "percentage", amount: 10, appliesTo: "land" }] }),
@@ -273,7 +273,7 @@ describe("Fase 7D — taxas, suplementos e dupla marcação", () => {
   });
 });
 
-describe("Fase 7D — margem por componente e ordem de cálculo", () => {
+describe("Fase 7D, margem por componente e ordem de cálculo", () => {
   it("cada tipo de componente usa a sua própria regra", () => {
     const res = calculatePricing({
       policy: policy({
@@ -317,7 +317,7 @@ describe("Fase 7D — margem por componente e ordem de cálculo", () => {
   });
 });
 
-describe("Fase 7D — proteção de tarifa aérea (estrutura futura)", () => {
+describe("Fase 7D, proteção de tarifa aérea (estrutura futura)", () => {
   it("percentagem de 10% sobre 800 dá 80 de proteção", () => {
     expect(applyFlightProtection(800, { method: "percentage", value: 10 })).toBe(80);
   });
@@ -339,7 +339,7 @@ describe("Fase 7D — proteção de tarifa aérea (estrutura futura)", () => {
   });
 });
 
-describe("Fase 7D — segurança do cálculo", () => {
+describe("Fase 7D, segurança do cálculo", () => {
   it("o motor ignora qualquer preço ou margem enviados no input do componente", () => {
     const injected = {
       ...component(),

@@ -117,7 +117,7 @@ export function PricingSimulation() {
             <p className="text-xs text-muted-foreground">Preço final (arredondado uma única vez)</p>
             <p className="text-2xl font-display font-bold">{result.finalPrice.toFixed(2)} {result.currency}</p>
             <p className="text-xs text-muted-foreground">
-              Margem bruta {result.grossMarginPct?.toFixed(2) ?? "—"}% · Markup {result.markupPct?.toFixed(2) ?? "—"}% ·
+              Margem bruta {result.grossMarginPct?.toFixed(2) ?? ","}% · Markup {result.markupPct?.toFixed(2) ?? ","}% ·
               Política v{result.policyVersionNumber}
             </p>
           </div>

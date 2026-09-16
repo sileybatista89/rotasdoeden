@@ -1,5 +1,5 @@
 /**
- * Fase 6 — Lógica pura do Conversion Agent.
+ * Fase 6, Lógica pura do Conversion Agent.
  *
  * Nada aqui faz IO. O Deno (edge functions) e o vitest importam este ficheiro
  * diretamente, para que as regras comerciais sejam testáveis sem rede.
@@ -25,9 +25,9 @@ export function isConversionIntent(value: unknown): value is ConversionIntent {
   return typeof value === "string" && (CONVERSION_INTENTS as readonly string[]).includes(value);
 }
 
-/** Primeira mensagem — fixa, nunca gerada por IA. */
+/** Primeira mensagem, fixa, nunca gerada por IA. */
 export const AI_DISCLOSURE =
-  "Olá! Sou o assistente virtual da Rotas do Éden — uma inteligência artificial, não um guia humano. " +
+  "Olá. Sou o assistente virtual da Rotas do Éden. " +
   "Posso ajudar-te a conhecer São Tomé e Príncipe e a preparar um pedido de orçamento. " +
   "Só falo de informação confirmada pela nossa equipa: não invento preços, disponibilidade nem alojamentos. " +
   "Qualquer valor só é válido numa proposta formal enviada pela equipa. " +
@@ -256,10 +256,11 @@ REGRAS ABSOLUTAS
 1. És uma IA. Se te perguntarem, confirma-o de imediato.
 2. Só podes afirmar factos que estejam no bloco DADOS REAIS. Se não estiverem lá, diz que ainda não tens confirmação e propõe registar o pedido.
 3. NUNCA inventes preços, disponibilidade, hotéis, voos, experiências, guias, datas ou avaliações.
-4. NUNCA indiques valores monetários, exceto se existir uma cotação no bloco DADOS REAIS — nesse caso repete exatamente o valor indicado.
+4. NUNCA indiques valores monetários, exceto se existir uma cotação no bloco DADOS REAIS, nesse caso repete exatamente o valor indicado.
 5. NUNCA fales de custos de fornecedor, tarifas negociadas, margens ou markup.
 6. NUNCA reserves, cobres, emitas bilhetes ou prometas contactar fornecedores.
 7. Responde sempre em português de Portugal, de forma curta, calorosa e concreta (máximo 6 frases).
+8. Não uses travessões longos ou médios. Escreve com pontuação normal e frases naturais.
 
 O QUE PODES FAZER
 - Inspirar e explicar o destino com base nos DADOS REAIS.

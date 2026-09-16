@@ -36,7 +36,7 @@ interface Block {
 }
 
 function fmt(date: string | null | undefined) {
-  return date ? new Date(date).toLocaleString("pt-PT") : "—";
+  return date ? new Date(date).toLocaleString("pt-PT") : ",";
 }
 
 export function ContentDetailDrawer({ contentId, onClose }: Props) {
@@ -122,7 +122,7 @@ export function ContentDetailDrawer({ contentId, onClose }: Props) {
                 <section className="rounded-2xl border border-border bg-card p-4 space-y-2">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Endereço e descrição</p>
                   <p className="text-sm text-foreground">/{item.slug}</p>
-                  <p className="text-sm text-muted-foreground">{current?.meta_description ?? "—"}</p>
+                  <p className="text-sm text-muted-foreground">{current?.meta_description ?? ","}</p>
                 </section>
 
                 <section className="rounded-2xl border border-border bg-card p-4 space-y-3">
@@ -218,10 +218,10 @@ export function ContentDetailDrawer({ contentId, onClose }: Props) {
 
               <TabsContent value="execucao" className="space-y-3 pt-4">
                 <div className="rounded-2xl border border-border bg-card p-4 space-y-1 text-sm">
-                  <p className="text-foreground">Tarefa: {run.data?.task?.task_type ?? "—"}</p>
-                  <p className="text-muted-foreground">Estado da tarefa: {run.data?.task?.status ?? "—"}</p>
+                  <p className="text-foreground">Tarefa: {run.data?.task?.task_type ?? ","}</p>
+                  <p className="text-muted-foreground">Estado da tarefa: {run.data?.task?.status ?? ","}</p>
                   <p className="text-muted-foreground">
-                    Modelo: {(run.data?.run as { model?: string } | null)?.model ?? "—"}
+                    Modelo: {(run.data?.run as { model?: string } | null)?.model ?? ","}
                   </p>
                   <p className="text-muted-foreground">
                     Custo: {(run.data?.costs ?? []).reduce((sum, c) => sum + Number(c.estimated_cost ?? 0), 0).toFixed(4)} USD

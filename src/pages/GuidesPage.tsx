@@ -19,7 +19,7 @@ const benefits = [
   { icon: Users, title: "Visibilidade real", text: "Tráfego de turistas internacionais e nacionais qualificados." },
   { icon: Wallet, title: "Pagamentos protegidos", text: "Recebes o valor após o serviço, sem risco de calote." },
   { icon: ShieldCheck, title: "Suporte e mediação", text: "Equipa dedicada a resolver disputas e apoiar o teu trabalho." },
-  { icon: MessageSquare, title: "Sem captação externa", text: "As reservas e a comunicação ficam dentro da plataforma — proteges-te a ti e ao turista." },
+  { icon: MessageSquare, title: "Sem captação externa", text: "As reservas e a comunicação ficam dentro da plataforma, proteges-te a ti e ao turista." },
 ];
 
 const steps = [
@@ -62,7 +62,7 @@ export default function GuidesPage() {
             </h1>
             <p className="mt-6 max-w-2xl text-base font-light leading-8 text-muted-foreground md:text-lg">
               Por princípio, a Rotas do Éden não publica guias antes de os verificar pessoalmente.
-              Estamos a selecionar os primeiros guias locais — preferimos arrancar com qualidade
+              Estamos a selecionar os primeiros guias locais, preferimos arrancar com qualidade
               comprovada a preencher esta página com perfis sem garantias.
             </p>
           </div>

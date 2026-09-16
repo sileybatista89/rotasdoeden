@@ -4,7 +4,7 @@ import { SEO } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { MapPin, Calendar, Plane, Languages, Coins, Sun, AlertTriangle } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
-import heroImg from "@/assets/optimized/praia-jale-hero.webp";
+import heroImg from "@/assets/real/principe-aerial-hd.jpg";
 
 export default function SobreSaoTomePage() {
   const { t } = useT();
@@ -130,7 +130,7 @@ export default function SobreSaoTomePage() {
           </aside>
         </div>
 
-        {/* Parceiros — secção discreta */}
+        {/* Parceiros, secção discreta */}
         <section className="mt-20 md:mt-24 border-t border-border pt-12">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div className="max-w-xl">

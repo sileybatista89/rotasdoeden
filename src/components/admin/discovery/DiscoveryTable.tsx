@@ -91,13 +91,13 @@ export function DiscoveryTable(props: Props) {
           <TableBody>
             {rows.map((r) => (
               <TableRow key={r.id} className="cursor-pointer" onClick={() => onOpen(r.id)}>
-                <TableCell>{r.market ?? "—"}</TableCell>
+                <TableCell>{r.market ?? ","}</TableCell>
                 <TableCell>{r.country}</TableCell>
                 <TableCell>{r.language}</TableCell>
                 <TableCell className="max-w-[220px] truncate" title={r.query}>{r.query}</TableCell>
-                <TableCell>{r.intent ?? "—"}</TableCell>
-                <TableCell>{r.category ?? "—"}</TableCell>
-                <TableCell>{r.season ?? "—"}</TableCell>
+                <TableCell>{r.intent ?? ","}</TableCell>
+                <TableCell>{r.category ?? ","}</TableCell>
+                <TableCell>{r.season ?? ","}</TableCell>
                 <TableCell>{r.source}</TableCell>
                 <TableCell className="font-semibold">{Number(r.opportunity_score).toFixed(1)}</TableCell>
                 <TableCell>{Number(r.confidence_score).toFixed(1)}</TableCell>

@@ -1,5 +1,5 @@
 /**
- * Fase 6 — porta pública do assistente de conversão.
+ * Fase 6, porta pública do assistente de conversão.
  *
  * Responsabilidades: sessão anónima por token opaco, limites de uso,
  * persistência das mensagens e dos pedidos de orçamento, e chamada ao agente.

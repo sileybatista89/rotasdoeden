@@ -65,7 +65,7 @@ const components = [
 
 const base = { policy, config, durationDays: 5, nights: 4, components, referenceDate: TODAY };
 
-describe("Fase 13 — preço de referência 'desde €X'", () => {
+describe("Fase 13, preço de referência 'desde €X'", () => {
   it("lê a configuração de baseline do produto", () => {
     expect(normalizeBaselineConfig({ baseline: { enabled: true, adults: 2, rooms: 1, required: ["flight"] } }))
       .toMatchObject({ adults: 2, required: ["flight"] });

@@ -21,10 +21,10 @@ import {
   type CatalogItem,
 } from "@/lib/packageBuilder";
 import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
-import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
-import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
-import imersaoImage from "@/assets/optimized/roca-card.webp";
-import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
+import essencialImage from "@/assets/real/praia-sul-hd.jpg";
+import explorarImage from "@/assets/real/pico-cao-grande-real.jpg";
+import imersaoImage from "@/assets/real/roca-casa-grande.jpg";
+import medidaImage from "@/assets/real/costa-floresta.jpg";
 
 const packageImages: Record<string, string> = {
   "rotas-essencial": essencialImage,
@@ -122,7 +122,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={`${rules?.name ?? "Pacote"} — monte a sua viagem em São Tomé e Príncipe`}
+        title={`${rules?.name ?? "Pacote"}, monte a sua viagem em São Tomé e Príncipe`}
         description={
           rules?.description ??
           "Monte a sua viagem dia a dia em São Tomé e Príncipe e receba uma proposta personalizada, sem reservar nem pagar."
@@ -162,7 +162,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                   <p className="mt-2 max-w-lg text-xs leading-5 text-muted-foreground">
                 {baseline.data.includes_flight
                   ? "Preço indicativo, voo incluído."
-                  : "Preço indicativo — base terrestre, voo não incluído."}{" "}
+                  : "Preço indicativo, base terrestre, voo não incluído."}{" "}
                 Referência para {baseline.data.duration_days} dias com {baseline.data.adults} adultos.
                 {baseline.data.indicative
                   ? " Baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."

@@ -40,7 +40,7 @@ export function ChatPanel({ open, onClose }: Props) {
           <Bot size={18} />
           <div>
             <p className="text-sm font-semibold leading-tight">Assistente Rotas do Éden</p>
-            <p className="text-[11px] opacity-90">Assistente de inteligência artificial</p>
+            <p className="text-[11px] opacity-90">Assistente virtual</p>
           </div>
         </div>
         <button onClick={onClose} aria-label="Fechar assistente" className="rounded-lg p-1 hover:bg-white/15">
@@ -59,12 +59,17 @@ export function ChatPanel({ open, onClose }: Props) {
                 : "self-start bg-muted text-foreground",
             )}
           >
-            {m.content}
+            {m.content
+              .replace(
+                "Olá! Sou o assistente virtual da Rotas do Éden, uma inteligência artificial, não um guia humano.",
+                "Olá. Sou o assistente virtual da Rotas do Éden.",
+              )
+              .replace(/[,-]/g, ",")}
           </div>
         ))}
         {sending && (
           <div className="self-start rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
-            A escrever…
+            A escrever...
           </div>
         )}
         {error && <p className="text-xs text-destructive">{error}</p>}
@@ -85,7 +90,7 @@ export function ChatPanel({ open, onClose }: Props) {
             }}
             rows={2}
             maxLength={1500}
-            placeholder="Escreve a tua pergunta sobre São Tomé e Príncipe…"
+            placeholder="Escreve a tua pergunta sobre São Tomé e Príncipe..."
             className="min-h-[2.75rem] resize-none text-sm"
           />
           <Button size="icon" onClick={submit} disabled={sending || !draft.trim()} aria-label="Enviar mensagem">
@@ -93,7 +98,7 @@ export function ChatPanel({ open, onClose }: Props) {
           </Button>
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Respostas geradas por IA com base em informação confirmada. Valores só são válidos em proposta formal.
+          Informação baseada em dados confirmados. Valores só são válidos em proposta formal.
         </p>
       </div>
     </div>
