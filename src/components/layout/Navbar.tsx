@@ -22,12 +22,15 @@ export function Navbar() {
   const initials = user?.email?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-[2px] border-b border-border">
-      <div className="container flex items-center justify-between h-20 md:h-24">
-        <Logo size="md" />
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
+      <div className="container flex h-20 items-center justify-between md:h-24">
+        <Logo size="sm" />
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden items-center gap-7 lg:flex">
+          <a href="/#pacotes" className="text-[0.72rem] uppercase text-foreground transition-colors hover:text-primary">
+            Pacotes
+          </a>
           <Link to="/experiences" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.experiences")}
           </Link>
@@ -37,29 +40,17 @@ export function Navbar() {
           <Link to="/sobre-sao-tome" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.destino")}
           </Link>
-          <Link to="/parceiros" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
-            Parceiros
-          </Link>
-          <a href="/#como-funciona" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
-            {t("nav.how")}
-          </a>
-          <a href="/#contacto" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
-            {t("nav.contact")}
-          </a>
         </nav>
 
 
         {/* Desktop actions */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden items-center gap-2 lg:flex">
           <LanguageSwitcher />
           <NotificationCenter />
           {!user ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="rounded-full">
-                <Link to="/seja-parceiro">{t("nav.becomePartner")}</Link>
-              </Button>
-              <Button variant="outline" size="sm" className="rounded-full" onClick={() => navigate("/auth?mode=login")}>{t("nav.login")}</Button>
-              <Button size="sm" variant="hero" className="rounded-full" onClick={() => navigate("/auth?mode=register")}>{t("nav.register")}</Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth?mode=login")}>{t("nav.login")}</Button>
+              <Button size="sm" variant="hero" onClick={() => navigate("/pacotes/rotas-essencial")}>Começar a viagem</Button>
             </>
           ) : (
             <DropdownMenu>
@@ -113,7 +104,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile actions */}
-        <div className="flex md:hidden items-center gap-1">
+        <div className="flex items-center gap-1 lg:hidden">
           <LanguageSwitcher compact />
           <NotificationCenter />
           <Sheet open={open} onOpenChange={setOpen}>
@@ -128,29 +119,22 @@ export function Navbar() {
               </SheetHeader>
               <nav className="flex flex-col gap-1 mt-6">
                 <SheetClose asChild>
-                  <Link to="/experiences" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
+                  <a href="/#pacotes" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">Pacotes</a>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/experiences" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">
                     {t("nav.experiences")}
                   </Link>
                 </SheetClose>
                 <SheetClose asChild>
-                  <Link to="/guides" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
+                  <Link to="/guides" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">
                     {t("nav.guides")}
                   </Link>
                 </SheetClose>
                 <SheetClose asChild>
-                  <Link to="/sobre-sao-tome" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
+                  <Link to="/sobre-sao-tome" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">
                     {t("nav.destino")}
                   </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <a href="/#como-funciona" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
-                    {t("nav.how")}
-                  </a>
-                </SheetClose>
-                <SheetClose asChild>
-                  <a href="/#contacto" className="px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors">
-                    {t("nav.contact")}
-                  </a>
                 </SheetClose>
                 {user && <>
                   <SheetClose asChild>
@@ -195,11 +179,8 @@ export function Navbar() {
               </nav>
               <div className="mt-auto flex flex-col gap-2 pb-4">
                 {!user ? <>
-                  <Button asChild variant="ghost" className="w-full justify-center">
-                    <Link to="/seja-parceiro" onClick={() => setOpen(false)}>{t("nav.becomePartner")}</Link>
-                  </Button>
                   <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/auth?mode=login"); }}>{t("nav.login")}</Button>
-                  <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/auth?mode=register"); }}>{t("nav.register")}</Button>
+                  <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/pacotes/rotas-essencial"); }}>Começar a viagem</Button>
                 </> : <>
                   <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
                     <UserIcon size={14} /> {user.email}

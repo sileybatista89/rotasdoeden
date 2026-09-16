@@ -21,7 +21,7 @@ export function DescobreStpSection() {
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-background">
+    <section className="section-space bg-background">
       <div className="container">
         <Reveal className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end mb-14 md:mb-20">
           <div className="lg:col-span-7">
@@ -33,15 +33,15 @@ export function DescobreStpSection() {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 md:gap-y-16">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-12 md:gap-y-16">
           {highlights.map((h, i) => (
             <Reveal
               key={h.key}
               delay={(i % 3) * 90}
-              className={i % 3 === 1 ? "lg:mt-10" : i % 3 === 2 ? "lg:mt-4" : ""}
+              className={i === 0 || i === 3 ? "lg:col-span-5" : "lg:col-span-3"}
             >
               <article className="group">
-                <div className={`${h.ratio} overflow-hidden rounded-md bg-muted`}>
+                <div className={`${i === 0 || i === 3 ? "aspect-[5/4]" : h.ratio} overflow-hidden bg-muted`}>
                   <img
                     src={h.img}
                     alt={t(`descobre.${h.key}.title`)}
