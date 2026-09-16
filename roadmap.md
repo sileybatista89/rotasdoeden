@@ -73,3 +73,9 @@
 - [x] Passos 2-4: aceitação pelo cliente (ligação com código), revalidação final server-side, criação da reserva
 - [x] Página pública /proposta (só preço final, sem custos) + ações de revalidar/criar reserva no painel
 - [ ] Passo 5 (pagamento, Stripe de pacote, voo real, confirmação de fornecedores) — requer autorização
+
+## Fluxo comercial dos pacotes (concluído)
+- [x] Pedido do configurador gera proposta automaticamente pelo Quote Engine (chamada interna de serviço) e grava quote_id
+- [x] Aceitação pública passa sempre por revalidação; preço alterado mostra proposta atualizada ao cliente
+- [x] Admin: fase do ciclo (criada / enviada / aceite / aguarda revalidação / pronta para pagamento) e lista de pedidos do configurador
+- [x] Pagamento continua desativado, reserva fica a aguardar pagamento; Duffel em teste
