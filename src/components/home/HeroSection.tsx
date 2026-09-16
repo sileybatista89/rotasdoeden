@@ -17,7 +17,6 @@ export function HeroSection() {
               fetchPriority="high"
             />
           </div>
-          <div className="absolute -left-3 -top-3 h-20 w-20 border-l border-t border-secondary/70 md:-left-6 md:-top-6" />
           <p className="mt-3 text-xs text-muted-foreground">Ilha do Príncipe · Golfo da Guiné</p>
         </div>
 

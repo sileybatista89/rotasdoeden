@@ -108,20 +108,9 @@
 }
 
 @layer components {
-  /* Small-caps editorial eyebrow with hairline rule */
+  /* Small-caps editorial eyebrow without decorative rules */
   .eyebrow {
-    @apply inline-flex items-center gap-3 text-[0.68rem] font-medium uppercase tracking-[0.22em] text-primary;
-  }
-  .eyebrow::before {
-    content: "";
-    @apply block w-8 h-px bg-current opacity-60;
-  }
-  .eyebrow-center::before {
-    @apply hidden;
-  }
-
-  .rule {
-    @apply block w-full h-px bg-border;
+    @apply inline-flex items-center text-[0.68rem] font-medium uppercase tracking-[0.22em] text-primary;
   }
 
   /* Editorial card: low radius, hairline border, whisper shadow */
