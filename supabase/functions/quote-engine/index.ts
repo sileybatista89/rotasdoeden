@@ -136,14 +136,24 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
-    const { data: userData } = await userClient.auth.getUser();
-    const user = userData?.user;
-    if (!user) return json({ error: "Unauthorized" }, 401);
-
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
-    if (!isAdmin) return json({ error: "Forbidden" }, 403);
+
+    // Duas origens permitidas: um administrador autenticado, ou uma chamada
+    // interna entre funções (configurador e proposta pública) feita com a
+    // chave de serviço. Nunca um visitante.
+    const bearer = authHeader.slice("Bearer ".length).trim();
+    const internal = bearer === serviceKey;
+    let actorId: string | null = null;
+
+    if (!internal) {
+      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+      const { data: userData } = await userClient.auth.getUser();
+      const user = userData?.user;
+      if (!user) return json({ error: "Unauthorized" }, 401);
+      const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+      if (!isAdmin) return json({ error: "Forbidden" }, 403);
+      actorId = user.id;
+    }
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
