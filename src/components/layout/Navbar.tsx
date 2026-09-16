@@ -12,9 +12,11 @@ import { Logo } from "@/components/brand/Logo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useT } from "@/i18n/LanguageProvider";
+import { JourneyChoiceDialog } from "@/components/home/JourneyChoiceDialog";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [choiceOpen, setChoiceOpen] = useState(false);
   const { user, role, signOut } = useAuth();
   const navigate = useNavigate();
   const { t } = useT();
@@ -50,7 +52,7 @@ export function Navbar() {
           {!user ? (
             <>
               <Button variant="ghost" size="sm" onClick={() => navigate("/auth?mode=login")}>{t("nav.login")}</Button>
-              <Button size="sm" variant="hero" onClick={() => navigate("/pacotes/rotas-essencial")}>Começar a viagem</Button>
+              <Button size="sm" variant="hero" onClick={() => setChoiceOpen(true)}>Começar a viagem</Button>
             </>
           ) : (
             <DropdownMenu>
@@ -180,7 +182,7 @@ export function Navbar() {
               <div className="mt-auto flex flex-col gap-2 pb-4">
                 {!user ? <>
                   <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/auth?mode=login"); }}>{t("nav.login")}</Button>
-                  <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/pacotes/rotas-essencial"); }}>Começar a viagem</Button>
+                  <Button variant="hero" className="w-full" onClick={() => { setOpen(false); setChoiceOpen(true); }}>Começar a viagem</Button>
                 </> : <>
                   <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
                     <UserIcon size={14} /> {user.email}
@@ -194,6 +196,7 @@ export function Navbar() {
           </Sheet>
         </div>
       </div>
+      <JourneyChoiceDialog open={choiceOpen} onOpenChange={setChoiceOpen} />
     </header>
   );
 }

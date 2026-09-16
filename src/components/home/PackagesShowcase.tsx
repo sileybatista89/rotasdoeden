@@ -11,21 +11,21 @@ const packages = [
   {
     slug: "rotas-essencial",
     name: "Rotas Essencial",
-    duration: "5-7 dias",
+    duration: "5 a 7 dias",
     description: "A primeira leitura das ilhas: natureza, costa, património e tempo para respirar.",
     image: essencialImage,
   },
   {
     slug: "rotas-explorar",
     name: "Rotas Explorar",
-    duration: "8-10 dias",
+    duration: "8 a 10 dias",
     description: "Mais caminhos, mais encontros e espaço para conhecer São Tomé para lá do evidente.",
     image: explorarImage,
   },
   {
     slug: "rotas-imersao",
     name: "Rotas Imersão",
-    duration: "14-15 dias",
+    duration: "14 a 15 dias",
     description: "Uma viagem longa e pausada, entre floresta, roças, comunidades e oceano.",
     image: imersaoImage,
   },
@@ -75,20 +75,26 @@ export function PackagesShowcase() {
                 <div className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-t border-primary-foreground/20 pt-5 mt-5">
                   <span className="text-xs text-coral">0{index + 1}</span>
                   <div>
-                    <p className="text-xs uppercase text-primary-foreground/55">{item.duration}</p>
+                    <p className="text-xs uppercase text-primary-foreground/65">{item.duration} · personalizável</p>
                     <h3 className="mt-1 font-display text-3xl font-normal text-primary-foreground">{item.name}</h3>
                     <p className="mt-3 max-w-md text-sm font-light leading-6 text-primary-foreground/70">{item.description}</p>
                     {index === 0 && baseline.data && (
-                      <p className="mt-4 text-sm text-coral">
-                        Desde {new Intl.NumberFormat("pt-PT", {
+                      <div className="mt-4">
+                        <p className="font-display text-2xl text-coral">
+                          Desde {new Intl.NumberFormat("de-DE", {
                           style: "currency",
                           currency: baseline.data.currency ?? "EUR",
                           maximumFractionDigits: 0,
                         }).format(baseline.data.price_per_person)} / pessoa
-                      </p>
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-primary-foreground/60">O valor final é confirmado antes da reserva.</p>
+                      </div>
                     )}
+                    <span className="mt-5 inline-flex items-center gap-2 text-xs font-medium uppercase text-primary-foreground">
+                      Personalizar esta viagem <ArrowUpRight className="h-4 w-4" />
+                    </span>
                   </div>
-                  <ArrowUpRight className="mt-1 h-5 w-5 text-primary-foreground/60 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+                  <ArrowUpRight className="mt-1 hidden h-5 w-5 text-primary-foreground/60 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 md:block" />
                 </div>
               </Link>
             </Reveal>

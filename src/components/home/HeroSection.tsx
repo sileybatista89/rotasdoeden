@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { JourneyChoiceDialog } from "@/components/home/JourneyChoiceDialog";
 import heroImage from "@/assets/real/enseada-principe.jpg";
 
 export function HeroSection() {
+  const [choiceOpen, setChoiceOpen] = useState(false);
+
   return (
     <section className="bg-background">
       <div className="container grid min-h-[calc(100vh-5rem)] gap-10 py-8 md:min-h-[760px] md:grid-cols-12 md:items-center md:py-14 lg:gap-14">
@@ -23,14 +27,14 @@ export function HeroSection() {
         <div className="order-1 flex flex-col pt-6 md:order-2 md:col-span-6 md:pl-6 md:pt-0 lg:pl-12">
           <span className="eyebrow mb-7">São Tomé e Príncipe</span>
           <h1 className="display-xl max-w-2xl text-foreground">
-            Uma viagem às ilhas, <em className="font-normal text-primary">bem pensada.</em>
+            Viagens completas a São Tomé e Príncipe, <em className="font-normal text-primary">feitas para si.</em>
           </h1>
           <p className="mt-7 max-w-lg text-base font-light leading-8 text-muted-foreground md:text-lg">
-            Descubra o arquipélago, escolha a sua rota e organize cada dia com experiências e conhecimento local.
+            A Rotas do Éden organiza a sua viagem às ilhas. Escolha uma rota, personalize os dias e receba uma proposta completa.
           </p>
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Button asChild variant="hero" size="lg">
-              <Link to="/pacotes/rotas-essencial">Começar a viagem <ArrowRight /></Link>
+            <Button variant="hero" size="lg" onClick={() => setChoiceOpen(true)}>
+              Começar a viagem <ArrowRight />
             </Button>
             <Link to="/sobre-sao-tome" className="link-underline w-fit text-sm text-foreground">Conhecer o destino</Link>
           </div>
@@ -46,6 +50,7 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+      <JourneyChoiceDialog open={choiceOpen} onOpenChange={setChoiceOpen} />
     </section>
   );
 }
