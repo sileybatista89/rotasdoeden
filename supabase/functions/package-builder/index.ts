@@ -137,6 +137,64 @@ function publicConfig(row: Record<string, any>) {
   };
 }
 
+/**
+ * Pede ao Quote Engine uma proposta a partir de um pedido do configurador.
+ * Só componentes reais entram; itens editoriais ficam de fora do preço.
+ * Qualquer falha é silenciosa para o visitante: o pedido continua registado
+ * e a equipa prepara a proposta manualmente, como antes.
+ */
+async function requestQuoteForConfig(
+  client: SupabaseClient,
+  config: Record<string, any>,
+): Promise<{ ok: boolean; config?: Record<string, any> }> {
+  try {
+    if (config.quote_id) return { ok: true };
+
+    const catalog = await publicCatalog(client);
+    const componentIds = componentIdsFor(config.selections ?? [], catalog as never);
+    if (componentIds.length === 0) return { ok: false };
+
+    const duration = Number(config.duration_days ?? 0);
+    const start: string | null = config.start_date ?? null;
+    const end = start
+      ? new Date(new Date(start).getTime() + Math.max(duration - 1, 0) * 86400000).toISOString().slice(0, 10)
+      : null;
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/quote-engine`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "create",
+        channel: "public",
+        visitor_id: config.visitor_id ?? null,
+        customer_name: config.contact_name ?? null,
+        customer_email: config.contact_email ?? null,
+        product_version_id: config.product_version_id ?? null,
+        component_ids: componentIds,
+        criteria: {
+          duration_days: duration,
+          nights: Math.max(duration - 1, 0),
+          adults: config.adults ?? 2,
+          children: config.children ?? 0,
+          rooms: config.rooms ?? 1,
+          departure_date: start,
+          return_date: end,
+          destination: "São Tomé e Príncipe",
+        },
+      }),
+    });
+    const payload = await res.json().catch(() => ({}));
+    const quoteId = payload?.quote?.id ?? null;
+    if (!res.ok || !quoteId) return { ok: false };
+
+    const { data: updated } = await client.from("package_builder_configs")
+      .update({ quote_id: quoteId, status: "cotado" }).eq("id", config.id).select("*").single();
+    return { ok: true, config: updated ?? undefined };
+  } catch {
+    return { ok: false };
+  }
+}
+
 /** Idade máxima do baseline guardado antes de ser recalculado. */
 const BASELINE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
