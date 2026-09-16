@@ -2,22 +2,22 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
 import { Reveal } from "@/components/ui/reveal";
-import picoImg from "@/assets/optimized/pico-cao-grande-card.webp";
-import praiaImg from "@/assets/optimized/praia-banana-hero.webp";
-import rocaImg from "@/assets/optimized/roca-card.webp";
-import calulu from "@/assets/optimized/calulu-card.webp";
-import bio from "@/assets/optimized/biodiversidade-card.webp";
-import cacau from "@/assets/optimized/cacau-card.webp";
+import picoImg from "@/assets/real/pico-cao-grande.jpg.asset.json";
+import praiaImg from "@/assets/real/praia-banana-hd.jpg.asset.json";
+import rocaImg from "@/assets/real/roca-portao.jpg.asset.json";
+import calulu from "@/assets/real/calulu-real.jpg.asset.json";
+import bio from "@/assets/real/costa-floresta.jpg.asset.json";
+import cacau from "@/assets/real/cacau-real.jpg.asset.json";
 
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { img: picoImg, key: "pico", ratio: "aspect-[4/5]" },
-    { img: praiaImg, key: "praias", ratio: "aspect-[4/5]" },
-    { img: rocaImg, key: "rocas", ratio: "aspect-[4/5]" },
-    { img: calulu, key: "sabores", ratio: "aspect-[4/5]" },
-    { img: bio, key: "bio", ratio: "aspect-[4/5]" },
-    { img: cacau, key: "cacau", ratio: "aspect-[4/5]" },
+    { img: picoImg.url, key: "pico", ratio: "aspect-[4/5]" },
+    { img: praiaImg.url, key: "praias", ratio: "aspect-[4/5]" },
+    { img: rocaImg.url, key: "rocas", ratio: "aspect-[4/5]" },
+    { img: calulu.url, key: "sabores", ratio: "aspect-[4/5]" },
+    { img: bio.url, key: "bio", ratio: "aspect-[4/5]" },
+    { img: cacau.url, key: "cacau", ratio: "aspect-[4/5]" },
   ];
 
   return (

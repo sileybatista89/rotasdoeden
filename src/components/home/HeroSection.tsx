@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/optimized/praia-jale-hero.webp";
+import heroImage from "@/assets/real/enseada-principe.jpg.asset.json";
 
 export function HeroSection() {
   return (
@@ -10,7 +10,7 @@ export function HeroSection() {
         <div className="relative order-2 md:order-1 md:col-span-6">
           <div className="aspect-[4/5] overflow-hidden bg-muted md:max-h-[680px]">
             <img
-              src={heroImage}
+              src={heroImage.url}
               alt="Costa tropical da ilha do Príncipe vista do alto"
               className="h-full w-full object-cover"
               loading="eager"

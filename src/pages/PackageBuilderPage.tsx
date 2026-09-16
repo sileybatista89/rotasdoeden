@@ -21,16 +21,16 @@ import {
   type CatalogItem,
 } from "@/lib/packageBuilder";
 import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
-import essencialImage from "@/assets/optimized/praia-piscina-hero.webp";
-import explorarImage from "@/assets/optimized/pico-cao-grande-hero.webp";
-import imersaoImage from "@/assets/optimized/roca-card.webp";
-import medidaImage from "@/assets/optimized/trilho-floresta-hero.webp";
+import essencialImage from "@/assets/real/praia-sul-hd.jpg.asset.json";
+import explorarImage from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
+import imersaoImage from "@/assets/real/roca-casa-grande.jpg.asset.json";
+import medidaImage from "@/assets/real/costa-floresta.jpg.asset.json";
 
 const packageImages: Record<string, string> = {
-  "rotas-essencial": essencialImage,
-  "rotas-explorar": explorarImage,
-  "rotas-imersao": imersaoImage,
-  "rotas-a-medida": medidaImage,
+  "rotas-essencial": essencialImage.url,
+  "rotas-explorar": explorarImage.url,
+  "rotas-imersao": imersaoImage.url,
+  "rotas-a-medida": medidaImage.url,
 };
 
 /**

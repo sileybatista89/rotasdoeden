@@ -1,38 +1,38 @@
-import costaMar from "@/assets/stp/biodiversidade.jpg";
-import passeioGruta from "@/assets/stp/passeio-barco.jpg";
-import praiaBanana from "@/assets/praias/praia-banana.jpg";
-import picoCaoGrande from "@/assets/optimized/pico-cao-grande-card.webp";
-import cacau from "@/assets/optimized/cacau-card.webp";
-import roca from "@/assets/optimized/roca-card.webp";
+import costaMar from "@/assets/real/costa-mar-real.jpeg.asset.json";
+import passeioGruta from "@/assets/real/passeio-gruta-real.jpeg.asset.json";
+import praiaBanana from "@/assets/real/praia-banana-hd.jpg.asset.json";
+import picoCaoGrande from "@/assets/real/pico-cao-grande-real.jpg.asset.json";
+import cacau from "@/assets/real/cacau-real.jpg.asset.json";
+import roca from "@/assets/real/roca-casa-grande.jpg.asset.json";
 
 const CATEGORIES = [
   {
-    img: passeioGruta,
+    img: passeioGruta.url,
     title: "Vida Marinha",
     text: "Conheça a costa a partir do mar, as grutas vulcânicas e as águas do arquipélago.",
   },
   {
-    img: praiaBanana,
+    img: praiaBanana.url,
     title: "Praias e Ilhas",
     text: "Descubra praias entre coqueiros, pequenas enseadas e ilhéus de origem vulcânica.",
   },
   {
-    img: costaMar,
+    img: costaMar.url,
     title: "Natureza e Floresta",
     text: "Explore paisagens onde a floresta tropical encontra diretamente o Atlântico.",
   },
   {
-    img: picoCaoGrande,
+    img: picoCaoGrande.url,
     title: "Trilhos e Aventura",
     text: "Conheça os caminhos do Obô e as paisagens em redor do Pico Cão Grande.",
   },
   {
-    img: cacau,
+    img: cacau.url,
     title: "Cacau e Gastronomia",
     text: "Descubra o cacau são-tomense, os produtos locais e os sabores preparados nas ilhas.",
   },
   {
-    img: roca,
+    img: roca.url,
     title: "Cultura e Património",
     text: "Explore as roças históricas, a arquitetura e as tradições vivas das comunidades.",
   },
