@@ -7,7 +7,7 @@ const pillars = [
   {
     Icon: Bird,
     title: "Concentração rara de endemismo",
-    text: "São Tomé e Príncipe está entre os territórios com maior densidade de espécies endémicas do planeta — incluindo o ibis-de-são-tomé, o tordo-do-príncipe e dezenas de plantas únicas no mundo.",
+    text: "São Tomé e Príncipe está entre os territórios com maior densidade de espécies endémicas do planeta, incluindo o ibis-de-são-tomé, o tordo-do-príncipe e dezenas de plantas únicas no mundo.",
   },
   {
     Icon: Globe2,
@@ -16,7 +16,7 @@ const pillars = [
   },
   {
     Icon: TreePine,
-    title: "Floresta Obô — coração verde",
+    title: "Floresta Obô, coração verde",
     text: "Os Parques Naturais Obô de São Tomé e do Príncipe protegem floresta tropical primária, cascatas e o icónico Pico Cão Grande.",
   },
   {
@@ -36,7 +36,7 @@ export function SustentabilidadeSection() {
             <div className="aspect-[4/5] overflow-hidden bg-muted">
               <img
                 src={obo.url}
-                alt="Floresta tropical de São Tomé — vegetação endémica do Parque Natural Obô"
+                alt="Floresta tropical de São Tomé, vegetação endémica do Parque Natural Obô"
                 loading="lazy"
                 decoding="async"
                 width={800}
@@ -61,7 +61,7 @@ export function SustentabilidadeSection() {
               </h2>
               <p className="body-copy mb-10">
                 São Tomé e Príncipe é internacionalmente reconhecido pela sua biodiversidade.
-                A Rotas do Éden apoia o turismo sustentável e a preservação ambiental — cada
+                A Rotas do Éden apoia o turismo sustentável e a preservação ambiental, cada
                 experiência reservada contribui para a proteção destes ecossistemas únicos.
               </p>
             </Reveal>
@@ -78,7 +78,7 @@ export function SustentabilidadeSection() {
 
             <div className="mt-10 flex items-start gap-3 text-[0.85rem] text-muted-foreground font-light">
               <ShieldCheck size={15} className="text-primary shrink-0 mt-1" strokeWidth={1.5} />
-              <span>Compromisso Rotas do Éden — guias licenciados, trilhos responsáveis, comunidades locais beneficiadas.</span>
+              <span>Compromisso Rotas do Éden, guias licenciados, trilhos responsáveis, comunidades locais beneficiadas.</span>
             </div>
           </div>
         </div>

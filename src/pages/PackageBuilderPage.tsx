@@ -122,7 +122,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={`${rules?.name ?? "Pacote"} — monte a sua viagem em São Tomé e Príncipe`}
+        title={`${rules?.name ?? "Pacote"}, monte a sua viagem em São Tomé e Príncipe`}
         description={
           rules?.description ??
           "Monte a sua viagem dia a dia em São Tomé e Príncipe e receba uma proposta personalizada, sem reservar nem pagar."
@@ -162,7 +162,7 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                   <p className="mt-2 max-w-lg text-xs leading-5 text-muted-foreground">
                 {baseline.data.includes_flight
                   ? "Preço indicativo, voo incluído."
-                  : "Preço indicativo — base terrestre, voo não incluído."}{" "}
+                  : "Preço indicativo, base terrestre, voo não incluído."}{" "}
                 Referência para {baseline.data.duration_days} dias com {baseline.data.adults} adultos.
                 {baseline.data.indicative
                   ? " Baseado em preços públicos observados no mercado: não é uma tarifa garantida e é confirmado na proposta."

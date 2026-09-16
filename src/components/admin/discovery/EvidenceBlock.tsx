@@ -48,13 +48,13 @@ export function EvidenceBlock({ opportunity }: { opportunity: Opportunity }) {
       </Section>
 
       <Section title="Interpretado (modelo)" tone="bg-secondary">
-        <p>Intenção: {opportunity.intent ?? "—"}</p>
+        <p>Intenção: {opportunity.intent ?? ","}</p>
         <p>
           Confiança da intenção:{" "}
-          {opportunity.intent_confidence !== null ? `${Number(opportunity.intent_confidence).toFixed(0)}%` : "—"}
+          {opportunity.intent_confidence !== null ? `${Number(opportunity.intent_confidence).toFixed(0)}%` : ","}
         </p>
-        <p>Categoria: {opportunity.category ?? "—"}</p>
-        <p>Sazonalidade: {opportunity.season ?? "—"}</p>
+        <p>Categoria: {opportunity.category ?? ","}</p>
+        <p>Sazonalidade: {opportunity.season ?? ","}</p>
       </Section>
 
       <Section title="Hipótese (racional registado)" tone="bg-eden-ocean">

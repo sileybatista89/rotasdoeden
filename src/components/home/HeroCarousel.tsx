@@ -12,17 +12,17 @@ import barco from "@/assets/real/barco-turquesa.jpg.asset.json";
 import banho from "@/assets/real/banho-praia.jpg.asset.json";
 
 const slides = [
-  { src: picoCaoGrande.url, alt: "Pico Cão Grande — agulha vulcânica de São Tomé vista do mar" },
+  { src: picoCaoGrande.url, alt: "Pico Cão Grande, agulha vulcânica de São Tomé vista do mar" },
   { src: rochasAerea.url, alt: "Praia de areia clara com rochas vulcânicas vista de cima, São Tomé" },
   { src: barco.url, alt: "Barco de pesca em água turquesa entre rochas vulcânicas" },
   { src: praiaEscondida.url, alt: "Praia com rochas vulcânicas e água turquesa, Príncipe" },
-  { src: lagoaAzul.url, alt: "Lagoa Azul — baobás centenários e enseada turquesa no norte de São Tomé" },
+  { src: lagoaAzul.url, alt: "Lagoa Azul, baobás centenários e enseada turquesa no norte de São Tomé" },
   { src: enseada.url, alt: "Enseada de floresta densa e praia deserta, ilha do Príncipe" },
   { src: principeAerial.url, alt: "Passadiço de Bom Bom, ilha do Príncipe" },
   { src: banho.url, alt: "Visitantes a banhar-se numa praia de palmeiras em São Tomé" },
   { src: praiaBanana.url, alt: "Praia de palmeiras e areia branca, Príncipe" },
   { src: santana.url, alt: "Baía de Santana, costa leste de São Tomé" },
-  { src: ilheuRolas.url, alt: "Ilhéu das Rolas — equador de São Tomé" },
+  { src: ilheuRolas.url, alt: "Ilhéu das Rolas, equador de São Tomé" },
 ];
 
 interface Props {

@@ -1,5 +1,5 @@
 /**
- * Fase 6 — Conversion Agent.
+ * Fase 6, Conversion Agent.
  *
  * Só o orquestrador ou a função `conversion-chat` (service role) podem chamar.
  * O agente lê dados reais da base, classifica a intenção e devolve uma resposta
@@ -45,7 +45,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-/** Leitura — e só leitura — dos dados reais que sustentam a resposta. */
+/** Leitura, e só leitura, dos dados reais que sustentam a resposta. */
 async function loadGrounding(db: SupabaseClient, quoteId: string | null): Promise<GroundingContext> {
   const [products, experiences, guides] = await Promise.all([
     db.from("travel_products")

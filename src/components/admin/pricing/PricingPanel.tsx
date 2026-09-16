@@ -70,7 +70,7 @@ export function PricingPanel() {
         ].map((c) => (
           <Card key={c.label} className="p-4">
             <p className="text-xs text-muted-foreground">{c.label}</p>
-            <p className="text-2xl font-display font-bold text-foreground">{c.value ?? "—"}</p>
+            <p className="text-2xl font-display font-bold text-foreground">{c.value ?? ","}</p>
           </Card>
         ))}
       </div>
@@ -109,7 +109,7 @@ export function PricingPanel() {
           {policies.isLoading && <p className="text-sm text-muted-foreground">A carregar…</p>}
           {!policies.isLoading && (policies.data ?? []).length === 0 && (
             <Card className="p-6 text-center text-sm text-muted-foreground">
-              Ainda não existe nenhuma política de preços. Cria a primeira em rascunho — nenhuma margem foi assumida.
+              Ainda não existe nenhuma política de preços. Cria a primeira em rascunho, nenhuma margem foi assumida.
             </Card>
           )}
 

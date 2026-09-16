@@ -46,9 +46,9 @@ export function StatsCards({ stats }: Props) {
 }
 
 export const defaultStats: Stat[] = [
-  { label: "Guias registados", value: "—", delta: "Contas com papel de guia", icon: Users, tone: "primary" },
-  { label: "Reservas", value: "—", delta: "Total na plataforma", icon: Calendar, tone: "secondary" },
-  { label: "KYC a rever", value: "—", delta: "Submissões pendentes", icon: ShieldCheck, tone: "ocean" },
-  { label: "Verificações pendentes", value: "—", delta: "Perfis à espera de análise", icon: FileClock, tone: "muted" },
+  { label: "Guias registados", value: ",", delta: "Contas com papel de guia", icon: Users, tone: "primary" },
+  { label: "Reservas", value: ",", delta: "Total na plataforma", icon: Calendar, tone: "secondary" },
+  { label: "KYC a rever", value: ",", delta: "Submissões pendentes", icon: ShieldCheck, tone: "ocean" },
+  { label: "Verificações pendentes", value: ",", delta: "Perfis à espera de análise", icon: FileClock, tone: "muted" },
 ];
 

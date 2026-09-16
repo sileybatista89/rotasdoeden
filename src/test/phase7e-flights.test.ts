@@ -19,7 +19,7 @@ import { applyFlightProtection, applyMarkup } from "@/lib/pricing";
 const FUTURE = new Date(Date.now() + 3600_000).toISOString();
 const PAST = new Date(Date.now() - 3600_000).toISOString();
 
-/** Mock de resposta Duffel — usado APENAS em testes, nunca em produção. */
+/** Mock de resposta Duffel, usado APENAS em testes, nunca em produção. */
 function duffelOffer(overrides: Record<string, unknown> = {}) {
   return {
     id: "off_test_123",
@@ -71,7 +71,7 @@ function mockFetch(status: number, body: unknown, headers: Record<string, string
   return { impl, calls };
 }
 
-describe("Fase 7E — validação de parâmetros", () => {
+describe("Fase 7E, validação de parâmetros", () => {
   const base = { origin: "lis", destination: "TMS", departureDate: "2026-11-02", adults: 2, cabin: "economy" as const };
 
   it("normaliza e aceita uma pesquisa válida", () => {
@@ -110,7 +110,7 @@ describe("Fase 7E — validação de parâmetros", () => {
   });
 });
 
-describe("Fase 7E — cache e idempotência", () => {
+describe("Fase 7E, cache e idempotência", () => {
   const p = validateSearchParams({ origin: "LIS", destination: "TMS", departureDate: "2026-11-02", adults: 2, cabin: "economy" });
 
   it("a mesma pesquisa gera a mesma chave", () => {
@@ -124,7 +124,7 @@ describe("Fase 7E — cache e idempotência", () => {
   });
 });
 
-describe("Fase 7E — normalização Duffel", () => {
+describe("Fase 7E, normalização Duffel", () => {
   it("guarda muito mais do que o preço", () => {
     const o = normalizeDuffelOffer(duffelOffer());
     expect(o.provider).toBe("duffel");
@@ -157,7 +157,7 @@ describe("Fase 7E — normalização Duffel", () => {
   });
 });
 
-describe("Fase 7E — expiry e reprice", () => {
+describe("Fase 7E, expiry e reprice", () => {
   const offer = normalizeDuffelOffer(duffelOffer());
 
   it("uma oferta futura não está expirada", () => {
@@ -196,7 +196,7 @@ describe("Fase 7E — expiry e reprice", () => {
   });
 });
 
-describe("Fase 7E — segurança de preço e integração com o Pricing Engine", () => {
+describe("Fase 7E, segurança de preço e integração com o Pricing Engine", () => {
   const offer = normalizeDuffelOffer(duffelOffer());
 
   it("o Flight Engine devolve custo de fornecedor sem margem", () => {
@@ -222,7 +222,7 @@ describe("Fase 7E — segurança de preço e integração com o Pricing Engine",
   });
 });
 
-describe("Fase 7E — mapeamento de erros", () => {
+describe("Fase 7E, mapeamento de erros", () => {
   it("distingue os erros do fornecedor", () => {
     expect(mapDuffelError(401, null).code).toBe("authentication_error");
     expect(mapDuffelError(422, null).code).toBe("invalid_request");
@@ -240,7 +240,7 @@ describe("Fase 7E — mapeamento de erros", () => {
   });
 });
 
-describe("Fase 7E — DuffelFlightProvider", () => {
+describe("Fase 7E, DuffelFlightProvider", () => {
   it("sem chave configurada falha em segurança e não inventa ofertas", async () => {
     const p = new DuffelFlightProvider({ apiKey: null });
     expect(p.isConfigured()).toBe(false);
@@ -338,7 +338,7 @@ describe("Fase 7E — DuffelFlightProvider", () => {
   });
 });
 
-describe("Fase 7E — o cliente nunca controla preço nem provider", () => {
+describe("Fase 7E, o cliente nunca controla preço nem provider", () => {
   it("o modelo interno não aceita markup nem preço final do cliente", () => {
     const offer = normalizeDuffelOffer(duffelOffer({ markup: 500, final_price: 9999 } as Record<string, unknown>));
     const asAny = offer as unknown as Record<string, unknown>;
@@ -352,7 +352,7 @@ describe("Fase 7E — o cliente nunca controla preço nem provider", () => {
   });
 });
 
-describe("Fase 7E — regressão", () => {
+describe("Fase 7E, regressão", () => {
   it("as fórmulas do Pricing Engine mantêm-se intactas", () => {
     expect(applyMarkup(100, 25)).toBe(125);
     expect(applyFlightProtection(1000, { method: "percentage", value: 3 })).toBe(30);

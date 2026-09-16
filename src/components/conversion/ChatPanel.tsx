@@ -61,10 +61,10 @@ export function ChatPanel({ open, onClose }: Props) {
           >
             {m.content
               .replace(
-                "Olá! Sou o assistente virtual da Rotas do Éden — uma inteligência artificial, não um guia humano.",
+                "Olá! Sou o assistente virtual da Rotas do Éden, uma inteligência artificial, não um guia humano.",
                 "Olá. Sou o assistente virtual da Rotas do Éden.",
               )
-              .replace(/[—–]/g, ",")}
+              .replace(/[,-]/g, ",")}
           </div>
         ))}
         {sending && (

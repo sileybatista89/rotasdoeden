@@ -1,5 +1,5 @@
 /**
- * Fase 7C — regras puras de fornecedores, alojamentos, quartos,
+ * Fase 7C, regras puras de fornecedores, alojamentos, quartos,
  * componentes e tarifas/custos. Sem margem, preço de venda ou voos.
  */
 
@@ -261,7 +261,7 @@ export function formatRateAmount(price: number, currency: string, unit: RateUnit
 }
 
 /* ------------------------------------------------------------------ *
- * Camada comercial — elegibilidade e prontidão                        *
+ * Camada comercial, elegibilidade e prontidão                        *
  * Só interpreta os dados já guardados. Não inventa preços nem fontes. *
  * ------------------------------------------------------------------ */
 

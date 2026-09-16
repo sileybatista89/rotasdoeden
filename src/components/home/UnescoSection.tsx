@@ -42,7 +42,7 @@ export function UnescoSection() {
               As roças históricas reconhecidas pela UNESCO
             </h2>
             <p className="body-copy mb-10">
-              O conjunto das roças de São Tomé e Príncipe integra o Património Mundial da UNESCO —
+              O conjunto das roças de São Tomé e Príncipe integra o Património Mundial da UNESCO ,
               um testemunho raro da história agrícola atlântica. Visitá-las é atravessar avenidas de
               palmeiras, hospitais centenários e terreiros de secagem de cacau ainda em uso.
             </p>

@@ -30,7 +30,7 @@ function money(v: number, c: string) {
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: c || "EUR" }).format(v);
 }
 function day(v: string | null | undefined) {
-  return v ? new Date(v).toLocaleDateString("pt-PT", { dateStyle: "long" }) : "—";
+  return v ? new Date(v).toLocaleDateString("pt-PT", { dateStyle: "long" }) : ",";
 }
 
 export default function PropostaPage() {
@@ -112,8 +112,8 @@ export default function PropostaPage() {
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div><dt className="text-xs text-muted-foreground">Partida</dt><dd>{day(quote.criteria?.departureDate)}</dd></div>
                 <div><dt className="text-xs text-muted-foreground">Regresso</dt><dd>{day(quote.criteria?.returnDate)}</dd></div>
-                <div><dt className="text-xs text-muted-foreground">Duração</dt><dd>{quote.criteria?.durationDays ?? "—"} dias{nights ? ` · ${nights} noites` : ""}</dd></div>
-                <div><dt className="text-xs text-muted-foreground">Viajantes</dt><dd>{quote.criteria?.adults ?? "—"} adultos{quote.criteria?.children ? ` · ${quote.criteria.children} crianças` : ""}</dd></div>
+                <div><dt className="text-xs text-muted-foreground">Duração</dt><dd>{quote.criteria?.durationDays ?? ","} dias{nights ? ` · ${nights} noites` : ""}</dd></div>
+                <div><dt className="text-xs text-muted-foreground">Viajantes</dt><dd>{quote.criteria?.adults ?? ","} adultos{quote.criteria?.children ? ` · ${quote.criteria.children} crianças` : ""}</dd></div>
                 <div className="col-span-2"><dt className="text-xs text-muted-foreground">Proposta válida até</dt><dd>{day(quote.validUntil)}</dd></div>
               </dl>
             </section>

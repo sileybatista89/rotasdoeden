@@ -58,7 +58,7 @@ export function BaselinePanel() {
   });
 
   const money = (v: number | null, c: string | null) =>
-    v == null ? "—" : new Intl.NumberFormat("pt-PT", { style: "currency", currency: c ?? "EUR" }).format(v);
+    v == null ? "," : new Intl.NumberFormat("pt-PT", { style: "currency", currency: c ?? "EUR" }).format(v);
 
   return (
     <div className="space-y-3">
@@ -136,12 +136,12 @@ export function BaselinePanel() {
                 {b.source_flags.filter((f: any) => f.lower_bound).length > 0 && (
                   <li>
                     {b.source_flags.filter((f: any) => f.lower_bound).length} origem(ns) registada(s) como limite
-                    inferior de um intervalo observado — o valor real pode ser mais alto.
+                    inferior de um intervalo observado, o valor real pode ser mais alto.
                   </li>
                 )}
                 {b.source_flags.filter((f: any) => f.expiring_soon).map((f: any) => (
                   <li key={f.rate_id}>
-                    Observação expira em {f.expires_at ? new Date(f.expires_at).toLocaleDateString("pt-PT") : "breve"} —
+                    Observação expira em {f.expires_at ? new Date(f.expires_at).toLocaleDateString("pt-PT") : "breve"} ,
                     atualizar antes disso ou o preço público deixa de aparecer.
                   </li>
                 ))}
@@ -173,7 +173,7 @@ export function BaselinePanel() {
                         {new Date(h.computed_at).toLocaleString("pt-PT")} ·{" "}
                         {h.status === "published"
                           ? `${money(Number(h.price_per_person), h.currency)} / pessoa${h.includes_flight ? " (com voo)" : " (base terrestre)"}`
-                          : `bloqueado — ${h.blocked_reason ?? "sem motivo registado"}`}
+                          : `bloqueado, ${h.blocked_reason ?? "sem motivo registado"}`}
                       </li>
                     ))}
                 </ul>

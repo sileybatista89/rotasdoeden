@@ -54,7 +54,7 @@ export default function KycPage() {
       });
       if (error) throw error;
       await supabase.from("profiles").update({ kyc_status: "submitted" }).eq("id", user.id);
-      toast.success("Documentos enviados — aguarde aprovação do admin.");
+      toast.success("Documentos enviados, aguarde aprovação do admin.");
       setStatus("submitted");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
@@ -84,7 +84,7 @@ export default function KycPage() {
           </div>
         ) : status === "submitted" ? (
           <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-6 text-center">
-            <p className="font-medium text-foreground">Submissão recebida — em revisão pelo admin.</p>
+            <p className="font-medium text-foreground">Submissão recebida, em revisão pelo admin.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 space-y-5">

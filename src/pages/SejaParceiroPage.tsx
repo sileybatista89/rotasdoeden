@@ -65,16 +65,16 @@ export default function SejaParceiroPage() {
       return;
     }
     const cat = categories.find((c) => c.value === form.category)?.label ?? form.category;
-    const subject = `Nova candidatura de parceiro — ${form.company}`;
+    const subject = `Nova candidatura de parceiro, ${form.company}`;
     const body =
       `Empresa: ${form.company}\n` +
       `Responsável: ${form.responsible}\n` +
       `Categoria: ${cat}\n` +
       `Telefone: ${form.phone}\n` +
       `Email: ${form.email}\n` +
-      `Website: ${form.website || "—"}\n\n` +
+      `Website: ${form.website || ","}\n\n` +
       `Atividade:\n${form.description}\n\n` +
-      `Mensagem:\n${form.message || "—"}\n`;
+      `Mensagem:\n${form.message || ","}\n`;
     window.location.href = `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);
     toast({ title: "Candidatura preparada", description: "Abrimos o seu email para enviar a candidatura à equipa Rotas do Éden." });
@@ -84,7 +84,7 @@ export default function SejaParceiroPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
         title="Tornar-me parceiro | Rotas do Éden"
-        description="Candidatura de parceiros Rotas do Éden — hotéis, restaurantes, rent-a-car, operadores turísticos e empresas locais de São Tomé e Príncipe."
+        description="Candidatura de parceiros Rotas do Éden, hotéis, restaurantes, rent-a-car, operadores turísticos e empresas locais de São Tomé e Príncipe."
         path="/seja-parceiro"
       />
       <Navbar />
@@ -197,7 +197,7 @@ export default function SejaParceiroPage() {
             </Button>
             {sent && (
               <p className="text-sm text-primary flex items-center gap-2">
-                <CheckCircle2 size={16} /> Candidatura preparada — finalize o envio no seu email.
+                <CheckCircle2 size={16} /> Candidatura preparada, finalize o envio no seu email.
               </p>
             )}
           </form>

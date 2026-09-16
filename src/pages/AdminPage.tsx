@@ -53,7 +53,7 @@ export default function AdminPage() {
         return { ...s, value: String(pendingVerif ?? 0) };
       }));
 
-      // Reservas por mês — últimos 6 meses, a partir de dados reais
+      // Reservas por mês, últimos 6 meses, a partir de dados reais
       const since = new Date();
       since.setMonth(since.getMonth() - 5, 1);
       const buckets: { month: string; reservas: number }[] = [];
@@ -105,7 +105,7 @@ export default function AdminPage() {
             <AdminSectionHeader
               eyebrow="Visão geral"
               title={`Olá, ${user?.user_metadata?.full_name?.split(" ")[0] ?? "Admin"}`}
-              description="Acompanha o que se passa na plataforma — guias, reservas, verificações e moderação."
+              description="Acompanha o que se passa na plataforma, guias, reservas, verificações e moderação."
               actions={
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 gap-1">
                   <Sparkles size={12} /> Dados reais
@@ -225,7 +225,7 @@ export default function AdminPage() {
             <AdminSectionHeader
               eyebrow="Agentes IA"
               title="Discovery Control Center"
-              description="Oportunidades de procura detetadas pelo agente Discovery. As ações aqui apenas classificam oportunidades — não executam campanhas."
+              description="Oportunidades de procura detetadas pelo agente Discovery. As ações aqui apenas classificam oportunidades, não executam campanhas."
             />
             <DiscoveryPanel />
           </>
@@ -330,7 +330,7 @@ export default function AdminPage() {
             <AdminSectionHeader
               eyebrow="Anti-fraude"
               title="Moderação de Chat"
-              description="Mensagens detectadas pelo filtro automático — contactos, pagamentos e termos suspeitos."
+              description="Mensagens detectadas pelo filtro automático, contactos, pagamentos e termos suspeitos."
             />
             <FlaggedMessages />
           </>

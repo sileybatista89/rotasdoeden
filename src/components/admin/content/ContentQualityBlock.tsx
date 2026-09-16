@@ -56,7 +56,7 @@ export function ContentQualityBlock({ qualityPassed, issues, wordCount }: Props)
               </Badge>
               <span className="text-muted-foreground">
                 <strong className="text-foreground">{CODE_LABEL[issue.code ?? ""] ?? issue.code}</strong>
-                {issue.detail ? ` — ${issue.detail}` : ""}
+                {issue.detail ? `, ${issue.detail}` : ""}
               </span>
             </li>
           ))}

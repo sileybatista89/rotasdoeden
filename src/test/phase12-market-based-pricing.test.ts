@@ -42,7 +42,7 @@ function component(overrides: Partial<PricingComponentInput> = {}): PricingCompo
 
 const BASE = { durationDays: 7, nights: 6, adults: 2, children: 0, rooms: 1, referenceDate: "2026-06-01" };
 
-describe("Fase 12 — elegibilidade do preço de mercado observado", () => {
+describe("Fase 12, elegibilidade do preço de mercado observado", () => {
   it("preço público com fonte e data de observação é elegível para proposta indicativa", () => {
     const res = classifyRateEligibility(marketRate(), "2026-06-01");
     expect(res.eligibility).toBe("indicative");
@@ -79,7 +79,7 @@ describe("Fase 12 — elegibilidade do preço de mercado observado", () => {
   });
 });
 
-describe("Fase 12 — proposta indicativa com preços de mercado", () => {
+describe("Fase 12, proposta indicativa com preços de mercado", () => {
   it("alojamento só com preço de mercado gera cálculo com estado market_based_pricing", () => {
     const res = calculatePricing({
       policy: policy(),
@@ -140,7 +140,7 @@ describe("Fase 12 — proposta indicativa com preços de mercado", () => {
   });
 });
 
-describe("Fase 12 — Quote Engine existente continua a decidir a confirmação", () => {
+describe("Fase 12, Quote Engine existente continua a decidir a confirmação", () => {
   it("proposta de mercado é utilizável mas exige revalidação", () => {
     const res = evaluateConfirmability({
       policyActive: true, pricingStatus: "estimated", validationErrors: [], rates: [],
@@ -168,7 +168,7 @@ describe("Fase 12 — Quote Engine existente continua a decidir a confirmação"
   });
 });
 
-describe("Fase 12 — normalização de observações de mercado", () => {
+describe("Fase 12, normalização de observações de mercado", () => {
   it("calcula o valor por noite sem perder o total nem a moeda", () => {
     const n = normalizeMarketObservation({ totalObservedAmount: 600, observedNights: 3, currency: "usd" });
     expect(n.nightlyAmount).toBe(200);
@@ -183,7 +183,7 @@ describe("Fase 12 — normalização de observações de mercado", () => {
   });
 });
 
-describe("Fase 12 — Duffel Stays continua em espera de acesso", () => {
+describe("Fase 12, Duffel Stays continua em espera de acesso", () => {
   it("sem credenciais o fornecedor fica indisponível sem quebrar o produto", async () => {
     const provider = new DuffelStaysProvider({ token: null, enabled: false, testMode: true } as never);
     await expect(provider.search({} as never)).rejects.toBeInstanceOf(StaysProviderError);

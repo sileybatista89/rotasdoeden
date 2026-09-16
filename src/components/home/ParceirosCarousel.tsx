@@ -4,7 +4,7 @@ import { Reveal } from "@/components/ui/reveal";
 
 const partnerTypes = [
   { Icon: Hotel, title: "Hotéis & Pousadas", text: "Roças históricas, pousadas familiares e resorts à beira-mar." },
-  { Icon: UtensilsCrossed, title: "Restaurantes", text: "Calulu, izaquente e marisco fresco — cozinha autêntica santomense." },
+  { Icon: UtensilsCrossed, title: "Restaurantes", text: "Calulu, izaquente e marisco fresco, cozinha autêntica santomense." },
   { Icon: Car, title: "Rent-a-car", text: "Mobilidade segura para explorar São Tomé e Príncipe ao seu ritmo." },
   { Icon: Compass, title: "Operadores turísticos", text: "Mergulho, observação de baleias e expedições ao Pico Cão Grande." },
   { Icon: Building2, title: "Experiências locais", text: "Festivais, artesanato e produtores de cacau." },
@@ -23,7 +23,7 @@ export function ParceirosCarousel() {
             </h2>
             <p className="body-copy max-w-xl">
               Hotéis, restaurantes, rent-a-car e operadores recomendados pela Rotas do Éden
-              — para que cada viagem seja completa.
+             , para que cada viagem seja completa.
             </p>
           </div>
           <Link

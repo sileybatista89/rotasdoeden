@@ -74,7 +74,7 @@ describe("validação de duração", () => {
   it("calcula noites por defeito e apresenta a duração", () => {
     expect(defaultNights(5)).toBe(4);
     expect(defaultNights(1)).toBe(0);
-    expect(formatDuration(range("rotas-essencial"))).toBe("5–7 dias");
+    expect(formatDuration(range("rotas-essencial"))).toBe("5-7 dias");
     expect(formatDuration(range("rotas-a-medida"))).toBe("5+ dias");
   });
 });

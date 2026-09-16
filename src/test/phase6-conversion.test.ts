@@ -19,14 +19,14 @@ import {
 
 const emptyContext: GroundingContext = { products: [], experiences: [], guides: [], quote: null };
 
-describe("Fase 6 — identificação como IA", () => {
+describe("Fase 6, identificação como IA", () => {
   it("a primeira mensagem declara que é uma IA e que não inventa valores", () => {
     expect(AI_DISCLOSURE).toMatch(/intelig[êe]ncia artificial/i);
     expect(AI_DISCLOSURE).toMatch(/n[ãa]o invento/i);
   });
 });
 
-describe("Fase 6 — classificação de intenção", () => {
+describe("Fase 6, classificação de intenção", () => {
   it("reconhece inspiração por omissão", () => {
     expect(classifyIntent("Olá, conta-me sobre as ilhas")).toBe("inspiracao");
     expect(classifyIntent("")).toBe("inspiracao");
@@ -72,7 +72,7 @@ describe("Fase 6 — classificação de intenção", () => {
   });
 });
 
-describe("Fase 6 — proteção comercial", () => {
+describe("Fase 6, proteção comercial", () => {
   it("bloqueia valores quando não existe cotação real", () => {
     const res = sanitizeReply("O pacote fica por 1.850 € por pessoa.");
     expect(res.blocked).toBe(true);
@@ -102,7 +102,7 @@ describe("Fase 6 — proteção comercial", () => {
   });
 });
 
-describe("Fase 6 — grounding", () => {
+describe("Fase 6, grounding", () => {
   it("declara explicitamente a ausência de dados reais", () => {
     const block = buildGroundingBlock(emptyContext);
     expect(block).toMatch(/nenhum confirmado/);
@@ -123,7 +123,7 @@ describe("Fase 6 — grounding", () => {
   });
 });
 
-describe("Fase 6 — leads", () => {
+describe("Fase 6, leads", () => {
   it("rejeita um pedido sem contacto", () => {
     const res = validateLead({ contact_name: "Ana" });
     expect(res.valid).toBe(false);
@@ -170,7 +170,7 @@ describe("Fase 6 — leads", () => {
   });
 });
 
-describe("Fase 6 — resposta do modelo", () => {
+describe("Fase 6, resposta do modelo", () => {
   it("lê JSON válido", () => {
     const decision = parseAgentOutput(
       '{"intent":"duvida","reply":"Não precisas de visto prévio.","lead":null,"handoff":false}',
@@ -202,7 +202,7 @@ describe("Fase 6 — resposta do modelo", () => {
   });
 });
 
-describe("Fase 6 — limites de uso", () => {
+describe("Fase 6, limites de uso", () => {
   it("rejeita mensagens vazias ou demasiado longas", () => {
     expect(isMessageAcceptable("   ").ok).toBe(false);
     expect(isMessageAcceptable("a".repeat(2000)).ok).toBe(false);

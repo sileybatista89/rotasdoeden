@@ -27,7 +27,7 @@ interface Props {
 }
 
 function fmt(date: string | null | undefined) {
-  return date ? new Date(date).toLocaleString("pt-PT") : "—";
+  return date ? new Date(date).toLocaleString("pt-PT") : ",";
 }
 
 function Json({ value }: { value: unknown }) {
@@ -108,7 +108,7 @@ export function AcquisitionDetailDrawer({ planId, onClose }: Props) {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Objetivo</p>
-                  <p className="text-sm text-foreground">{plan.objective ?? "—"}</p>
+                  <p className="text-sm text-foreground">{plan.objective ?? ","}</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Público</p>
@@ -127,7 +127,7 @@ export function AcquisitionDetailDrawer({ planId, onClose }: Props) {
                   <Json value={plan.target_metric} />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Custo estimado registado: {Number(plan.estimated_cost ?? 0).toFixed(2)} — nenhum valor é gasto por este painel.
+                  Custo estimado registado: {Number(plan.estimated_cost ?? 0).toFixed(2)}, nenhum valor é gasto por este painel.
                 </p>
               </TabsContent>
 
@@ -150,7 +150,7 @@ export function AcquisitionDetailDrawer({ planId, onClose }: Props) {
                 <Json value={plan.score_breakdown} />
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Racional</p>
-                  <p className="text-sm text-foreground">{plan.rationale ?? "—"}</p>
+                  <p className="text-sm text-foreground">{plan.rationale ?? ","}</p>
                 </div>
               </TabsContent>
 
@@ -210,10 +210,10 @@ export function AcquisitionDetailDrawer({ planId, onClose }: Props) {
 
               <TabsContent value="execucao" className="space-y-3 pt-3">
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Tarefa: {run.data?.task?.task_type ?? "—"} ({run.data?.task?.status ?? "—"})</p>
-                  <p>Execução: {run.data?.run?.status ?? "—"} · {fmt(run.data?.run?.started_at)}</p>
+                  <p>Tarefa: {run.data?.task?.task_type ?? ","} ({run.data?.task?.status ?? ","})</p>
+                  <p>Execução: {run.data?.run?.status ?? ","} · {fmt(run.data?.run?.started_at)}</p>
                   <p>
-                    Modelo: {run.data?.run?.model_provider ?? "—"} / {run.data?.run?.model_name ?? "—"}
+                    Modelo: {run.data?.run?.model_provider ?? ","} / {run.data?.run?.model_name ?? ","}
                   </p>
                   <p>
                     Custo: {(run.data?.costs ?? []).reduce((t, c) => t + Number(c.estimated_cost ?? 0), 0).toFixed(4)} €
@@ -231,7 +231,7 @@ export function AcquisitionDetailDrawer({ planId, onClose }: Props) {
                       <li key={h.id} className="rounded-xl border border-border p-3 text-sm">
                         <p className="font-medium">{h.action}</p>
                         <p className="text-muted-foreground">
-                          {h.previous_status ?? "—"} → {h.new_status ?? "—"} · {h.actor_kind} · {fmt(h.created_at)}
+                          {h.previous_status ?? ","} → {h.new_status ?? ","} · {h.actor_kind} · {fmt(h.created_at)}
                         </p>
                         {h.note && <p className="text-muted-foreground mt-1">{h.note}</p>}
                       </li>

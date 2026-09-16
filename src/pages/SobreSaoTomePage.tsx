@@ -130,7 +130,7 @@ export default function SobreSaoTomePage() {
           </aside>
         </div>
 
-        {/* Parceiros — secção discreta */}
+        {/* Parceiros, secção discreta */}
         <section className="mt-20 md:mt-24 border-t border-border pt-12">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div className="max-w-xl">

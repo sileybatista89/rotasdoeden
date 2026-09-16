@@ -127,7 +127,7 @@ export function rememberAttribution(current: Attribution): Attribution {
   try {
     localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(next));
   } catch {
-    /* storage unavailable — tracking simply does not happen */
+    /* storage unavailable, tracking simply does not happen */
   }
   return next;
 }

@@ -102,7 +102,7 @@ export default function VerificationRequestPage() {
         experience_summary: summary.trim().slice(0, 2000) || null,
       });
       if (error) throw error;
-      toast.success("Pedido enviado — a equipa vai analisar os documentos.");
+      toast.success("Pedido enviado, a equipa vai analisar os documentos.");
       setLatestRequest({ status: "pending", reviewer_notes: null });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao enviar pedido");
@@ -148,7 +148,7 @@ export default function VerificationRequestPage() {
               <FileField label="Enviar documento" file={requestFiles[request.id] ?? null} onChange={(file) => setRequestFiles((current) => ({ ...current, [request.id]: file }))} required />
               <Button className="mt-3" size="sm" disabled={busy} onClick={() => fulfillRequest(request.id)}>Enviar para análise</Button>
             </>) : (
-              <p className="text-sm text-muted-foreground mt-2">Documento entregue — a equipa está a analisar.</p>
+              <p className="text-sm text-muted-foreground mt-2">Documento entregue, a equipa está a analisar.</p>
             )}
           </div>)}</div>
           <Button asChild variant="outline" className="mt-4"><Link to="/messages"><MessageSquare size={16} className="mr-2" /> Falar com o suporte</Link></Button>

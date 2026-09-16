@@ -211,7 +211,7 @@ export default function ProfessionalProfilePage() {
                 <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                 <SelectContent>
                   {PROFESSIONAL_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>{t.label} — {t.hint}</SelectItem>
+                    <SelectItem key={t.value} value={t.value}>{t.label}, {t.hint}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

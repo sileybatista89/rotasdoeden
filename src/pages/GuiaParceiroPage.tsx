@@ -15,7 +15,7 @@ const benefits = [
   { icon: Users, title: "Visibilidade nacional e internacional", text: "Aparece a turistas verificados que procuram experiências autênticas em São Tomé e Príncipe." },
   { icon: Wallet, title: "Pagamentos protegidos", text: "Recebes o valor após o serviço prestado. Sem intermediários informais nem risco de não pagamento." },
   { icon: ShieldCheck, title: "Suporte dedicado", text: "Equipa disponível para resolver disputas, ajudar com KYC e apoiar na construção do teu perfil." },
-  { icon: MessageSquare, title: "Comunicação segura", text: "Chat moderado dentro da plataforma — proteges-te a ti e ao turista contra fraudes." },
+  { icon: MessageSquare, title: "Comunicação segura", text: "Chat moderado dentro da plataforma, proteges-te a ti e ao turista contra fraudes." },
 ];
 
 const steps = [
@@ -28,7 +28,7 @@ const steps = [
 const faqs = [
   {
     q: "Quanto custa entrar na plataforma?",
-    a: "O registo e a candidatura são gratuitos. A Rotas do Éden cobra uma comissão apenas sobre reservas concluídas — o valor exacto é comunicado por escrito antes da activação do perfil.",
+    a: "O registo e a candidatura são gratuitos. A Rotas do Éden cobra uma comissão apenas sobre reservas concluídas, o valor exacto é comunicado por escrito antes da activação do perfil.",
   },
   {
     q: "Quanto tempo demora o processo?",
@@ -48,7 +48,7 @@ export default function GuiaParceiroPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Seja Parceiro — Guia turístico em São Tomé e Príncipe | Rotas do Éden"
+        title="Seja Parceiro, Guia turístico em São Tomé e Príncipe | Rotas do Éden"
         description="Junte-se à Rotas do Éden como guia parceiro. Receba reservas verificadas, pagamentos protegidos e suporte dedicado em São Tomé e Príncipe."
         path="/guia-parceiro"
         jsonLd={{
@@ -90,7 +90,7 @@ export default function GuiaParceiroPage() {
           <div className="container">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="font-display text-3xl font-bold text-foreground mb-3">Porquê juntares-te à Rotas do Éden</h2>
-              <p className="text-muted-foreground">Construímos a plataforma a pensar em ti — não apenas no turista.</p>
+              <p className="text-muted-foreground">Construímos a plataforma a pensar em ti, não apenas no turista.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {benefits.map((b) => (
