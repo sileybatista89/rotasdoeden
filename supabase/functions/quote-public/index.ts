@@ -76,17 +76,72 @@ Deno.serve(async (req) => {
 
     // ============ ACCEPT ============
     if (action === "accept") {
+      // Revalidação obrigatória antes de aceitar: preço e disponibilidade são
+      // sempre reconfirmados pelo Quote Engine, nunca reutilizados às cegas.
+      let quoteRow = quote;
+      let versionRow = version;
+      let itemRows = items ?? [];
+
+      if (!quote.accepted_at || quote.requires_reacceptance) {
+        const revalidation = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/quote-engine`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "revalidate", quote_id: quote.id }),
+        }).then((r) => r.json()).catch(() => null);
+
+        if (!revalidation) {
+          return json({ accepted: false, code: "revalidation_failed", error: "Não foi possível confirmar a proposta agora. Tente novamente dentro de instantes." }, 503);
+        }
+
+        if (revalidation.outcome === "blocked") {
+          return json({
+            accepted: false,
+            code: "revalidation_blocked",
+            error: "Esta proposta precisa de ser revista pela nossa equipa antes de ser aceite. Entramos em contacto consigo.",
+          }, 409);
+        }
+
+        if (revalidation.changed) {
+          // Nasceu uma nova versão. Recarregamos sempre o que o cliente vê.
+          const { data: freshQuote } = await admin.from("travel_quotes").select("*").eq("id", quote.id).maybeSingle();
+          const { data: freshVersion } = await admin.from("travel_quote_versions").select("*")
+            .eq("id", freshQuote?.current_version_id).maybeSingle();
+          const { data: freshItems } = await admin.from("travel_quote_items").select("*")
+            .eq("quote_version_id", freshVersion?.id).order("line_order");
+          if (freshQuote && freshVersion) {
+            quoteRow = freshQuote;
+            versionRow = freshVersion;
+            itemRows = freshItems ?? [];
+          }
+
+          if (revalidation.requires_reacceptance) {
+            return json({
+              accepted: false,
+              code: "quote_updated",
+              error: "O preço desta viagem foi atualizado. Reveja a proposta atualizada e confirme de novo.",
+              updated: true,
+              previous_price: revalidation.revalidation?.previous_price ?? null,
+              new_price: revalidation.revalidation?.new_price ?? null,
+              quote: sanitizeQuoteForCustomer({ quote: quoteRow, version: versionRow, items: itemRows, productName }),
+            }, 409);
+          }
+        }
+      }
+
       let productVersionStatus: string | null = null;
-      if (quote.product_version_id) {
+      if (quoteRow.product_version_id) {
         const { data: pv } = await admin.from("travel_product_versions").select("status")
-          .eq("id", quote.product_version_id).maybeSingle();
+          .eq("id", quoteRow.product_version_id).maybeSingle();
         productVersionStatus = pv?.status ?? null;
       }
 
       const evaluation = evaluateAcceptance({
-        quote,
-        version,
-        expectedVersionNumber: Number.isFinite(Number(body.version_number)) ? Number(body.version_number) : null,
+        quote: quoteRow,
+        version: versionRow,
+        expectedVersionNumber: null,
         productVersionStatus,
       });
 
