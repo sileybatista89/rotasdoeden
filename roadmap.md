@@ -58,6 +58,12 @@
 - [x] Verificar páginas públicas em desktop e mobile, typecheck e build
 - [x] Preservar apenas fotografias turísticas fornecidas pelo proprietário e eliminar travessões decorativos públicos
 
+## Homepage e entrada para os pacotes
+- [ ] Apresentar os quatro pacotes imediatamente após a abertura da homepage
+- [ ] Criar uma escolha simples entre viagem completa e exploração do destino
+- [ ] Simplificar o preço público e orientar as quatro etapas do configurador
+- [ ] Verificar computador, telemóvel, tipos e build de produção
+
 
 ## Fase 7I passo 1 — Estruturas de reserva de pacote (concluída)
 - [x] package_bookings, package_booking_items, booking_flight, supplier_confirmations, payment_events
