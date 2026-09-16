@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/real/principe-beach.jpg.asset.json";
+import heroImg from "@/assets/real/principe-beach.jpg";
 
 const categories = [
   {
@@ -41,7 +41,7 @@ export default function ParceirosPage() {
 
       <header className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
-          <img src={heroImg.url} alt="" className="w-full h-full object-cover" loading="eager" />
+          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-br from-foreground/85 via-foreground/55 to-foreground/35" />
         </div>
         <div className="container relative py-16 md:py-24">

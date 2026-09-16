@@ -4,7 +4,7 @@ import { SEO } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { MapPin, Calendar, Plane, Languages, Coins, Sun, AlertTriangle } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
-import heroImg from "@/assets/real/principe-aerial-hd.jpg.asset.json";
+import heroImg from "@/assets/real/principe-aerial-hd.jpg";
 
 export default function SobreSaoTomePage() {
   const { t } = useT();
@@ -28,7 +28,7 @@ export default function SobreSaoTomePage() {
 
       <header className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
-          <img src={heroImg.url} alt="" className="w-full h-full object-cover" loading="eager" />
+          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-foreground/55" />
         </div>
         <div className="container relative py-24 md:py-36">

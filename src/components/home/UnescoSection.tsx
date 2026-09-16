@@ -1,8 +1,8 @@
 import { Landmark, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Reveal } from "@/components/ui/reveal";
-import roca from "@/assets/real/roca-casa-grande.jpg.asset.json";
-import rocaPortao from "@/assets/real/roca-portao.jpg.asset.json";
+import roca from "@/assets/real/roca-casa-grande.jpg";
+import rocaPortao from "@/assets/real/roca-portao.jpg";
 
 const facts = [
   { k: "Século XIX", v: "Auge das roças de cacau e café, que fizeram das ilhas o maior produtor mundial de cacau." },
@@ -16,14 +16,14 @@ export function UnescoSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <Reveal className="relative min-h-[22rem] lg:min-h-[38rem] grid grid-rows-2">
           <img
-            src={roca.url}
+            src={roca}
             alt="Casa-grande de uma roça histórica de São Tomé e Príncipe, com escadaria e varanda coloniais"
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover"
           />
           <img
-            src={rocaPortao.url}
+            src={rocaPortao}
             alt="Portão amarelo de entrada de uma roça histórica de São Tomé, com sino e canhões"
             loading="lazy"
             decoding="async"
