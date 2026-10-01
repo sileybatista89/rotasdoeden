@@ -4,7 +4,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import heroImg from "@/assets/real/principe-beach.jpg";
 
 const categories = [
   {
@@ -39,11 +38,7 @@ export default function ParceirosPage() {
       />
       <Navbar />
 
-      <header className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0">
-          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
-          <div className="absolute inset-0 bg-gradient-to-br from-foreground/85 via-foreground/55 to-foreground/35" />
-        </div>
+      <header className="relative overflow-hidden border-b border-border bg-forest">
         <div className="container relative py-16 md:py-24">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
             <Sparkles size={12} /> Rede Rotas do Éden

@@ -56,7 +56,7 @@
 - [x] Redesenhar páginas públicas de destino, experiências e guias
 - [x] Redesenhar visualmente o configurador partilhado sem alterar a lógica
 - [x] Verificar páginas públicas em desktop e mobile, typecheck e build
-- [x] Preservar apenas fotografias turísticas fornecidas pelo proprietário e eliminar travessões decorativos públicos
+- [x] Remover todas as fotografias editoriais sem origem comprovada; manter apenas logótipo e imagens carregadas pelos próprios profissionais
 
 ## Homepage e entrada para os pacotes
 - [x] Apresentar os quatro pacotes imediatamente após a abertura da homepage

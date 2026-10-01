@@ -3,28 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { JourneyChoiceDialog } from "@/components/home/JourneyChoiceDialog";
-import heroImage from "@/assets/real/enseada-principe.jpg";
 
 export function HeroSection() {
   const [choiceOpen, setChoiceOpen] = useState(false);
 
   return (
     <section className="bg-background">
-      <div className="container grid min-h-[calc(100vh-5rem)] gap-10 py-8 md:min-h-[760px] md:grid-cols-12 md:items-center md:py-14 lg:gap-14">
-        <div className="relative order-2 md:order-1 md:col-span-6">
-          <div className="aspect-[4/5] overflow-hidden bg-muted md:max-h-[680px]">
-            <img
-              src={heroImage}
-              alt="Costa tropical da ilha do Príncipe vista do alto"
-              className="h-full w-full object-cover"
-              loading="eager"
-              fetchPriority="high"
-            />
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">Ilha do Príncipe · Golfo da Guiné</p>
-        </div>
-
-        <div className="order-1 flex flex-col pt-6 md:order-2 md:col-span-6 md:pl-6 md:pt-0 lg:pl-12">
+      <div className="container flex min-h-[calc(100vh-5rem)] items-center py-14 md:min-h-[760px]">
+        <div className="flex max-w-4xl flex-col">
           <span className="eyebrow mb-7">São Tomé e Príncipe</span>
           <h1 className="display-xl max-w-2xl text-foreground">
             Viagens completas a São Tomé e Príncipe, <em className="font-normal text-primary">feitas para si.</em>

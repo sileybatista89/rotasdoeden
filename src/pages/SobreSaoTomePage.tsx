@@ -4,7 +4,6 @@ import { SEO } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { MapPin, Calendar, Plane, Languages, Coins, Sun, AlertTriangle } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
-import heroImg from "@/assets/real/principe-aerial-hd.jpg";
 
 export default function SobreSaoTomePage() {
   const { t } = useT();
@@ -26,11 +25,7 @@ export default function SobreSaoTomePage() {
       />
       <Navbar />
 
-      <header className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0">
-          <img src={heroImg} alt="" className="w-full h-full object-cover" loading="eager" />
-          <div className="absolute inset-0 bg-foreground/55" />
-        </div>
+      <header className="relative overflow-hidden border-b border-border bg-forest">
         <div className="container relative py-24 md:py-36">
           <span className="inline-block text-xs font-semibold uppercase tracking-wider text-secondary mb-3">
             {t("sobre.eyebrow")}
