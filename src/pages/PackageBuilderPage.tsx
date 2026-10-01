@@ -21,6 +21,17 @@ import {
   type CatalogItem,
 } from "@/lib/packageBuilder";
 import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
+import essencialImage from "@/assets/real/praia-sul-hd.jpg";
+import explorarImage from "@/assets/real/pico-cao-grande-real.jpg";
+import imersaoImage from "@/assets/real/roca-casa-grande.jpg";
+import medidaImage from "@/assets/real/costa-floresta.jpg";
+
+const packageImages: Record<string, string> = {
+  "rotas-essencial": essencialImage,
+  "rotas-explorar": explorarImage,
+  "rotas-imersao": imersaoImage,
+  "rotas-a-medida": medidaImage,
+};
 
 /**
  * Página única do configurador. Todo o comportamento (duração, limites, dias,
@@ -155,6 +166,11 @@ export default function PackageBuilderPage({ slug }: { slug: string }) {
                 </div>
               )}
               <a href="#planear" className="mt-8 inline-flex items-center gap-2 text-xs uppercase text-primary">Planear esta rota <ArrowDown size={14} /></a>
+            </div>
+            <div className="md:col-span-5 lg:col-span-5 lg:col-start-8">
+              <div className="aspect-[4/5] overflow-hidden bg-muted">
+                {packageImages[slug] && <img src={packageImages[slug]} alt={rules?.name ?? "Viagem Rotas do Éden"} className="h-full w-full object-cover" />}
+              </div>
             </div>
           </div>
         </header>
