@@ -56,7 +56,7 @@
 - [x] Redesenhar páginas públicas de destino, experiências e guias
 - [x] Redesenhar visualmente o configurador partilhado sem alterar a lógica
 - [x] Verificar páginas públicas em desktop e mobile, typecheck e build
-- [x] Remover todas as fotografias editoriais sem origem comprovada; manter apenas logótipo e imagens carregadas pelos próprios profissionais
+- [x] Repor as fotografias enviadas pelo proprietário (whitelist em src/assets/real) e remover só as versões "melhoradas" pelo sistema
 
 ## Homepage e entrada para os pacotes
 - [x] Apresentar os quatro pacotes imediatamente após a abertura da homepage
