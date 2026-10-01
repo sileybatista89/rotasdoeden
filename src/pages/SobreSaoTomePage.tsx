@@ -4,7 +4,7 @@ import { SEO } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { MapPin, Calendar, Plane, Languages, Coins, Sun, AlertTriangle } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
-import heroImg from "@/assets/real/principe-aerial-hd.jpg";
+import heroImg from "@/assets/real/bom-bom.jpg";
 
 export default function SobreSaoTomePage() {
   const { t } = useT();

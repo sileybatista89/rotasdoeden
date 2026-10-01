@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
 import { Reveal } from "@/components/ui/reveal";
 import picoImg from "@/assets/real/pico-cao-grande.jpg";
-import praiaImg from "@/assets/real/praia-banana-hd.jpg";
+import praiaImg from "@/assets/real/praia-palmeiras.jpg";
 import rocaImg from "@/assets/real/roca-portao.jpg";
 import calulu from "@/assets/real/calulu-real.jpg";
 import bio from "@/assets/real/costa-floresta.jpg";

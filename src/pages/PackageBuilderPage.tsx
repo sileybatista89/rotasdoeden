@@ -21,8 +21,8 @@ import {
   type CatalogItem,
 } from "@/lib/packageBuilder";
 import { ArrowDown, CalendarDays, UsersRound } from "lucide-react";
-import essencialImage from "@/assets/real/praia-sul-hd.jpg";
-import explorarImage from "@/assets/real/pico-cao-grande-real.jpg";
+import essencialImage from "@/assets/real/santana-real.jpg";
+import explorarImage from "@/assets/real/pico-cao-grande.jpg";
 import imersaoImage from "@/assets/real/roca-casa-grande.jpg";
 import medidaImage from "@/assets/real/costa-floresta.jpg";
 
