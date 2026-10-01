@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { useProductBaseline } from "@/hooks/usePackageBuilder";
 import { Reveal } from "@/components/ui/reveal";
+import essencialImage from "@/assets/real/santana-real.jpg";
+import explorarImage from "@/assets/real/pico-cao-grande.jpg";
+import imersaoImage from "@/assets/real/roca-casa-grande.jpg";
+import medidaImage from "@/assets/real/costa-floresta.jpg";
 
 const packages = [
   {
@@ -9,24 +13,28 @@ const packages = [
     name: "Rotas Essencial",
     duration: "5 a 7 dias",
     description: "A primeira leitura das ilhas: natureza, costa, património e tempo para respirar.",
+    image: essencialImage,
   },
   {
     slug: "rotas-explorar",
     name: "Rotas Explorar",
     duration: "8 a 10 dias",
     description: "Mais caminhos, mais encontros e espaço para conhecer São Tomé para lá do evidente.",
+    image: explorarImage,
   },
   {
     slug: "rotas-imersao",
     name: "Rotas Imersão",
     duration: "14 a 15 dias",
     description: "Uma viagem longa e pausada, entre floresta, roças, comunidades e oceano.",
+    image: imersaoImage,
   },
   {
     slug: "rotas-a-medida",
     name: "Rotas à Medida",
     duration: "A partir de 5 dias",
     description: "Uma rota construída à volta do seu ritmo, das suas datas e da forma como gosta de viajar.",
+    image: medidaImage,
   },
 ];
 
@@ -56,7 +64,15 @@ export function PackagesShowcase() {
               className={index < 2 ? "lg:col-span-6" : "lg:col-span-5 lg:first-of-type:col-start-2"}
             >
               <Link to={`/pacotes/${item.slug}`} className="group block">
-                <div className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-t border-primary-foreground/20 pt-5">
+                <div className={`overflow-hidden bg-primary-foreground/10 ${index === 0 ? "aspect-[5/4]" : "aspect-[4/3]"}`}>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]"
+                  />
+                </div>
+                <div className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-t border-primary-foreground/20 pt-5 mt-5">
                   <span className="text-xs text-coral">0{index + 1}</span>
                   <div>
                     <p className="text-xs uppercase text-primary-foreground/65">{item.duration} · personalizável</p>

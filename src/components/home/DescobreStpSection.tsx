@@ -2,16 +2,22 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useT } from "@/i18n/LanguageProvider";
 import { Reveal } from "@/components/ui/reveal";
+import picoImg from "@/assets/real/pico-cao-grande.jpg";
+import praiaImg from "@/assets/real/praia-palmeiras.jpg";
+import rocaImg from "@/assets/real/roca-portao.jpg";
+import calulu from "@/assets/real/calulu-real.jpg";
+import bio from "@/assets/real/costa-floresta.jpg";
+import cacau from "@/assets/real/cacau-real.jpg";
 
 export function DescobreStpSection() {
   const { t } = useT();
   const highlights = [
-    { key: "pico" },
-    { key: "praias" },
-    { key: "rocas" },
-    { key: "sabores" },
-    { key: "bio" },
-    { key: "cacau" },
+    { img: picoImg, key: "pico", ratio: "aspect-[4/5]" },
+    { img: praiaImg, key: "praias", ratio: "aspect-[4/5]" },
+    { img: rocaImg, key: "rocas", ratio: "aspect-[4/5]" },
+    { img: calulu, key: "sabores", ratio: "aspect-[4/5]" },
+    { img: bio, key: "bio", ratio: "aspect-[4/5]" },
+    { img: cacau, key: "cacau", ratio: "aspect-[4/5]" },
   ];
 
   return (
@@ -35,7 +41,18 @@ export function DescobreStpSection() {
               className={i === 0 || i === 3 ? "lg:col-span-5" : "lg:col-span-3"}
             >
               <article className="group">
-                <div className="border-t border-border pt-6">
+                <div className={`${i === 0 || i === 3 ? "aspect-[5/4]" : h.ratio} overflow-hidden bg-muted`}>
+                  <img
+                    src={h.img}
+                    alt={t(`descobre.${h.key}.title`)}
+                    loading="lazy"
+                    decoding="async"
+                    width={640}
+                    height={800}
+                    className="w-full h-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+                  />
+                </div>
+                <div className="pt-6">
                   <span className="text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground/70">
                     {String(i + 1).padStart(2, "0")}
                   </span>
