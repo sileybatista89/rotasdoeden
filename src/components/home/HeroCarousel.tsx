@@ -58,17 +58,16 @@ export function HeroCarousel({ intervalMs = 6000, className = "" }: Props) {
           />
         );
       })}
-      <div className="absolute inset-0 bg-gradient-to-t from-eden-ink/85 via-eden-ink/35 to-eden-ink/45" />
 
-      <div className="absolute bottom-7 right-6 md:right-10 flex gap-2 z-10" aria-hidden="false">
+      <div className="absolute bottom-4 right-4 flex gap-1.5 z-10" aria-hidden="false">
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             aria-label={`Ir para imagem ${i + 1}`}
             onClick={() => setIndex(i)}
-            className={`h-px transition-all duration-700 ${
-              i === index ? "w-10 bg-secondary" : "w-4 bg-primary-foreground/45 hover:bg-primary-foreground/80"
+            className={`h-2 w-2 rounded-full transition-colors duration-500 ${
+              i === index ? "bg-primary-foreground" : "bg-primary-foreground/45 hover:bg-primary-foreground/80"
             }`}
           />
         ))}
