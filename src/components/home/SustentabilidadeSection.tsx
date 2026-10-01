@@ -1,6 +1,5 @@
 import { Leaf, Globe2, Bird, TreePine, Waves, ShieldCheck } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
-import obo from "@/assets/real/costa-floresta.jpg";
 
 
 const pillars = [
@@ -31,27 +30,7 @@ export function SustentabilidadeSection() {
     <section className="section-space bg-accent/40">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Visual */}
-          <Reveal className="relative order-2 lg:order-1 lg:col-span-5">
-            <div className="aspect-[4/5] overflow-hidden bg-muted">
-              <img
-                src={obo}
-                alt="Floresta tropical de São Tomé, vegetação endémica do Parque Natural Obô"
-                loading="lazy"
-                decoding="async"
-                width={800}
-                height={1000}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-foreground/15 pt-4">
-              <p className="font-display text-lg text-foreground leading-snug">Reserva Mundial da Biosfera</p>
-              <p className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground shrink-0">Príncipe · 2012</p>
-            </div>
-          </Reveal>
-
-          {/* Content */}
-          <div className="order-1 lg:order-2 lg:col-span-6 lg:col-start-7">
+          <div className="lg:col-span-10">
             <Reveal>
               <span className="eyebrow mb-6">
                 <Leaf size={13} strokeWidth={1.75} className="ml-1" /> Sustentabilidade & Biodiversidade
