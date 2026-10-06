@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type BookingStatus = "pending_payment" | "confirmed" | "completed" | "cancelled" | "refunded";
 
@@ -18,6 +19,13 @@ interface Row {
   total_price: number;
   currency: string;
   status: BookingStatus;
+  payment_status: string | null;
+}
+
+interface PostTrip {
+  booking_id: string;
+  status: string;
+  sent_at: string | null;
 }
 
 const statusLabels: Record<BookingStatus, string> = {
@@ -43,12 +51,27 @@ export function BookingsTable() {
   const [rows, setRows] = useState<Row[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [postTrip, setPostTrip] = useState<Record<string, PostTrip>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+
+  const run = async (action: "complete" | "test", b: Row) => {
+    if (action === "complete" && !window.confirm(`Marcar "${b.service_title}" como concluída e enviar o email pós-viagem ao cliente?`)) return;
+    setBusy(b.id + action);
+    const { data, error } = await supabase.functions.invoke("booking-complete", { body: { action, booking_id: b.id } });
+    setBusy(null);
+    if (error || data?.error) return toast.error(data?.error ?? "Não foi possível concluir a ação.");
+    if (action === "test") toast.success(data.sent ? "Email de teste enviado para o seu endereço." : "O seu endereço está bloqueado para envios.");
+    else if (data.alreadySent) toast.info("O email pós-viagem já tinha sido enviado para esta reserva.");
+    else toast.success(data.sent ? "Reserva concluída e email pós-viagem enviado." : "Reserva concluída, mas o email não foi enviado.");
+    setReload((n) => n + 1);
+  };
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("bookings")
-        .select("id, guide_id, tourist_id, service_title, date, num_people, total_price, currency, status")
+        .select("id, guide_id, tourist_id, service_title, date, num_people, total_price, currency, status, payment_status")
         .order("created_at", { ascending: false })
         .limit(200);
       const list = (data ?? []) as Row[];
@@ -58,9 +81,17 @@ export function BookingsTable() {
         const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", ids);
         setNames(Object.fromEntries((profs ?? []).map((p) => [p.id, p.full_name ?? ","])));
       }
+      if (list.length) {
+        const { data: pt } = await supabase
+          .from("post_trip_emails")
+          .select("booking_id, status, sent_at")
+          .eq("is_test", false)
+          .in("booking_id", list.map((b) => b.id));
+        setPostTrip(Object.fromEntries((pt ?? []).map((p) => [p.booking_id, p as PostTrip])));
+      }
       setLoading(false);
     })();
-  }, []);
+  }, [reload]);
 
   const filtered = filter === "all" ? rows : rows.filter((b) => b.status === filter);
 
@@ -97,6 +128,7 @@ export function BookingsTable() {
               <TableHead>Data</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Estado</TableHead>
+              <TableHead>Pós-viagem</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -117,11 +149,31 @@ export function BookingsTable() {
                     {statusLabels[b.status]}
                   </Badge>
                 </TableCell>
+                <TableCell className="text-xs">
+                  {(() => {
+                    const pt = postTrip[b.id];
+                    const eligible = b.payment_status === "paid" && (b.status === "confirmed" || b.status === "completed");
+                    if (pt?.status === "sent") return <span className="text-primary">Enviado {pt.sent_at ? new Date(pt.sent_at).toLocaleString("pt-PT") : ""}</span>;
+                    if (pt?.status === "suppressed") return <span className="text-muted-foreground">Bloqueado pelo destinatário</span>;
+                    if (!eligible) return <span className="text-muted-foreground">Não elegível</span>;
+                    return (
+                      <div className="flex flex-col gap-1">
+                        {pt?.status === "failed" && <span className="text-destructive">Falhou, pode tentar de novo</span>}
+                        <div className="flex gap-1">
+                          <Button size="sm" disabled={!!busy} onClick={() => run("complete", b)}>
+                            {b.status === "completed" ? "Enviar pós-viagem" : "Concluir e enviar"}
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("test", b)}>Teste</Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </TableCell>
               </TableRow>
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
                   Sem reservas neste estado.
                 </TableCell>
               </TableRow>
