@@ -3233,6 +3233,54 @@ export type Database = {
           },
         ]
       }
+      post_trip_emails: {
+        Row: {
+          booking_id: string
+          booking_type: string
+          created_at: string
+          error: string | null
+          id: string
+          is_test: boolean
+          review_invite_method: string | null
+          review_invite_sent_at: string | null
+          review_invite_status: string
+          sent_at: string | null
+          status: string
+          triggered_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          booking_type?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          is_test?: boolean
+          review_invite_method?: string | null
+          review_invite_sent_at?: string | null
+          review_invite_status?: string
+          sent_at?: string | null
+          status?: string
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          booking_type?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          is_test?: boolean
+          review_invite_method?: string | null
+          review_invite_sent_at?: string | null
+          review_invite_status?: string
+          sent_at?: string | null
+          status?: string
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing_calculations: {
         Row: {
           calculation_kind: string
