@@ -9,3 +9,7 @@ project_id = "hiurdjlnnbrdsyplesfb"
     verify_jwt = false
   [functions.quote-public]
     verify_jwt = false
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.booking-complete]
+    verify_jwt = false
