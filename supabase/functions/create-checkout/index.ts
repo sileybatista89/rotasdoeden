@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { resolvePaymentGate } from "../_shared/payment-gate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,10 +53,23 @@ Deno.serve(async (req) => {
     if (!serviceId || !date || !numPeople || !returnUrl) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    // Derive Stripe environment server-side. NEVER trust client input — a
-    // direct API caller could otherwise force sandbox and complete fake
-    // payments. Prefer live if the live key is configured.
-    const environment: StripeEnv = Deno.env.get("STRIPE_LIVE_API_KEY") ? "live" : "sandbox";
+    // Payment mode comes ONLY from public.commerce_settings (default: test,
+    // sales off). A live key existing never selects live mode. Checked before
+    // any booking row or checkout session is created.
+    const gateClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: settings, error: settingsErr } = await gateClient
+      .from("commerce_settings").select("sales_enabled, payment_mode").eq("id", true).maybeSingle();
+    if (settingsErr) {
+      return new Response(JSON.stringify({ error: "Pagamentos indisponíveis de momento.", code: "config_unavailable" }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const gate = resolvePaymentGate(settings, {
+      hasSandboxKey: !!Deno.env.get("STRIPE_SANDBOX_API_KEY"),
+      hasLiveKey: !!Deno.env.get("STRIPE_LIVE_API_KEY"),
+    }, body?.environment);
+    if (!gate.ok) {
+      return new Response(JSON.stringify({ error: gate.message, code: gate.code }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const environment: StripeEnv = gate.env;
     const peopleCount = Number(numPeople);
     if (!Number.isInteger(peopleCount) || peopleCount < 1 || peopleCount > 50) {
       return new Response(JSON.stringify({ error: "Invalid numPeople" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
