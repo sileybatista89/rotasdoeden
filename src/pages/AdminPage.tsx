@@ -4,6 +4,7 @@ import { CheckCircle2, ShieldAlert, Cloud, Sparkles, Star, FileText } from "luci
 import { AdminSidebar, type AdminSection } from "@/components/admin/AdminSidebar";
 import { StatsCards, defaultStats } from "@/components/admin/StatsCards";
 import { BookingsTable } from "@/components/admin/BookingsTable";
+import { CommerceSettingsCard } from "@/components/admin/CommerceSettingsCard";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { KycQueue } from "@/components/admin/KycQueue";
 import { VerificationQueue } from "@/components/admin/VerificationQueue";
@@ -354,6 +355,7 @@ export default function AdminPage() {
               title="Reservas"
               description="Todas as reservas reais da plataforma, com guia, viajante, valor e estado do pagamento."
             />
+            <CommerceSettingsCard />
             <BookingsTable />
           </>
         )}
