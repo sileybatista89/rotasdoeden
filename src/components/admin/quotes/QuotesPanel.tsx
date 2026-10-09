@@ -38,12 +38,12 @@ const PROVENANCE_LABEL: Record<string, string> = {
 
 
 function money(value: number | null | undefined, currency: string | null | undefined) {
-  if (value == null) return ",";
+  if (value == null) return "n/d";
   return new Intl.NumberFormat("pt-PT", { style: "currency", currency: currency || "EUR" }).format(Number(value));
 }
 
 function dt(value: string | null | undefined) {
-  if (!value) return ",";
+  if (!value) return "n/d";
   return new Date(value).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" });
 }
 
@@ -255,7 +255,7 @@ export function QuotesPanel() {
                 {(quotes.data ?? []).map((q) => (
                   <tr key={q.id} className="border-t border-border">
                     <td className="px-4 py-3 font-mono text-xs">{q.quote_number}</td>
-                    <td className="px-4 py-3">{q.product_id ? productName.get(q.product_id) ?? "," : ","}</td>
+                    <td className="px-4 py-3">{q.product_id ? productName.get(q.product_id) ?? "n/d" : "n/d"}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {money((q as unknown as { total_price?: number | null }).total_price ?? undefined, q.sale_currency)}
                     </td>
@@ -298,10 +298,10 @@ export function QuotesPanel() {
                 {(builderRequests.data ?? []).map((r) => (
                   <tr key={r.id} className="border-t border-border">
                     <td className="px-4 py-3">
-                      <span className="block">{r.contact_name ?? ","}</span>
-                      <span className="text-xs text-muted-foreground">{r.contact_email ?? ","}</span>
+                      <span className="block">{r.contact_name ?? "n/d"}</span>
+                      <span className="text-xs text-muted-foreground">{r.contact_email ?? "n/d"}</span>
                     </td>
-                    <td className="px-4 py-3">{r.product_id ? productName.get(r.product_id) ?? "," : ","}</td>
+                    <td className="px-4 py-3">{r.product_id ? productName.get(r.product_id) ?? "n/d" : "n/d"}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
                       {r.duration_days} dias · {r.adults} adultos{r.children ? ` · ${r.children} crianças` : ""}
                     </td>
@@ -368,8 +368,8 @@ export function QuotesPanel() {
                 <div><p className="text-xs text-muted-foreground">Preço ao cliente</p><p className="font-semibold">{money(current?.total_price, current?.sale_currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Custo interno</p><p>{money(current?.total_cost, current?.cost_currency)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Validade</p><p>{dt(current?.valid_until)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Limitada por</p><p>{current?.validity_limited_by ?? ","}</p></div>
-                <div><p className="text-xs text-muted-foreground">Política</p><p>v{current?.policy_version_number ?? ","}</p></div>
+                <div><p className="text-xs text-muted-foreground">Limitada por</p><p>{current?.validity_limited_by ?? "n/d"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Política</p><p>v{current?.policy_version_number ?? "n/d"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Voo</p><p>{current?.flight_provider_offer_id ?? "Sem voo"}</p></div>
               </div>
 
@@ -412,7 +412,7 @@ export function QuotesPanel() {
                         </Badge>
                       )}
                       <p className="text-muted-foreground mt-1">
-                        {i.quantity} × {money(i.unit_cost, i.currency)} ({i.unit ?? ","}) · custo {money(i.total_cost, i.currency)} · tarifa {i.rate_kind ?? ","} · fonte {i.source_type ?? ","} · válida até {i.rate_valid_until ?? "desconhecida"}
+                        {i.quantity} × {money(i.unit_cost, i.currency)} ({i.unit ?? "n/d"}) · custo {money(i.total_cost, i.currency)} · tarifa {i.rate_kind ?? "n/d"} · fonte {i.source_type ?? "n/d"} · válida até {i.rate_valid_until ?? "desconhecida"}
                       </p>
                       {i.cancellation_summary && <p className="text-muted-foreground mt-1">{i.cancellation_summary}</p>}
                     </div>
@@ -451,7 +451,7 @@ export function QuotesPanel() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Canal</p>
-                    <p>{(detail.data.quote as any).accepted_channel ?? ","}</p>
+                    <p>{(detail.data.quote as any).accepted_channel ?? "n/d"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Última revalidação</p>

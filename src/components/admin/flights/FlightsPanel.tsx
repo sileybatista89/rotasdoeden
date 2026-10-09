@@ -140,7 +140,7 @@ export function FlightsPanel() {
                   {r.status === "ok" ? `${r.offers_count} ofertas` : r.error_code}
                 </Badge>
                 <span className="text-xs text-muted-foreground ml-auto">
-                  {new Date(r.created_at).toLocaleString("pt-PT")} · {r.duration_ms ?? ","} ms
+                  {new Date(r.created_at).toLocaleString("pt-PT")} · {r.duration_ms ?? "n/d"} ms
                 </span>
               </div>
             </button>
@@ -156,7 +156,7 @@ export function FlightsPanel() {
             {(offers.data ?? []).map((o) => (
               <div key={o.id} className="rounded-lg border border-border p-3 text-sm space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{o.owner_name ?? o.owner_carrier ?? ","}</span>
+                  <span className="font-medium">{o.owner_name ?? o.owner_carrier ?? "n/d"}</span>
                   <span>{Number(o.total_amount).toFixed(2)} {o.total_currency}</span>
                   <Badge variant="outline">custo de fornecedor</Badge>
                   <Badge variant={o.hold_capable ? "secondary" : "outline"}>
@@ -170,7 +170,7 @@ export function FlightsPanel() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Validade: {o.expires_at ? new Date(o.expires_at).toLocaleString("pt-PT") : ","}
+                  Validade: {o.expires_at ? new Date(o.expires_at).toLocaleString("pt-PT") : "n/d"}
                   {o.refreshed_at ? ` · reconsultada ${new Date(o.refreshed_at).toLocaleString("pt-PT")}` : ""}
                 </p>
                 {o.last_reprice && (

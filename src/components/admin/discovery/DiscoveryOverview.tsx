@@ -40,8 +40,8 @@ export function DiscoveryOverview({ stats, loading, error, onRetry }: Props) {
     { label: "Aceites", value: num(stats?.aceites ?? 0) },
     { label: "Rejeitadas", value: num(stats?.rejeitadas ?? 0) },
     { label: "Expiradas", value: num(stats?.expiradas ?? 0) },
-    { label: "Score médio", value: stats?.avg_score !== null && stats?.avg_score !== undefined ? Number(stats.avg_score).toFixed(2) : "," },
-    { label: "Confiança média", value: stats?.avg_confidence !== null && stats?.avg_confidence !== undefined ? Number(stats.avg_confidence).toFixed(2) : "," },
+    { label: "Score médio", value: stats?.avg_score !== null && stats?.avg_score !== undefined ? Number(stats.avg_score).toFixed(2) : "n/d" },
+    { label: "Confiança média", value: stats?.avg_confidence !== null && stats?.avg_confidence !== undefined ? Number(stats.avg_confidence).toFixed(2) : "n/d" },
     { label: "Países distintos", value: num(stats?.distinct_countries ?? 0) },
     { label: "Mercados distintos", value: num(stats?.distinct_markets ?? 0) },
     { label: "Custo total Discovery", value: money(stats?.total_cost) },
@@ -52,7 +52,7 @@ export function DiscoveryOverview({ stats, loading, error, onRetry }: Props) {
     },
     {
       label: "Última execução Discovery",
-      value: stats?.last_run_at ? new Date(stats.last_run_at).toLocaleString("pt-PT") : ",",
+      value: stats?.last_run_at ? new Date(stats.last_run_at).toLocaleString("pt-PT") : "n/d",
     },
   ];
 

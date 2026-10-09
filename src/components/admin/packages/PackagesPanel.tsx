@@ -69,7 +69,7 @@ export function PackagesPanel() {
         ].map((c) => (
           <Card key={c.label} className="p-4">
             <p className="text-xs text-muted-foreground">{c.label}</p>
-            <p className="text-2xl font-display font-bold text-foreground">{c.value ?? ","}</p>
+            <p className="text-2xl font-display font-bold text-foreground">{c.value ?? "n/d"}</p>
           </Card>
         ))}
       </div>
