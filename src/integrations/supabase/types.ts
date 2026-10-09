@@ -1272,6 +1272,30 @@ export type Database = {
         }
         Relationships: []
       }
+      commerce_settings: {
+        Row: {
+          id: boolean
+          payment_mode: string
+          sales_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          payment_mode?: string
+          sales_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          payment_mode?: string
+          sales_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       component_rates: {
         Row: {
           cancellation_summary: string | null
@@ -3194,7 +3218,14 @@ export type Database = {
       }
       payment_events: {
         Row: {
+          amount_total: number | null
+          attempts: number
+          booking_id: string | null
+          checkout_session_id: string | null
           created_at: string
+          currency: string | null
+          environment: string | null
+          error: string | null
           event_id: string
           event_type: string
           id: string
@@ -3202,9 +3233,18 @@ export type Database = {
           processed_at: string
           provider: string
           result: string | null
+          status: string
+          updated_at: string
         }
         Insert: {
+          amount_total?: number | null
+          attempts?: number
+          booking_id?: string | null
+          checkout_session_id?: string | null
           created_at?: string
+          currency?: string | null
+          environment?: string | null
+          error?: string | null
           event_id: string
           event_type: string
           id?: string
@@ -3212,9 +3252,18 @@ export type Database = {
           processed_at?: string
           provider?: string
           result?: string | null
+          status?: string
+          updated_at?: string
         }
         Update: {
+          amount_total?: number | null
+          attempts?: number
+          booking_id?: string | null
+          checkout_session_id?: string | null
           created_at?: string
+          currency?: string | null
+          environment?: string | null
+          error?: string | null
           event_id?: string
           event_type?: string
           id?: string
@@ -3222,6 +3271,8 @@ export type Database = {
           processed_at?: string
           provider?: string
           result?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -5070,6 +5121,10 @@ export type Database = {
       admin_save_room: { Args: { _payload: Json }; Returns: Json }
       admin_save_supplier: { Args: { _payload: Json }; Returns: Json }
       admin_save_travel_product: { Args: { _payload: Json }; Returns: Json }
+      admin_set_commerce_settings: {
+        Args: { _payment_mode: string; _sales_enabled: boolean }
+        Returns: Json
+      }
       admin_set_content_status: {
         Args: { _content_id: string; _note?: string; _status: string }
         Returns: Json
