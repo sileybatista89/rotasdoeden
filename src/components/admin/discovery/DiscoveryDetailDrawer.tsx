@@ -95,7 +95,7 @@ export function DiscoveryDetailDrawer({ opportunityId, onClose, configWeights }:
                 <div className="rounded-2xl border border-border bg-card p-4 text-sm space-y-2">
                   <p><span className="text-muted-foreground">Fonte:</span> {opportunity.source}</p>
                   <p><span className="text-muted-foreground">Descoberta:</span> {new Date(opportunity.discovered_at).toLocaleString("pt-PT")}</p>
-                  <p><span className="text-muted-foreground">Expira:</span> {opportunity.expires_at ? new Date(opportunity.expires_at).toLocaleString("pt-PT") : ","}</p>
+                  <p><span className="text-muted-foreground">Expira:</span> {opportunity.expires_at ? new Date(opportunity.expires_at).toLocaleString("pt-PT") : "n/d"}</p>
                   <pre className="text-xs bg-muted rounded-xl p-3 overflow-x-auto whitespace-pre-wrap">
                     {JSON.stringify(opportunity.source_reference, null, 2)}
                   </pre>
@@ -112,13 +112,13 @@ export function DiscoveryDetailDrawer({ opportunityId, onClose, configWeights }:
                     <li key={h.id} className="rounded-2xl border border-border bg-card p-4 text-sm">
                       <div className="flex justify-between gap-2">
                         <span className="font-medium text-foreground">
-                          {h.status ? `${STATUS_LABEL[h.previous_status ?? ""] ?? h.previous_status ?? ","} → ${STATUS_LABEL[h.status] ?? h.status}` : "Snapshot de deteção"}
+                          {h.status ? `${STATUS_LABEL[h.previous_status ?? ""] ?? h.previous_status ?? "n/d"} → ${STATUS_LABEL[h.status] ?? h.status}` : "Snapshot de deteção"}
                         </span>
                         <span className="text-xs text-muted-foreground">{new Date(h.recorded_at).toLocaleString("pt-PT")}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Score {h.opportunity_score !== null ? Number(h.opportunity_score).toFixed(1) : ","} · Confiança{" "}
-                        {h.confidence_score !== null ? Number(h.confidence_score).toFixed(1) : ","}
+                        Score {h.opportunity_score !== null ? Number(h.opportunity_score).toFixed(1) : "n/d"} · Confiança{" "}
+                        {h.confidence_score !== null ? Number(h.confidence_score).toFixed(1) : "n/d"}
                         {h.source ? ` · ${h.source}` : ""}
                       </p>
                       {h.note && <p className="text-sm mt-2 whitespace-pre-wrap">{h.note}</p>}
@@ -135,9 +135,9 @@ export function DiscoveryDetailDrawer({ opportunityId, onClose, configWeights }:
                 {run.data?.run && (
                   <div className="rounded-2xl border border-border bg-card p-4 text-sm space-y-1">
                     <p><span className="text-muted-foreground">Estado:</span> {run.data.run.status}</p>
-                    <p><span className="text-muted-foreground">Modelo:</span> {run.data.run.model_provider ?? ","} / {run.data.run.model_name ?? ","}</p>
+                    <p><span className="text-muted-foreground">Modelo:</span> {run.data.run.model_provider ?? "n/d"} / {run.data.run.model_name ?? "n/d"}</p>
                     <p><span className="text-muted-foreground">Tokens:</span> {run.data.run.input_tokens} entrada · {run.data.run.output_tokens} saída</p>
-                    <p><span className="text-muted-foreground">Duração:</span> {run.data.run.duration_ms ?? ","} ms</p>
+                    <p><span className="text-muted-foreground">Duração:</span> {run.data.run.duration_ms ?? "n/d"} ms</p>
                     <p><span className="text-muted-foreground">Custo estimado:</span> {Number(run.data.run.estimated_cost).toFixed(6)}</p>
                     {run.data.run.error_message && <p className="text-destructive">{run.data.run.error_message}</p>}
                   </div>

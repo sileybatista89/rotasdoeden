@@ -72,9 +72,9 @@ export default function SejaParceiroPage() {
       `Categoria: ${cat}\n` +
       `Telefone: ${form.phone}\n` +
       `Email: ${form.email}\n` +
-      `Website: ${form.website || ","}\n\n` +
+      `Website: ${form.website || "n/d"}\n\n` +
       `Atividade:\n${form.description}\n\n` +
-      `Mensagem:\n${form.message || ","}\n`;
+      `Mensagem:\n${form.message || "n/d"}\n`;
     window.location.href = `mailto:${PARTNER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);
     toast({ title: "Candidatura preparada", description: "Abrimos o seu email para enviar a candidatura à equipa Rotas do Éden." });

@@ -89,12 +89,12 @@ export function AdminGuideTable() {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-foreground truncate">{g.full_name || ","}</p>
+                      <p className="font-medium text-foreground truncate">{g.full_name || "n/d"}</p>
                       <p className="text-xs text-muted-foreground font-mono truncate max-w-[12rem]">{g.id.slice(0, 8)}…</p>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{g.country ?? ","}</TableCell>
+                <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{g.country ?? "n/d"}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className={`text-xs ${guideStatusClass(g.guide_status)}`}>
                     {guideStatusLabel(g.guide_status)}

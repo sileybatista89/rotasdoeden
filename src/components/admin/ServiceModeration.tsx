@@ -66,7 +66,7 @@ export function ServiceModeration() {
               <h3 className="font-display font-semibold text-foreground">{s.title}</h3>
               <Badge variant="outline" className={moderationClass(s.moderation_status)}>{moderationLabel(s.moderation_status)}</Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Guia: {names[s.guide_id] ?? ","}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Guia: {names[s.guide_id] ?? "n/d"}</p>
             <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{s.description}</p>
             <p className="text-xs text-muted-foreground mt-2">
               {Number(s.price_per_person).toFixed(2)} {s.currency} / pessoa · {s.duration_hours}h · {s.min_people}-{s.max_people} pessoas

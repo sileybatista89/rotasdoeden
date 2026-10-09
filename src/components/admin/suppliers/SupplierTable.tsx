@@ -55,7 +55,7 @@ export function SupplierTable({ rows, loading, error, onRetry, onOpen }: Props) 
                 {s.trading_name && <p className="text-xs text-muted-foreground">{s.legal_name}</p>}
               </td>
               <td className="p-3 text-muted-foreground">{SUPPLIER_TYPE_LABEL[s.supplier_type]}</td>
-              <td className="p-3 text-muted-foreground hidden md:table-cell">{s.locality ?? ","}</td>
+              <td className="p-3 text-muted-foreground hidden md:table-cell">{s.locality ?? "n/d"}</td>
               <td className="p-3 text-muted-foreground hidden md:table-cell">{RELATIONSHIP_LABEL[s.relationship_stage]}</td>
               <td className="p-3"><Badge variant="outline">{SUPPLY_STATUS_LABEL[s.status]}</Badge></td>
               <td className="p-3 text-right">

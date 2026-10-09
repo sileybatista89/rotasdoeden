@@ -141,12 +141,12 @@ export function PolicyVersionEditor({ version }: Props) {
           {grossMargin(example, markupPreview).toFixed(2)}%).
         </p>
         <p>
-          Custo 100 com margem alvo {targetMargin || 0}% → preço {Number.isFinite(marginPreview) ? marginPreview.toFixed(2) : ","}.
+          Custo 100 com margem alvo {targetMargin || 0}% → preço {Number.isFinite(marginPreview) ? marginPreview.toFixed(2) : "n/d"}.
         </p>
         <p>
           Markup {targetMargin || 0}% equivale a margem {markupToMargin(Number(targetMargin || 0)).toFixed(2)}% · Margem{" "}
           {targetMargin || 0}% exige markup{" "}
-          {Number(targetMargin) < 100 ? marginToMarkup(Number(targetMargin || 0)).toFixed(2) : ","}%.
+          {Number(targetMargin) < 100 ? marginToMarkup(Number(targetMargin || 0)).toFixed(2) : "n/d"}%.
         </p>
       </div>
 
