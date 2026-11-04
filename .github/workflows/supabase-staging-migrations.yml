@@ -1,0 +1,156 @@
+name: Supabase staging migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Preview migrations first; choose apply only after reviewing a successful preview run.
+        type: choice
+        options:
+          - preview
+          - apply
+        default: preview
+        required: true
+      confirm_project_ref:
+        description: Required for apply. Enter the staging project ref exactly.
+        type: string
+        required: false
+      preview_run_id:
+        description: Required for apply. Enter the ID of the successful preview run for this branch and commit.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    name: Preview or apply staging migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    env:
+      SUPABASE_STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+      STAGING_PROJECT_REF: twdgrnivqodkxputzryt
+      MODE: ${{ inputs.mode }}
+      CONFIRM_PROJECT_REF: ${{ inputs.confirm_project_ref }}
+      PREVIEW_RUN_ID: ${{ inputs.preview_run_id }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 3.0.0
+
+      - name: Validate staging connection without printing it
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from urllib.parse import unquote, urlparse
+
+          raw = os.environ.get("SUPABASE_STAGING_DB_URL", "")
+          expected_ref = os.environ["STAGING_PROJECT_REF"]
+          mode = os.environ["MODE"]
+          confirmation = os.environ.get("CONFIRM_PROJECT_REF", "")
+          preview_run_id = os.environ.get("PREVIEW_RUN_ID", "")
+
+          if not raw:
+              raise SystemExit("Missing repository secret SUPABASE_STAGING_DB_URL.")
+          parsed = urlparse(raw)
+          if parsed.scheme not in ("postgres", "postgresql"):
+              raise SystemExit("The staging database URL must use PostgreSQL.")
+          if parsed.port != 5432 or not parsed.hostname or not parsed.hostname.endswith(".pooler.supabase.com"):
+              raise SystemExit("Use the Supabase session pooler URL on port 5432.")
+          if unquote(parsed.username or "") != f"postgres.{expected_ref}":
+              raise SystemExit("The URL username does not identify the approved staging project.")
+          if not parsed.password or parsed.path.rstrip("/") != "/postgres":
+              raise SystemExit("The staging connection URL is incomplete.")
+          if mode == "apply" and confirmation != expected_ref:
+              raise SystemExit("Apply requires confirm_project_ref to exactly match the staging project ref.")
+          if mode == "apply" and not preview_run_id.isdigit():
+              raise SystemExit("Apply requires the run ID of a successful preview for this branch and commit.")
+          print("Staging connection target validated; the URL and password were not printed.")
+          PY
+
+      - name: Show migration history
+        shell: bash
+        run: supabase migration list --remote="$SUPABASE_STAGING_DB_URL"
+
+      - name: Preview pending migrations
+        shell: bash
+        run: supabase db push --remote="$SUPABASE_STAGING_DB_URL" --dry-run --skip-vault
+
+      - name: Record successful preview for later review
+        if: ${{ inputs.mode == 'preview' }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          marker = {
+              "mode": "preview",
+              "run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "ref": os.environ["GITHUB_REF"],
+              "sha": os.environ["GITHUB_SHA"],
+              "project_ref": os.environ["STAGING_PROJECT_REF"],
+          }
+          with open("staging-preview.json", "w", encoding="utf-8") as marker_file:
+              json.dump(marker, marker_file)
+          PY
+
+      - name: Upload preview record
+        if: ${{ inputs.mode == 'preview' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-preview-${{ github.run_id }}
+          path: staging-preview.json
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Download the reviewed preview record
+        if: ${{ inputs.mode == 'apply' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-preview-${{ inputs.preview_run_id }}
+          path: .staging-preview
+          run-id: ${{ inputs.preview_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify preview run matches this target, branch, and commit
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          with open(".staging-preview/staging-preview.json", encoding="utf-8") as marker_file:
+              marker = json.load(marker_file)
+          expected = {
+              "mode": "preview",
+              "run_id": int(os.environ["PREVIEW_RUN_ID"]),
+              "ref": os.environ["GITHUB_REF"],
+              "sha": os.environ["GITHUB_SHA"],
+              "project_ref": os.environ["STAGING_PROJECT_REF"],
+          }
+          if marker != expected:
+              raise SystemExit("The preview record does not match this successful preview run, target, branch, and commit.")
+          print("Verified a successful preview record for this target, branch, and commit.")
+          PY
+
+      - name: Apply reviewed migrations to staging
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        run: supabase db push --remote="$SUPABASE_STAGING_DB_URL" --yes --skip-vault
+
+      - name: Verify applied migration history
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        run: supabase migration list --remote="$SUPABASE_STAGING_DB_URL"
+
