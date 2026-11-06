@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { JourneyChoiceDialog } from "@/components/home/JourneyChoiceDialog";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { TravelSearchTabs } from "@/components/search/TravelSearchTabs";
 
 export function HeroSection() {
   const [choiceOpen, setChoiceOpen] = useState(false);
@@ -19,13 +20,15 @@ export function HeroSection() {
         </div>
 
         <div className="order-1 flex flex-col pt-6 md:order-2 md:col-span-6 md:pl-6 md:pt-0 lg:pl-12">
-          <span className="eyebrow mb-7">São Tomé e Príncipe</span>
           <h1 className="display-xl max-w-2xl text-foreground">
             Viagens completas a São Tomé e Príncipe, <em className="font-normal text-primary">feitas para si.</em>
           </h1>
           <p className="mt-7 max-w-lg text-base font-light leading-8 text-muted-foreground md:text-lg">
             A Rotas do Éden organiza a sua viagem às ilhas. Escolha uma rota, personalize os dias e receba uma proposta completa.
           </p>
+          <div className="mt-7 w-full max-w-2xl">
+            <TravelSearchTabs />
+          </div>
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Button variant="hero" size="lg" onClick={() => setChoiceOpen(true)}>
               Começar a viagem <ArrowRight />

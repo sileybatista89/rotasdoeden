@@ -29,12 +29,15 @@ export function Navbar() {
         <Logo size="sm" />
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-7 xl:flex">
           <a href="/#pacotes" className="text-[0.72rem] uppercase text-foreground transition-colors hover:text-primary">
             Pacotes
           </a>
           <Link to="/experiences" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.experiences")}
+          </Link>
+          <Link to="/voos" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
+            Voos
           </Link>
           <Link to="/guides" className="text-[0.78rem] uppercase tracking-[0.14em] font-medium text-muted-foreground hover:text-foreground transition-colors duration-300">
             {t("nav.guides")}
@@ -46,7 +49,7 @@ export function Navbar() {
 
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
           <LanguageSwitcher />
           <NotificationCenter />
           {!user ? (
@@ -106,7 +109,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile actions */}
-        <div className="flex items-center gap-1 lg:hidden">
+        <div className="flex items-center gap-1 xl:hidden">
           <LanguageSwitcher compact />
           <NotificationCenter />
           <Sheet open={open} onOpenChange={setOpen}>
@@ -127,6 +130,9 @@ export function Navbar() {
                   <Link to="/experiences" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">
                     {t("nav.experiences")}
                   </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/voos" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">Voos</Link>
                 </SheetClose>
                 <SheetClose asChild>
                   <Link to="/guides" className="border-b border-border px-1 py-4 font-display text-2xl text-foreground">

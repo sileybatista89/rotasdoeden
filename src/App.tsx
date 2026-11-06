@@ -12,6 +12,7 @@ import { AttributionTracker } from "@/components/AttributionTracker";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import CheckoutReturnPage from "./pages/CheckoutReturnPage.tsx";
 import Index from "./pages/Index.tsx";
+import FlightsPage from "./pages/FlightsPage.tsx";
 import GuidesPage from "./pages/GuidesPage.tsx";
 import GuideProfilePage from "./pages/GuideProfilePage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
@@ -63,6 +64,7 @@ const App = () => (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/voos" element={<FlightsPage />} />
             <Route path="/guides" element={<GuidesPage />} />
             <Route path="/guides/:id" element={<GuideProfilePage />} />
             <Route path="/experiences" element={<ExperiencesPage />} />
