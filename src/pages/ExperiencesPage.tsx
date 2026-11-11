@@ -27,17 +27,33 @@ export default function ExperiencesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [guides, setGuides] = useState<Record<string, ProfilePub>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const [search, setSearch] = useState(params.get("q") ?? "");
   const [category, setCategory] = useState<string>(params.get("category") ?? "all");
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data: svcs } = await supabase
+      setLoading(true);
+      setLoadError("");
+      const { data: svcs, error: servicesError } = await supabase
         .from("services")
         .select("*")
         .eq("is_active", true)
         .eq("moderation_status", "approved")
         .order("created_at", { ascending: false });
+
+      // Uma falha de rede não é o mesmo que "ainda não há parceiros": mostrar a ausência
+      // quando houve erro seria esconder um bloqueio atrás de uma mensagem tranquilizadora.
+      if (servicesError) {
+        if (!cancelled) {
+          setLoadError("Não foi possível carregar as experiências.");
+          setLoading(false);
+        }
+        return;
+      }
+
       const list = svcs ?? [];
       setServices(list);
 
@@ -51,9 +67,10 @@ export default function ExperiencesPage() {
         (profs ?? []).forEach((p) => { if (p.id) map[p.id] = p; });
         setGuides(map);
       }
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     })();
-  }, []);
+    return () => { cancelled = true; };
+  }, [attempt]);
 
   const filtered = useMemo(() => {
     return services.filter((s) => {
@@ -131,6 +148,18 @@ export default function ExperiencesPage() {
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-80 rounded-sm" />
                 ))}
+              </div>
+            ) : loadError ? (
+              <div className="py-8 md:py-10 max-w-2xl" role="alert">
+                <h3 className="font-display text-2xl font-semibold mb-2">Não conseguimos mostrar as experiências</h3>
+                <p className="text-muted-foreground mb-6">
+                  {loadError} Isto é uma falha de ligação, não uma ausência de parceiros — os dados continuam
+                  guardados. Tenta novamente.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 mt-5">
+                  <Button variant="hero" onClick={() => setAttempt((value) => value + 1)}>Tentar novamente</Button>
+                  <Button asChild variant="outline"><Link to="/proposta">Falar com a equipa</Link></Button>
+                </div>
               </div>
             ) : filtered.length === 0 ? (
               <div className="py-8 md:py-10 max-w-2xl">
