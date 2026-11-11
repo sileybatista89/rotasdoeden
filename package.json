@@ -8,10 +8,13 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "deploy": "wrangler deploy --config wrangler.jsonc",
+    "guard:db-target": "node scripts/guards/supabase-target.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "verify": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
