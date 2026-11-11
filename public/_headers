@@ -1,0 +1,20 @@
+# Cabeçalhos de segurança servidos pelo Cloudflare Workers Static Assets.
+#
+# O wrangler lê este ficheiro de `dist/_headers` (copiado de `public/` pelo Vite) e aplica as regras
+# em tempo de serviço. Verificado localmente com wrangler 4.158.0 — ver
+# docs/engineering/security-headers.md para o log e o método.
+#
+# A CSP está em modo *Report-Only* de propósito: não bloqueia nada, só reporta violações na consola.
+# Passar a enforcing (Content-Security-Policy) só depois de validar num preview com a aplicação real.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")
+  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://checkout.stripe.com; script-src 'self' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://m.stripe.network; frame-src https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com; upgrade-insecure-requests
+
+# Os assets têm hash no nome: podem ser cacheados para sempre com segurança.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

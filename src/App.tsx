@@ -10,39 +10,43 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import { AttributionTracker } from "@/components/AttributionTracker";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
-import CheckoutReturnPage from "./pages/CheckoutReturnPage.tsx";
 import Index from "./pages/Index.tsx";
-import GuidesPage from "./pages/GuidesPage.tsx";
-import GuideProfilePage from "./pages/GuideProfilePage.tsx";
-import BookingPage from "./pages/BookingPage.tsx";
-import AuthPage from "./pages/AuthPage.tsx";
-import OAuthConsent from "./pages/OAuthConsent.tsx";
-import KycPage from "./pages/KycPage.tsx";
-import MessagesPage from "./pages/MessagesPage.tsx";
-import ConversationPage from "./pages/ConversationPage.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import TermosPage from "./pages/legal/TermosPage.tsx";
-import PrivacidadePage from "./pages/legal/PrivacidadePage.tsx";
-import ReservasPage from "./pages/legal/ReservasPage.tsx";
-import AntifraudePage from "./pages/legal/AntifraudePage.tsx";
-import GuiasLegalPage from "./pages/legal/GuiasPage.tsx";
-import ComunidadePage from "./pages/legal/ComunidadePage.tsx";
-import ParceriasPage from "./pages/legal/ParceriasPage.tsx";
-import SejaParceiroPage from "./pages/SejaParceiroPage.tsx";
-import GuiaParceiroPage from "./pages/GuiaParceiroPage.tsx";
-import MyServicesPage from "./pages/MyServicesPage.tsx";
-import ServiceFormPage from "./pages/ServiceFormPage.tsx";
-import ExperiencesPage from "./pages/ExperiencesPage.tsx";
-import ExperienceDetailPage from "./pages/ExperienceDetailPage.tsx";
-import MyBookingsPage from "./pages/MyBookingsPage.tsx";
-import SobreSaoTomePage from "./pages/SobreSaoTomePage.tsx";
-import ParceirosPage from "./pages/ParceirosPage.tsx";
-import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
-import PropostaPage from "./pages/PropostaPage.tsx";
-import PackageBuilderPage from "./pages/PackageBuilderPage.tsx";
-import ProfessionalProfilePage from "./pages/ProfessionalProfilePage.tsx";
-import VerificationRequestPage from "./pages/VerificationRequestPage.tsx";
-import SupportConversationPage from "./pages/SupportConversationPage.tsx";
+
+// As restantes páginas são carregadas a pedido. Sem isto, todas as rotas (administração, legal,
+// mensagens, área de guia, pacotes) entram no bundle inicial e a primeira visita paga o custo todo.
+const CheckoutReturnPage = lazy(() => import("./pages/CheckoutReturnPage.tsx"));
+const FlightsPage = lazy(() => import("./pages/FlightsPage.tsx"));
+const GuidesPage = lazy(() => import("./pages/GuidesPage.tsx"));
+const GuideProfilePage = lazy(() => import("./pages/GuideProfilePage.tsx"));
+const BookingPage = lazy(() => import("./pages/BookingPage.tsx"));
+const AuthPage = lazy(() => import("./pages/AuthPage.tsx"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent.tsx"));
+const KycPage = lazy(() => import("./pages/KycPage.tsx"));
+const MessagesPage = lazy(() => import("./pages/MessagesPage.tsx"));
+const ConversationPage = lazy(() => import("./pages/ConversationPage.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const TermosPage = lazy(() => import("./pages/legal/TermosPage.tsx"));
+const PrivacidadePage = lazy(() => import("./pages/legal/PrivacidadePage.tsx"));
+const ReservasPage = lazy(() => import("./pages/legal/ReservasPage.tsx"));
+const AntifraudePage = lazy(() => import("./pages/legal/AntifraudePage.tsx"));
+const GuiasLegalPage = lazy(() => import("./pages/legal/GuiasPage.tsx"));
+const ComunidadePage = lazy(() => import("./pages/legal/ComunidadePage.tsx"));
+const ParceriasPage = lazy(() => import("./pages/legal/ParceriasPage.tsx"));
+const SejaParceiroPage = lazy(() => import("./pages/SejaParceiroPage.tsx"));
+const GuiaParceiroPage = lazy(() => import("./pages/GuiaParceiroPage.tsx"));
+const MyServicesPage = lazy(() => import("./pages/MyServicesPage.tsx"));
+const ServiceFormPage = lazy(() => import("./pages/ServiceFormPage.tsx"));
+const ExperiencesPage = lazy(() => import("./pages/ExperiencesPage.tsx"));
+const ExperienceDetailPage = lazy(() => import("./pages/ExperienceDetailPage.tsx"));
+const MyBookingsPage = lazy(() => import("./pages/MyBookingsPage.tsx"));
+const SobreSaoTomePage = lazy(() => import("./pages/SobreSaoTomePage.tsx"));
+const ParceirosPage = lazy(() => import("./pages/ParceirosPage.tsx"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage.tsx"));
+const PropostaPage = lazy(() => import("./pages/PropostaPage.tsx"));
+const PackageBuilderPage = lazy(() => import("./pages/PackageBuilderPage.tsx"));
+const ProfessionalProfilePage = lazy(() => import("./pages/ProfessionalProfilePage.tsx"));
+const VerificationRequestPage = lazy(() => import("./pages/VerificationRequestPage.tsx"));
+const SupportConversationPage = lazy(() => import("./pages/SupportConversationPage.tsx"));
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ChatLauncher } from "@/components/conversion/ChatLauncher";
 
@@ -63,6 +67,7 @@ const App = () => (
           <Suspense fallback={<div className="min-h-screen bg-background" />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/voos" element={<FlightsPage />} />
             <Route path="/guides" element={<GuidesPage />} />
             <Route path="/guides/:id" element={<GuideProfilePage />} />
             <Route path="/experiences" element={<ExperiencesPage />} />

@@ -55,6 +55,7 @@ export function Footer() {
               <li><Link to="/pacotes/rotas-essencial" className={linkCls}>Pacotes</Link></li>
               <li><Link to="/guides" className={linkCls}>{t("footer.findGuides")}</Link></li>
               <li><Link to="/experiences" className={linkCls}>{t("nav.experiences")}</Link></li>
+              <li><Link to="/voos" className={linkCls}>Voos</Link></li>
               <li><Link to="/sobre-sao-tome" className={linkCls}>{t("nav.destino")}</Link></li>
               <li><a href="/#como-funciona" className={linkCls}>{t("nav.how")}</a></li>
             </ul>
