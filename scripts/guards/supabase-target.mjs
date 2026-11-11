@@ -20,6 +20,7 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 
 export const PRODUCTION_REF = "hiurdjlnnbrdsyplesfb";
 export const STAGING_REF = "twdgrnivqodkxputzryt";
@@ -52,11 +53,16 @@ export function extractRefFromUrl(value) {
  * @param {string|null} input.configRef   project_id do config.toml
  * @param {string|null} input.linkedRef   ref em supabase/.temp/project-ref
  * @param {Record<string,string|undefined>} input.env
+ * @param {Array<{source: string, ref: string|null, value?: string}>} [input.flagTargets]
  * @returns {{targets: Array<{source: string, ref: string|null, value?: string}>, production: Array<string>, decision: "allow"|"deny", reasons: string[]}}
  */
-export function evaluateTargets({ configRef, linkedRef, env }) {
+export function evaluateTargets({ configRef, linkedRef, env, flagTargets = [] }) {
   const targets = [];
   const reasons = [];
+
+  // As flags da linha de comando ganham a tudo o resto: se o comando levar --project-ref ou
+  // --db-url, é esse o destino real, independentemente do projeto ligado.
+  for (const flag of flagTargets) targets.push(flag);
 
   if (linkedRef) targets.push({ source: "supabase/.temp/project-ref (projeto ligado)", ref: linkedRef });
   if (configRef) targets.push({ source: "supabase/config.toml project_id", ref: configRef });
@@ -126,11 +132,40 @@ export function loadContext(root) {
   return { configRef, linkedRef };
 }
 
+/** Extrai destinos declarados por flags do comando que se pretende executar. */
+export function flagTargetsFromArgs(args) {
+  const out = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const take = (name) => {
+      if (arg === name) return args[i + 1] ?? "";
+      if (arg.startsWith(`${name}=`)) return arg.slice(name.length + 1);
+      return null;
+    };
+    const ref = take("--project-ref");
+    if (ref !== null) {
+      out.push({ source: "flag --project-ref", ref: REF_RE.test(ref) ? ref : null, value: ref });
+      continue;
+    }
+    const dbUrl = take("--db-url");
+    if (dbUrl !== null) {
+      out.push({ source: "flag --db-url", ref: extractRefFromUrl(dbUrl), value: redactUrl(dbUrl) });
+    }
+  }
+  return out;
+}
+
 function main() {
-  const asJson = process.argv.includes("--json");
+  const argv = process.argv.slice(2);
+  const separator = argv.indexOf("--");
+  const ownArgs = separator >= 0 ? argv.slice(0, separator) : argv;
+  const command = separator >= 0 ? argv.slice(separator + 1) : [];
+  const asJson = ownArgs.includes("--json");
+
   const root = process.env.GUARD_ROOT || process.cwd();
   const { configRef, linkedRef } = loadContext(root);
-  const result = evaluateTargets({ configRef, linkedRef, env: process.env });
+  const flagTargets = flagTargetsFromArgs(command);
+  const result = evaluateTargets({ configRef, linkedRef, env: process.env, flagTargets });
 
   if (asJson) {
     console.log(JSON.stringify(result, null, 2));
@@ -144,7 +179,18 @@ function main() {
     for (const r of result.reasons) console.log(`  ${result.decision === "allow" ? "OK" : "RECUSADO"}: ${r}`);
   }
 
-  process.exit(result.decision === "allow" ? 0 : 1);
+  if (result.decision !== "allow") process.exit(1);
+
+  // Modo invólucro: `npm run guard:db-target -- supabase db push` só executa depois de validar.
+  if (command.length === 0) process.exit(0);
+
+  const [file, ...rest] = command;
+  // No Windows, `supabase` é um shim .cmd e precisa de shell; um .exe com caminho cheio
+  // (ex.: "C:\Program Files\nodejs\node.exe") rebenta se o shell o partir no primeiro espaço.
+  const needsShell = process.platform === "win32" && !/\.(exe|com)$/i.test(file);
+
+  const run = spawnSync(file, rest, { stdio: "inherit", shell: needsShell });
+  process.exit(run.status ?? 1);
 }
 
 if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}` || process.argv[1]?.endsWith("supabase-target.mjs")) {

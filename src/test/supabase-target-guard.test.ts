@@ -121,3 +121,52 @@ describe("guarda de destino Supabase", () => {
     expect(r.json().production).toContain("supabase/config.toml project_id");
   });
 });
+
+/** Modo invólucro: `guard -- <comando>` valida as flags do comando antes de o executar. */
+function writeProbe(root: string) {
+  const probe = join(root, "probe.cjs");
+  writeFileSync(probe, "console.log('EXECUTOU');\n");
+  return probe;
+}
+
+function runWrapped(root: string, args: string[], env: Record<string, string> = {}) {
+  const base: Record<string, string | undefined> = { ...process.env };
+  for (const key of SENSITIVE_ENV) delete base[key];
+  const result = spawnSync(process.execPath, [GUARD, "--", ...args], {
+    env: { ...base, GUARD_ROOT: root, ...env } as NodeJS.ProcessEnv,
+    encoding: "utf8",
+  });
+  return { status: result.status, stdout: result.stdout ?? "" };
+}
+
+describe("guarda em modo invólucro", () => {
+  it("não executa o comando quando --project-ref aponta para produção", () => {
+    const root = makeRoot({ linkedRef: STAGING });
+    const r = runWrapped(root, [process.execPath, writeProbe(root), "--project-ref", PROD]);
+    expect(r.status).toBe(1);
+    expect(r.stdout).toContain("RECUSADO");
+    expect(r.stdout).not.toContain("EXECUTOU");
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("não executa o comando quando --db-url aponta para produção", () => {
+    const root = makeRoot({ linkedRef: STAGING });
+    const r = runWrapped(root, [
+      process.execPath,
+      writeProbe(root),
+      "--db-url",
+      `postgresql://postgres:x@db.${PROD}.supabase.co:5432/postgres`,
+    ]);
+    expect(r.status).toBe(1);
+    expect(r.stdout).not.toContain("EXECUTOU");
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("executa o comando quando o destino validado é o staging", () => {
+    const root = makeRoot({ linkedRef: STAGING });
+    const r = runWrapped(root, [process.execPath, writeProbe(root), "--project-ref", STAGING]);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("EXECUTOU");
+    rmSync(root, { recursive: true, force: true });
+  });
+});
