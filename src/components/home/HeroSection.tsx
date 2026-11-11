@@ -29,7 +29,7 @@ export function HeroSection() {
           <div className="mt-7 w-full max-w-2xl">
             <TravelSearchTabs />
           </div>
-          <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="mt-9 flex flex-col gap-4 lg:flex-row lg:items-center">
             <Button variant="hero" size="lg" onClick={() => setChoiceOpen(true)}>
               Começar a viagem <ArrowRight />
             </Button>

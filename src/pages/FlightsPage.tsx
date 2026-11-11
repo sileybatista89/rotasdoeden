@@ -53,6 +53,25 @@ export default function FlightsPage() {
     ? multiLegs.length >= 2 && multiLegs.every((leg) => leg.origin && leg.destination && leg.departureDate)
     : Boolean(origin && destination && departure && (tripType === "one-way" || returnDate));
 
+  const searchSummary = useMemo(() => {
+    const passengers = adults + children + infants;
+    const paxLabel = `${passengers} ${passengers === 1 ? "passageiro" : "passageiros"}`;
+    if (tripType === "multi-city") {
+      return `${multiLegs.length} etapas · ${paxLabel}`;
+    }
+    const route = `${origin} → ${destination}`;
+    const dates = tripType === "round-trip" && returnDate ? `${departure} – ${returnDate}` : departure;
+    return `${route}${dates ? ` · ${dates}` : ""} · ${paxLabel}`;
+  }, [tripType, multiLegs, origin, destination, departure, returnDate, adults, children, infants]);
+
+  const hasActiveFilters = stopsFilter.length > 0 || carriersFilter.length > 0 || departureWindow !== "any";
+
+  function clearFilters() {
+    setStopsFilter([]);
+    setCarriersFilter([]);
+    setDepartureWindow("any");
+  }
+
   useEffect(() => {
     if (params.get("tripType") === "multi-city") {
       if (multiLegs.length >= 2 && multiLegs.every(leg => leg.origin && leg.destination && leg.departureDate)) void runSearch();
@@ -139,22 +158,36 @@ export default function FlightsPage() {
           </form>
         </div>
       </section>
-      <section className="container py-8 md:py-12" aria-live="polite">
+      <section className="container py-8 md:py-12" aria-busy={loading}>
         {error && <p role="alert" className="mb-5 rounded-sm border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{error}</p>}
         {demoMessage && <p role="status" className="mb-5 rounded-sm border border-primary/30 bg-primary/5 p-4 text-sm">{demoMessage}</p>}
-        {offers.length === 0 && !loading && !error && <div className="py-12 text-center"><Plane className="mx-auto mb-4 text-primary" aria-hidden="true" /><h2 className="display-md">A sua pesquisa começa aqui</h2><p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">Escolha o percurso e as datas. A demonstração apresenta apenas dados sintéticos.</p></div>}
+        {loading && <div role="status" aria-label="A preparar resultados de demonstração" className="space-y-3">
+          <p className="text-sm text-muted-foreground">A preparar resultados de demonstração…</p>
+          {[0, 1, 2].map((index) => <div key={index} className="h-24 animate-pulse rounded-sm border border-border bg-muted/60" />)}
+        </div>}
+        {offers.length === 0 && !loading && !error && !demoMessage && <div className="py-12 text-center"><Plane className="mx-auto mb-4 text-primary" aria-hidden="true" /><h2 className="display-md">A sua pesquisa começa aqui</h2><p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">Escolha o percurso e as datas. A demonstração apresenta apenas dados sintéticos.</p></div>}
         {offers.length > 0 && <div className="grid gap-8 lg:grid-cols-[15rem_1fr]">
-          <aside aria-label="Filtros" className="space-y-3">
-            <h2 className="text-sm font-semibold">Escalas</h2>
+          <aside aria-label="Filtros" className="space-y-3 lg:sticky lg:top-24 lg:self-start">
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-sm font-semibold">Filtros</h2>
+              {hasActiveFilters && (
+                <Button type="button" variant="link" className="h-auto min-h-9 px-0 text-xs" onClick={clearFilters}>Limpar</Button>
+              )}
+            </div>
+            <h3 className="text-sm font-semibold">Escalas</h3>
             {[0, 1, 2].map(stops => <label key={stops} className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={stopsFilter.includes(stops)} onChange={event => setStopsFilter(current => event.target.checked ? [...current, stops] : current.filter(value => value !== stops))} className="h-4 w-4 accent-primary" />{stops === 0 ? "Direto (exemplo)" : `${stops} escala${stops > 1 ? "s" : ""} (exemplo)`}</label>)}
             <h3 className="pt-3 text-sm font-semibold">Companhias de demonstração</h3>
             {carriers.map(carrier => <label key={carrier} className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={carriersFilter.includes(carrier)} onChange={event => setCarriersFilter(current => event.target.checked ? [...current, carrier] : current.filter(value => value !== carrier))} className="h-4 w-4 accent-primary" />{carrier}</label>)}
             <Field label="Hora de partida"><select aria-label="Hora de partida" value={departureWindow} onChange={event => setDepartureWindow(event.target.value as FlightDepartureWindow)} className="h-11 w-full rounded-sm border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="any">Qualquer hora</option><option value="morning">Manhã · antes das 12h</option><option value="afternoon">Tarde · 12h a 18h</option><option value="evening">Noite · depois das 18h</option></select></Field>
           </aside>
-          <div><h2 className="mb-4 text-sm font-semibold">{visibleOffers.length} opções de demonstração</h2>
+          <div>
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-sm font-semibold">{visibleOffers.length} opções de demonstração</h2>
+              <p className="text-xs text-muted-foreground">{searchSummary}</p>
+            </div>
             <ul className="space-y-3">{visibleOffers.map(offer => <li key={offer.id} className="rounded-sm border border-border bg-card p-4 md:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0"><p className="font-medium">{offer.carrierName}</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span>{offer.departureTime}</span><ArrowRight size={14} aria-hidden="true" /><span>{offer.arrivalTime}</span><span className="text-muted-foreground">· {offer.stops === 0 ? "direto" : `${offer.stops} ${offer.stops === 1 ? "escala" : "escalas"}`}</span></div><p className="mt-1 text-xs text-muted-foreground">{offer.legs.map(leg => `${leg[0].origin} → ${leg[leg.length - 1].destination}`).join(" · ")} · {offer.baggageSummary}</p></div>
+                <div className="min-w-0"><p className="flex flex-wrap items-center gap-2 font-medium">{offer.carrierName}<span className="rounded-sm border border-border bg-secondary/60 px-1.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">Exemplo</span></p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span>{offer.departureTime}</span><ArrowRight size={14} aria-hidden="true" /><span>{offer.arrivalTime}</span><span className="text-muted-foreground">· {offer.stops === 0 ? "direto" : `${offer.stops} ${offer.stops === 1 ? "escala" : "escalas"}`}</span></div><p className="mt-1 text-xs text-muted-foreground">{offer.legs.map(leg => `${leg[0].origin} → ${leg[leg.length - 1].destination}`).join(" · ")} · {offer.baggageSummary}</p></div>
                 <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end"><span className="text-lg font-semibold tabular-nums">{formatPrice(offer.totalAmount)}</span><Button type="button" variant="outline" className="min-h-11" aria-label={`Ver opção de ${offer.carrierName}`} onClick={() => setSelectedOffer(offer)}>Ver exemplo</Button></div>
               </div>
             </li>)}</ul>
