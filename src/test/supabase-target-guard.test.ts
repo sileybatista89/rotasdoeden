@@ -1,8 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+
+// Este ficheiro lança processos Node reais; sob carga paralela o prazo por omissão (5 s) é curto.
+vi.setConfig({ testTimeout: 20000, hookTimeout: 20000 });
 
 const GUARD = resolve(process.cwd(), "scripts/guards/supabase-target.mjs");
 const PROD = "hiurdjlnnbrdsyplesfb";

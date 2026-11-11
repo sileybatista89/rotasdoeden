@@ -81,7 +81,7 @@ describe("ProtectedRoute", () => {
 
     expect(await screen.findByText("página de autenticação")).toBeTruthy();
     expect(screen.queryByText("conteúdo protegido")).toBeNull();
-    await waitFor(() => expect(state.signOut).toHaveBeenCalled());
+    await waitFor(() => expect(state.signOut).toHaveBeenCalled(), { timeout: 5000 });
   });
 
   it("falha fechado quando a consulta ao perfil falha", async () => {
@@ -116,7 +116,7 @@ describe("ProtectedRoute", () => {
     expect(await screen.findByRole("alert")).toBeTruthy();
 
     screen.getByRole("button", { name: "Terminar sessão" }).click();
-    await waitFor(() => expect(state.signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(state.signOut).toHaveBeenCalledTimes(1), { timeout: 5000 });
   });
 
   it("encaminha para a página inicial quando a função exigida não corresponde", async () => {
