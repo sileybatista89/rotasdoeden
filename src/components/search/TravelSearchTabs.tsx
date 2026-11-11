@@ -22,6 +22,7 @@ export function TravelSearchTabs({ defaultValue = "pacotes" }: { defaultValue?: 
   const [departure, setDeparture] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [passengers, setPassengers] = useState("1");
+  const [experienceQuery, setExperienceQuery] = useState("");
   const [searchError, setSearchError] = useState("");
 
   function searchFlights(event: FormEvent<HTMLFormElement>) {
@@ -46,6 +47,15 @@ export function TravelSearchTabs({ defaultValue = "pacotes" }: { defaultValue?: 
   function swapAirports() {
     setOrigin(destination);
     setDestination(origin);
+  }
+
+  function searchExperiences(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    const query = experienceQuery.trim();
+    if (query) params.set("q", query);
+    const suffix = params.toString();
+    navigate(`/experiences${suffix ? `?${suffix}` : ""}`);
   }
 
   return (
@@ -132,9 +142,22 @@ export function TravelSearchTabs({ defaultValue = "pacotes" }: { defaultValue?: 
         </div>
       </TabsContent>
 
-      <TabsContent value="experiencias" className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">Descubra experiências publicadas na plataforma.</p>
-        <Button asChild variant="hero" className="min-h-11 w-full sm:w-auto"><Link to="/experiences">Explorar experiências</Link></Button>
+      <TabsContent value="experiencias" className="mt-4">
+        <form onSubmit={searchExperiences} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="grid flex-1 gap-1 text-xs font-medium text-foreground">O que quer fazer?
+            <input
+              value={experienceQuery}
+              onChange={(event) => setExperienceQuery(event.target.value)}
+              placeholder="Trilhos, mergulho, gastronomia…"
+              className={controlClass}
+            />
+          </label>
+          <Button type="submit" variant="hero" className="min-h-11 w-full sm:w-auto">Procurar experiências</Button>
+        </form>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="text-xs leading-5 text-muted-foreground">Só experiências de parceiros verificados e aprovados pela equipa.</p>
+          <Link to="/experiences" className="link-underline text-xs">Explorar experiências</Link>
+        </div>
       </TabsContent>
     </Tabs>
   );

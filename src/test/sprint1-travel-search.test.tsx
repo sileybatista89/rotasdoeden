@@ -66,4 +66,19 @@ describe("TravelSearchTabs", () => {
     expect(screen.getByRole("link", { name: "Ver pacote Rotas Essencial" }).getAttribute("href"))
       .toBe("/pacotes/rotas-essencial");
   });
+
+  it("procura experiências a partir do separador e leva a pesquisa no URL", () => {
+    renderSearchTabs("experiencias");
+    fireEvent.change(screen.getByLabelText("O que quer fazer?"), { target: { value: "mergulho" } });
+    fireEvent.click(screen.getByRole("button", { name: "Procurar experiências" }));
+
+    expect(screen.getByTestId("current-route").textContent).toBe("/experiences?q=mergulho");
+  });
+
+  it("abre a lista de experiências sem filtro quando a pesquisa está vazia", () => {
+    renderSearchTabs("experiencias");
+    fireEvent.click(screen.getByRole("button", { name: "Procurar experiências" }));
+
+    expect(screen.getByTestId("current-route").textContent).toBe("/experiences");
+  });
 });
